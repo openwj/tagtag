@@ -1,4 +1,59 @@
 package dev.tagtag.contract.iam.api;
 
+import dev.tagtag.common.model.PageQuery;
+import dev.tagtag.common.model.PageResult;
+import dev.tagtag.common.model.Result;
+import dev.tagtag.contract.iam.dto.MenuDTO;
+import dev.tagtag.contract.iam.dto.RoleDTO;
+import dev.tagtag.contract.iam.dto.RoleQueryDTO;
+
+import java.util.List;
+
+/**
+ * 角色契约接口
+ */
 public interface RoleApi {
+
+    /**
+     * 分页查询角色列表（支持过滤）
+     * @param pageQuery 分页参数
+     * @param filter 过滤条件
+     * @return 角色分页结果
+     */
+    Result<PageResult<RoleDTO>> listRoles(PageQuery pageQuery, RoleQueryDTO filter);
+
+    /**
+     * 查询角色详情
+     * @param roleId 角色ID
+     * @return 角色详情
+     */
+    Result<RoleDTO> getRoleById(Long roleId);
+
+    /**
+     * 创建角色
+     * @param role 角色数据
+     * @return 操作结果
+     */
+    Result<Void> createRole(RoleDTO role);
+
+    /**
+     * 更新角色
+     * @param role 角色数据
+     * @return 操作结果
+     */
+    Result<Void> updateRole(RoleDTO role);
+
+    /**
+     * 删除角色
+     * @param roleId 角色ID
+     * @return 操作结果
+     */
+    Result<Void> deleteRole(Long roleId);
+
+    /**
+     * 查询指定角色的菜单（含按钮）
+     * @param roleId 角色ID
+     * @return 菜单列表
+     */
+    Result<List<MenuDTO>> listMenusByRole(Long roleId);
 }

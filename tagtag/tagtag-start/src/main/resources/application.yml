@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: tagtag-admin
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+logging:
+  config: classpath:logback-spring.xml

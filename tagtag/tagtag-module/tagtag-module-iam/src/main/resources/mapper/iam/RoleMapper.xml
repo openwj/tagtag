@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.tagtag.module.iam.mapper.RoleMapper">
+
+    <!-- 角色分页查询 -->
+    <select id="selectPage" resultType="dev.tagtag.module.iam.entity.Role">
+        SELECT
+            id,
+            code,
+            name,
+            status,
+            create_time AS createTime,
+            update_time AS updateTime,
+            create_by AS createBy,
+            update_by AS updateBy
+        FROM iam_role
+        <where>
+            <if test="q != null">
+                <if test="q.code != null and q.code != ''">
+                    AND code LIKE CONCAT('%', #{q.code}, '%')
+                </if>
+                <if test="q.name != null and q.name != ''">
+                    AND name LIKE CONCAT('%', #{q.name}, '%')
+                </if>
+                <if test="q.status != null">
+                    AND status = #{q.status.code}
+                </if>
+            </if>
+        </where>
+
+        <choose>
+            <when test="orderList != null and orderList.size() &gt; 0">
+                ORDER BY
+                <foreach collection="orderList" item="sf" separator=",">
+                    <choose>
+                        <when test="sf.field == 'id'"> id </when>
+                        <when test="sf.field == 'code'"> code </when>
+                        <when test="sf.field == 'name'"> name </when>
+                        <when test="sf.field == 'createTime' or sf.field == 'create_time'"> create_time </when>
+                        <otherwise> id </otherwise>
+                    </choose>
+                    <choose>
+                        <when test="sf.asc == null or sf.asc"> ASC </when>
+                        <otherwise> DESC </otherwise>
+                    </choose>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY id ASC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 查询角色的权限ID列表 -->
+    <select id="selectPermissionIdsByRoleId" resultType="long">
+        SELECT rm.menu_id
+        FROM iam_role_menu rm
+        JOIN iam_menu m ON rm.menu_id = m.id
+        WHERE rm.role_id = #{roleId}
+          AND m.menu_type = 2
+    </select>
+
+    <!-- 删除角色的所有权限关联 -->
+    <delete id="deleteRolePermissions">
+        DELETE FROM iam_role_menu WHERE role_id = #{roleId}
+    </delete>
+
+    <!-- 批量插入角色权限关联 -->
+    <insert id="insertRolePermissions">
+        INSERT INTO iam_role_menu (role_id, menu_id)
+        VALUES
+        <foreach collection="permissionIds" item="pid" separator=",">
+            (#{roleId}, #{pid})
+        </foreach>
+    </insert>
+
+</mapper>

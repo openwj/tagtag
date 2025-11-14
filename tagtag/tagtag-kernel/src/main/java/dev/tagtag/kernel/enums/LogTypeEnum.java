@@ -1,7 +1,13 @@
 package dev.tagtag.kernel.enums;
 
-/**
- * 日志类型枚举
- */
-public class LogTypeEnum {
+public enum LogTypeEnum {
+    CREATE,
+    UPDATE,
+    DELETE,
+    READ,
+    LOGIN,
+    LOGOUT,
+    EXPORT,
+    IMPORT,
+    OTHER
 }

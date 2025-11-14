@@ -20,4 +20,33 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <!-- 框架层（Spring Web/Validation/Security 等依赖） -->
+        <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-framework</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- 契约层（令牌 DTO 与接口定义） -->
+        <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-contract-auth</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- IAM 契约层（User/Role/Permission 合同） -->
+        <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-contract-iam</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- Lombok（提供） -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

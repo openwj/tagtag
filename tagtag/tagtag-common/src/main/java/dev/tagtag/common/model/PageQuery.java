@@ -1,7 +1,144 @@
 package dev.tagtag.common.model;
 
-/**
- * 分页请求参数封装
- */
+import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.common.exception.BusinessException;
+import dev.tagtag.common.exception.ErrorCode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+@Data
+@Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class PageQuery {
+    @NotNull
+    @Min(1)
+    private Integer pageNo = GlobalConstants.DEFAULT_PAGE_NO;
+    @NotNull
+    @Min(1)
+    @Max(GlobalConstants.MAX_PAGE_SIZE)
+    private Integer pageSize = GlobalConstants.DEFAULT_PAGE_SIZE;
+    private List<SortField> sortFields;
+
+    /**
+     * 归一化页码与分页大小
+     * @return 当前对象（便于链式调用）
+     */
+    public PageQuery normalize() {
+        this.pageNo = GlobalConstants.normalizePageNo(this.pageNo);
+        this.pageSize = GlobalConstants.clampPageSize(this.pageSize);
+        return this;
+    }
+
+    /**
+        * 计算查询偏移量（(pageNo-1)*pageSize）
+        * @return 偏移量
+        */
+    public int toOffset() {
+        int pn = GlobalConstants.normalizePageNo(this.pageNo);
+        int ps = GlobalConstants.clampPageSize(this.pageSize);
+        return (pn - 1) * ps;
+    }
+
+    /**
+     * 判断是否指定排序
+     * @return 是否存在排序字段
+     */
+    public boolean hasSort() {
+        return this.sortFields != null && !this.sortFields.isEmpty();
+    }
+
+    /**
+     * 解析排序字段与方向（支持 "field asc|desc"）
+     *
+     * @return 当前对象（便于链式调用）
+     */
+    /**
+     * 判断是否已设置排序字段（多字段支持）
+     * @return 是否存在排序字段
+     */
+    public boolean hasSortFields() {
+        return this.sortFields != null && !this.sortFields.isEmpty();
+    }
+
+    /**
+     * 应用排序默认值
+     *
+     * @param defaultField 默认排序字段
+     * @param defaultAsc 默认是否升序
+     * @return 当前对象（便于链式调用）
+     */
+    public PageQuery applyDefaultSort(String defaultField, boolean defaultAsc) {
+        if (this.sortFields == null) {
+            this.sortFields = new ArrayList<>();
+        }
+        if (this.sortFields.isEmpty()) {
+            this.sortFields.add(SortField.of(defaultField, defaultAsc));
+        }
+        return this;
+    }
+
+    /**
+     * 添加一个排序字段
+     * @param field 排序字段
+     * @param asc 是否升序
+     * @return 当前对象
+     */
+    public PageQuery addSortField(String field, boolean asc) {
+        if (this.sortFields == null) {
+            this.sortFields = new ArrayList<>();
+        }
+        if (field != null && !field.trim().isEmpty()) {
+            this.sortFields.add(SortField.of(field.trim(), asc));
+        }
+        return this;
+    }
+
+    /**
+     * 过滤排序字段白名单（移除不在白名单内的字段）
+     * @param whitelist 允许的字段集合
+     */
+    public void filterSortByWhitelist(Collection<String> whitelist) {
+        if (this.sortFields == null || this.sortFields.isEmpty() || whitelist == null || whitelist.isEmpty()) {
+            return;
+        }
+        List<SortField> filtered = new ArrayList<>();
+        for (SortField sf : this.sortFields) {
+            if (containsIgnoreCase(whitelist, sf.getField())) {
+                filtered.add(sf);
+            }
+        }
+        this.sortFields = filtered;
+    }
+
+    /**
+     * 断言排序字段均在白名单内（否则抛出异常）
+     * @param whitelist 允许的字段集合
+     */
+    public void assertSortWhitelist(Collection<String> whitelist) {
+        if (this.sortFields == null || this.sortFields.isEmpty() || whitelist == null || whitelist.isEmpty()) {
+            return;
+        }
+        for (SortField sf : this.sortFields) {
+            if (!containsIgnoreCase(whitelist, sf.getField())) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "非法排序字段: " + sf.getField());
+            }
+        }
+    }
+
+    private static boolean containsIgnoreCase(Collection<String> set, String value) {
+        if (value == null) return false;
+        for (String s : set) {
+            if (s != null && s.equalsIgnoreCase(value)) return true;
+        }
+        return false;
+    }
 }

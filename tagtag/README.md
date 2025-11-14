@@ -4,7 +4,7 @@ tagtag-parent
 │     ← 父工程 POM（统一管理依赖版本、插件、模块聚合）
 │
 ├─tagtag-common                                   ← 🧰 通用工具层（纯工具类，无Spring依赖）
-│  ├─src/main/java/cn/tagtag/common/
+│  ├─src/main/java/dev/tagtag/common/
 │  │  ├─constant/
 │  │  │   ├─GlobalConstants.java                 ← 系统通用常量（如字符集、分页默认值等）
 │  │  │   └─CacheConstants.java                  ← 缓存Key定义（用户信息、权限列表等）
@@ -31,7 +31,7 @@ tagtag-parent
 │  └─pom.xml                                      ← 模块POM
 │
 ├─tagtag-framework                                ← ⚙️ 框架整合层（Spring、MyBatis、Security 等基础设施整合）
-│  ├─src/main/java/cn/tagtag/framework/
+│  ├─src/main/java/dev/tagtag/framework/
 │  │  ├─config/
 │  │  │   ├─MybatisPlusConfig.java               ← MyBatis Plus 配置
 │  │  │   ├─RedisConfig.java                     ← Redis 配置
@@ -59,7 +59,7 @@ tagtag-parent
 │  └─pom.xml
 │
 ├─tagtag-kernel                                   ← 🧩 核心支撑层（业务基础设施、AOP 注解、枚举、工具类）
-│  ├─src/main/java/cn/tagtag/kernel/
+│  ├─src/main/java/dev/tagtag/kernel/
 │  │  ├─annotation/
 │  │  │   ├─OperationLog.java                    ← 操作日志注解
 │  │  │   ├─RateLimit.java                       ← 接口限流注解
