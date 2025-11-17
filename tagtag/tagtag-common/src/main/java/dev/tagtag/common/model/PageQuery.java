@@ -102,37 +102,6 @@ public class PageQuery {
         return this;
     }
 
-    /**
-     * 过滤排序字段白名单（移除不在白名单内的字段）
-     * @param whitelist 允许的字段集合
-     */
-    public void filterSortByWhitelist(Collection<String> whitelist) {
-        if (this.sortFields == null || this.sortFields.isEmpty() || whitelist == null || whitelist.isEmpty()) {
-            return;
-        }
-        List<SortField> filtered = new ArrayList<>();
-        for (SortField sf : this.sortFields) {
-            if (containsIgnoreCase(whitelist, sf.getField())) {
-                filtered.add(sf);
-            }
-        }
-        this.sortFields = filtered;
-    }
-
-    /**
-     * 断言排序字段均在白名单内（否则抛出异常）
-     * @param whitelist 允许的字段集合
-     */
-    public void assertSortWhitelist(Collection<String> whitelist) {
-        if (this.sortFields == null || this.sortFields.isEmpty() || whitelist == null || whitelist.isEmpty()) {
-            return;
-        }
-        for (SortField sf : this.sortFields) {
-            if (!containsIgnoreCase(whitelist, sf.getField())) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "非法排序字段: " + sf.getField());
-            }
-        }
-    }
 
     private static boolean containsIgnoreCase(Collection<String> set, String value) {
         if (value == null) return false;
@@ -140,5 +109,43 @@ public class PageQuery {
             if (s != null && s.equalsIgnoreCase(value)) return true;
         }
         return false;
+    }
+
+    /**
+     * 基于字段解析器与白名单构建安全的 ORDER BY 片段
+     * @param resolver 字段到列名解析器
+     * @param whitelist 允许的字段集合
+     * @param defaultProperty 无有效排序时的默认属性
+     * @param defaultAsc 默认排序方向是否升序
+     * @return 完整 SQL 片段（如：ORDER BY create_time DESC）
+     */
+    public String buildOrderBy(ColumnResolver resolver, Collection<String> whitelist,
+                               String defaultProperty, boolean defaultAsc) {
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        if (this.sortFields != null) {
+            for (SortField sf : this.sortFields) {
+                if (sf == null || sf.getField() == null) continue;
+                String field = sf.getField().trim();
+                if (field.isEmpty()) continue;
+                if (!containsIgnoreCase(whitelist, field)) continue;
+                String column = resolver == null ? null : resolver.resolve(field);
+                if (!isSafeColumn(column)) continue;
+                boolean asc = sf.getAsc() == null || java.util.Objects.equals(sf.getAsc(), Boolean.TRUE);
+                parts.add(column + (asc ? " ASC" : " DESC"));
+            }
+        }
+        if (parts.isEmpty()) {
+            String col = isSafeColumn(defaultProperty) ? defaultProperty : "id";
+            return "ORDER BY " + col + (defaultAsc ? " ASC" : " DESC");
+        }
+        return "ORDER BY " + String.join(", ", parts);
+    }
+
+    /** 简单列名安全校验（字母/数字/下划线/点） */
+    private static boolean isSafeColumn(String column) {
+        if (column == null) return false;
+        String c = column.trim();
+        if (c.isEmpty()) return false;
+        return c.matches("[A-Za-z0-9_.]+");
     }
 }

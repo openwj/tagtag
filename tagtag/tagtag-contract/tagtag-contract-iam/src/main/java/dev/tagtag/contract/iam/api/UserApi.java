@@ -56,4 +56,11 @@ public interface UserApi {
      * @return 操作结果
      */
     Result<Void> assignRoles(Long userId, List<Long> roleIds);
+
+    /**
+     * 根据用户名查询用户信息（包含密码）
+     * @param username 用户名
+     * @return 用户信息
+     */
+    Result<UserDTO> getUserByUsername(String username);
 }

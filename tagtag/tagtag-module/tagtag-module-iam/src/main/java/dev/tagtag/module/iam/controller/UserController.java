@@ -6,6 +6,7 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.module.iam.service.UserService;
+import dev.tagtag.common.constant.GlobalConstants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,11 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.kernel.constant.Permissions;
 
 @RestController
 @Validated
 @AllArgsConstructor
-@RequestMapping("/iam/users")
+@RequestMapping(GlobalConstants.API_PREFIX + "/iam/users")
 public class UserController {
 
 
@@ -49,34 +52,34 @@ public class UserController {
 
     /** 创建用户 */
     @PostMapping
-    @PreAuthorize("hasAuthority('PERM_user:create')")
-    public Result<Void> create(@RequestBody UserDTO user) {
+    @PreAuthorize("hasAuthority('" + Permissions.USER_CREATE + "')")
+    public Result<Void> create(@Valid @RequestBody UserDTO user) {
         userService.create(user);
-        return Result.okMsg("创建成功");
+        return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
 
     /** 更新用户（忽略源对象中的空值） */
     @PutMapping
-    @PreAuthorize("hasAuthority('PERM_user:update')")
-    public Result<Void> update(@RequestBody UserDTO user) {
+    @PreAuthorize("hasAuthority('" + Permissions.USER_UPDATE + "')")
+    public Result<Void> update(@Valid @RequestBody UserDTO user) {
         userService.update(user);
-        return Result.okMsg("更新成功");
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
     /** 删除用户 */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('PERM_user:delete')")
+    @PreAuthorize("hasAuthority('" + Permissions.USER_DELETE + "')")
     public Result<Void> delete(@PathVariable("id") Long id) {
         userService.delete(id);
-        return Result.okMsg("删除成功");
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /** 为用户分配角色（覆盖式分配） */
     @PostMapping("/{id}/roles")
-    @PreAuthorize("hasAuthority('PERM_user:assignRole')")
+    @PreAuthorize("hasAuthority('" + Permissions.USER_ASSIGN_ROLE + "')")
     public Result<Void> assignRoles(@PathVariable("id") Long id, @RequestBody java.util.List<Long> roleIds) {
         userService.assignRoles(id, roleIds);
-        return Result.okMsg("分配成功");
+        return Result.okMsg(AppMessages.ASSIGN_SUCCESS);
     }
 
     @Data

@@ -57,4 +57,10 @@ public class UserApiImpl implements UserApi {
         userService.assignRoles(userId, roleIds);
         return Result.ok();
     }
+
+    /** 根据用户名查询用户信息（包含密码） */
+    @Override
+    public Result<UserDTO> getUserByUsername(String username) {
+        return Result.ok(userService.getByUsername(username));
+    }
 }

@@ -6,7 +6,7 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
-import dev.tagtag.framework.util.SortWhitelists;
+import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.contract.iam.dto.MenuDTO;
@@ -15,27 +15,32 @@ import dev.tagtag.module.iam.convert.MenuConvert;
 import dev.tagtag.module.iam.entity.Role;
 import dev.tagtag.module.iam.entity.Menu;
 import dev.tagtag.module.iam.mapper.RoleMapper;
-import dev.tagtag.module.iam.mapper.MenuMapper;
 import dev.tagtag.module.iam.service.RoleService;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
+    
+    private final PageProperties pageProperties;
 
-    private final MenuMapper menuMapper;
-
-    public RoleServiceImpl(MenuMapper menuMapper) {
-        this.menuMapper = menuMapper;
-    }
+    
 
     /** 角色分页查询 */
     @Override
     public PageResult<RoleDTO> page(RoleQueryDTO query, PageQuery pageQuery) {
-        pageQuery.filterSortByWhitelist(SortWhitelists.role());
-        IPage<Role> page = baseMapper.selectPage(Pages.toPage(pageQuery), query, pageQuery.getSortFields());
+        IPage<Role> page = Pages.selectPage(pageQuery, pageProperties, Role.class, pageProperties.getRole(),
+                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
         IPage<RoleDTO> dtoPage = page.convert(RoleConvert::toDTO);
         return PageResults.of(dtoPage);
     }
@@ -45,6 +50,52 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public RoleDTO getById(Long id) {
         Role entity = super.getById(id);
         return RoleConvert.toDTO(entity);
+    }
+
+    /**
+     * 根据角色编码查询角色详情（LambdaQuery）
+     * @param code 角色编码
+     * @return 角色详情
+     */
+    @Override
+    public RoleDTO getByCode(String code) {
+        if (code == null || code.isBlank()) return null;
+        Role entity = this.lambdaQuery().eq(Role::getCode, code).last("LIMIT 1").one();
+        return RoleConvert.toDTO(entity);
+    }
+
+    /**
+     * 根据角色名称查询角色详情（LambdaQuery）
+     * @param name 角色名称
+     * @return 角色详情
+     */
+    @Override
+    public RoleDTO getByName(String name) {
+        if (name == null || name.isBlank()) return null;
+        Role entity = this.lambdaQuery().eq(Role::getName, name).last("LIMIT 1").one();
+        return RoleConvert.toDTO(entity);
+    }
+
+    /**
+     * 判断角色编码是否存在（LambdaQuery）
+     * @param code 角色编码
+     * @return 是否存在
+     */
+    @Override
+    public boolean existsByCode(String code) {
+        if (code == null || code.isBlank()) return false;
+        return this.lambdaQuery().eq(Role::getCode, code).count() > 0;
+    }
+
+    /**
+     * 判断角色名称是否存在（LambdaQuery）
+     * @param name 角色名称
+     * @return 是否存在
+     */
+    @Override
+    public boolean existsByName(String name) {
+        if (name == null || name.isBlank()) return false;
+        return this.lambdaQuery().eq(Role::getName, name).count() > 0;
     }
 
     /** 创建角色 */
@@ -78,21 +129,32 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 为角色分配菜单（覆盖式：先删后插） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"roleMenuCodes", "roleMenus"}, allEntries = true)
     public void assignMenus(Long roleId, List<Long> menuIds) {
         if (roleId == null) return;
         baseMapper.deleteRolePermissions(roleId);
         if (menuIds != null && !menuIds.isEmpty()) {
             baseMapper.insertRolePermissions(roleId, menuIds);
         }
+        log.info("assignMenus: roleId={}, menuCount={}", roleId, menuIds == null ? 0 : menuIds.size());
     }
 
-    /** 查询指定角色的菜单列表（仅返回按钮型作为权限） */
+    /** 查询指定角色的菜单列表（仅返回按钮型作为权限；单次 JOIN 查询） */
     @Override
+    @Cacheable(cacheNames = "roleMenus", key = "#roleId")
     public List<MenuDTO> listMenusByRole(Long roleId) {
         if (roleId == null) return java.util.Collections.emptyList();
-        List<Long> ids = baseMapper.selectPermissionIdsByRoleId(roleId);
-        if (ids == null || ids.isEmpty()) return java.util.Collections.emptyList();
-        List<Menu> menus = menuMapper.selectBatchIds(ids);
+        List<Menu> menus = baseMapper.selectMenusByRoleId(roleId);
         return MenuConvert.toDTOList(menus);
+    }
+
+    /** 批量查询角色的权限编码集合（按钮型菜单的 menu_code，去重） */
+    @Override
+    @Cacheable(cacheNames = "roleMenuCodes", key = "#roleIds")
+    public Set<String> listMenuCodesByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptySet();
+        List<String> codes = baseMapper.selectPermissionCodesByRoleIds(roleIds);
+        if (codes == null || codes.isEmpty()) return java.util.Collections.emptySet();
+        return codes.stream().filter(java.util.Objects::nonNull).collect(Collectors.toCollection(java.util.LinkedHashSet::new));
     }
 }

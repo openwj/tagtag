@@ -29,3 +29,8 @@ logging:
 
 jwt:
   secret: ${JWT_SECRET}
+
+security:
+  jwt:
+    access-ttl-seconds: ${SECURITY_JWT_ACCESS_TTL_SECONDS:3600}
+    refresh-ttl-seconds: ${SECURITY_JWT_REFRESH_TTL_SECONDS:604800}

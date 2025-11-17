@@ -11,10 +11,14 @@ import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
+import dev.tagtag.kernel.constant.AppMessages;
+import org.springframework.security.access.prepost.PreAuthorize;
+import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.common.constant.GlobalConstants;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/iam/depts")
+@RequestMapping(GlobalConstants.API_PREFIX + "/iam/depts")
 @Validated
 public class DeptController {
 
@@ -35,23 +39,26 @@ public class DeptController {
 
     /** 创建部门 */
     @PostMapping
-    public Result<Void> create(@RequestBody DeptDTO dept) {
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_CREATE + "')")
+    public Result<Void> create(@Valid @RequestBody DeptDTO dept) {
         deptService.create(dept);
-        return Result.okMsg("创建成功");
+        return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
 
     /** 更新部门（忽略源对象中的空值） */
     @PutMapping
-    public Result<Void> update(@RequestBody DeptDTO dept) {
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_UPDATE + "')")
+    public Result<Void> update(@Valid @RequestBody DeptDTO dept) {
         deptService.update(dept);
-        return Result.okMsg("更新成功");
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
     /** 删除部门 */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_DELETE + "')")
     public Result<Void> delete(@PathVariable("id") Long id) {
         deptService.delete(id);
-        return Result.okMsg("删除成功");
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /** 部门树列表 */

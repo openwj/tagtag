@@ -1,36 +1,45 @@
 package dev.tagtag.module.auth.service.impl;
 
-import dev.tagtag.common.model.PageQuery;
-import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.iam.api.RoleApi;
 import dev.tagtag.contract.iam.api.UserApi;
-import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.UserDTO;
-import dev.tagtag.contract.iam.dto.UserQueryDTO;
+import dev.tagtag.common.exception.BusinessException;
+import dev.tagtag.common.exception.ErrorCode;
+import dev.tagtag.common.util.Numbers;
+import dev.tagtag.common.util.Strings;
 import dev.tagtag.framework.security.JwtService;
+import dev.tagtag.framework.security.TokenVersionService;
 import dev.tagtag.module.auth.service.AuthService;
+import dev.tagtag.module.auth.service.PermissionResolver;
+import dev.tagtag.module.auth.service.TokenFactory;
+import dev.tagtag.kernel.constant.SecurityMessages;
+import dev.tagtag.framework.config.SecurityJwtProperties;
+import dev.tagtag.kernel.constant.SecurityClaims;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 认证服务实现，使用 JwtProvider 生成与校验令牌
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final JwtService jwtService;
     private final UserApi userApi;
-    private final RoleApi roleApi;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenVersionService tokenVersionService;
+    private final PermissionResolver permissionResolver;
+    private final TokenFactory tokenFactory;
 
-    private static final long ACCESS_TTL_SECONDS = 3600;      // 1小时
-    private static final long REFRESH_TTL_SECONDS = 7 * 24 * 3600; // 7天
+    private final SecurityJwtProperties jwtProps;
 
     /**
      * 用户登录（简单校验后发放访问与刷新令牌）
@@ -40,43 +49,28 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public TokenDTO login(String username, String password) {
-        if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
-            throw new IllegalArgumentException("用户名或密码不能为空");
-        }
-        // 通过 IAM 契约查询用户与权限
-        UserQueryDTO filter = UserQueryDTO.builder().username(username).build();
-        PageQuery pq = new PageQuery();
-        pq.setPageNo(1);
-        pq.setPageSize(1);
-        PageResult<UserDTO> pr = userApi.listUsers(pq, filter).getData();
-        List<UserDTO> users = pr == null ? java.util.Collections.emptyList() : pr.getList();
-        if (users.isEmpty()) {
-            throw new IllegalArgumentException("用户不存在");
-        }
-        UserDTO u = users.get(0);
-        List<Long> roleIds = u.getRoleIds() == null ? java.util.Collections.emptyList() : u.getRoleIds();
-        java.util.Set<String> perms = new java.util.HashSet<>();
-        for (Long rid : roleIds) {
-            List<MenuDTO> list = roleApi.listMenusByRole(rid).getData();
-            if (list != null) {
-                for (MenuDTO m : list) if (m != null && m.getMenuCode() != null) perms.add(m.getMenuCode());
-            }
+
+        String uname = Strings.normalize(username);
+        String pwd = Strings.normalize(password);
+        if (!StringUtils.hasText(uname) || !StringUtils.hasText(pwd)) {
+            log.warn("login failed: blank credentials username='{}'", uname);
+            throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
         }
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("uid", u.getId());
-        claims.put("uname", u.getUsername());
-        claims.put("roles", roleIds);
-        claims.put("perms", perms);
-        claims.put("typ", "access");
-        String access = jwtService.generateToken(claims, username, ACCESS_TTL_SECONDS);
-        claims.put("typ", "refresh");
-        String refresh = jwtService.generateToken(claims, username, REFRESH_TTL_SECONDS);
-        TokenDTO dto = new TokenDTO();
-        dto.setAccessToken(access);
-        dto.setRefreshToken(refresh);
-        dto.setTokenType("Bearer");
-        dto.setExpiresIn(ACCESS_TTL_SECONDS);
+        UserDTO full = loadUserOrFail(uname);
+        String stored = Strings.normalize(full.getPassword());
+        if (!passwordEncoder.matches(pwd, stored)) {
+            log.warn("login failed: invalid credentials username='{}'", uname);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+        }
+
+        List<Long> roleIds = Objects.requireNonNullElse(full.getRoleIds(), Collections.emptyList());
+        Set<String> perms = permissionResolver.resolvePermissions(roleIds);
+
+        long ver = tokenVersionService.getCurrentVersion(full.getId());
+        Map<String, Object> claims = tokenFactory.buildClaims(full, roleIds, perms, ver);
+        TokenDTO dto = tokenFactory.issueTokens(claims, uname, jwtProps.getAccessTtlSeconds(), jwtProps.getRefreshTtlSeconds());
+        log.info("login success: uid={}, roles={}, perms={}", full.getId(), roleIds.size(), perms.size());
         return dto;
     }
 
@@ -88,19 +82,28 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenDTO refresh(String refreshToken) {
         if (!StringUtils.hasText(refreshToken) || !jwtService.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("刷新令牌无效");
+            log.warn("refresh failed: invalid token");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
         }
         String subject = jwtService.getSubject(refreshToken);
         Map<String, Object> claims = new HashMap<>(jwtService.getClaims(refreshToken));
-        claims.put("typ", "access");
-        String access = jwtService.generateToken(claims, subject, ACCESS_TTL_SECONDS);
-        claims.put("typ", "refresh");
-        String refresh = jwtService.generateToken(claims, subject, REFRESH_TTL_SECONDS);
+        // 校验令牌版本是否仍然有效
+        Long uid = claims.get(SecurityClaims.UID) == null ? null : Numbers.toLong(claims.get(SecurityClaims.UID));
+        Long tokenVer = claims.get(SecurityClaims.VER) == null ? null : Numbers.toLong(claims.get(SecurityClaims.VER));
+        if (uid == null || tokenVer == null || !tokenVersionService.isTokenVersionValid(uid, tokenVer)) {
+            log.warn("refresh failed: token version mismatch uid={} tokenVer={}", uid, tokenVer);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+        }
+        claims.put(SecurityClaims.TYP, "access");
+        String access = jwtService.generateToken(claims, subject, jwtProps.getAccessTtlSeconds());
+        Map<String, Object> refreshClaims = new HashMap<>(claims);
+        refreshClaims.put(SecurityClaims.TYP, "refresh");
+        String refresh = jwtService.generateToken(refreshClaims, subject, jwtProps.getRefreshTtlSeconds());
         TokenDTO dto = new TokenDTO();
         dto.setAccessToken(access);
         dto.setRefreshToken(refresh);
         dto.setTokenType("Bearer");
-        dto.setExpiresIn(ACCESS_TTL_SECONDS);
+        dto.setExpiresIn(jwtProps.getAccessTtlSeconds());
         return dto;
     }
 
@@ -110,6 +113,28 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void logout(String accessToken) {
-        // 无状态，不做持久化处理
+        // 解析令牌并提升令牌版本，使旧令牌全部失效
+        if (!StringUtils.hasText(accessToken) || !jwtService.validateToken(accessToken)) {
+            return;
+        }
+        Map<String, Object> claims = jwtService.getClaims(accessToken);
+        Long uid = claims.get(SecurityClaims.UID) == null ? null : Numbers.toLong(claims.get(SecurityClaims.UID));
+        if (uid != null) {
+            tokenVersionService.bumpVersion(uid);
+            log.info("logout: bumped token version for uid={}", uid);
+        }
+    }  
+
+    /**
+     * 按用户名加载用户，不存在或凭证为空时抛出未认证异常
+     * @param uname 用户名
+     * @return 用户详情
+     */
+    private UserDTO loadUserOrFail(String uname) {
+        UserDTO full = userApi.getUserByUsername(uname).getData();
+        if (full == null || full.getPassword() == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+        }
+        return full;
     }
 }

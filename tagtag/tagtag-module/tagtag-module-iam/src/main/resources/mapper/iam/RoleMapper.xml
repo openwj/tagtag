@@ -28,27 +28,12 @@
             </if>
         </where>
 
-        <choose>
-            <when test="orderList != null and orderList.size() &gt; 0">
-                ORDER BY
-                <foreach collection="orderList" item="sf" separator=",">
-                    <choose>
-                        <when test="sf.field == 'id'"> id </when>
-                        <when test="sf.field == 'code'"> code </when>
-                        <when test="sf.field == 'name'"> name </when>
-                        <when test="sf.field == 'createTime' or sf.field == 'create_time'"> create_time </when>
-                        <otherwise> id </otherwise>
-                    </choose>
-                    <choose>
-                        <when test="sf.asc == null or sf.asc"> ASC </when>
-                        <otherwise> DESC </otherwise>
-                    </choose>
-                </foreach>
-            </when>
-            <otherwise>
-                ORDER BY id ASC
-            </otherwise>
-        </choose>
+        <if test="orderBySql != null and orderBySql != ''">
+            ${orderBySql}
+        </if>
+        <if test="orderBySql == null or orderBySql == ''">
+            ORDER BY id ASC
+        </if>
     </select>
 
     <!-- 查询角色的权限ID列表 -->
@@ -73,5 +58,46 @@
             (#{roleId}, #{pid})
         </foreach>
     </insert>
+
+    <!-- 按角色ID集合批量查询按钮型菜单的权限编码（menu_code） -->
+    <select id="selectPermissionCodesByRoleIds" resultType="string">
+        SELECT DISTINCT m.menu_code
+        FROM iam_role_menu rm
+        JOIN iam_menu m ON rm.menu_id = m.id
+        WHERE rm.role_id IN
+        <foreach collection="roleIds" item="rid" open="(" separator="," close=")">
+            #{rid}
+        </foreach>
+          AND m.menu_type = 2
+          AND m.deleted = 0
+    </select>
+
+    <!-- 根据角色ID查询按钮型菜单实体列表（JOIN 查询） -->
+    <select id="selectMenusByRoleId" resultType="dev.tagtag.module.iam.entity.Menu">
+        SELECT m.id,
+               m.parent_id    AS parentId,
+               m.menu_name    AS menuName,
+               m.menu_code    AS menuCode,
+               m.path,
+               m.component,
+               m.icon,
+               m.sort,
+               m.status,
+               m.menu_type    AS menuType,
+               m.is_hidden    AS isHidden,
+               m.is_external  AS isExternal,
+               m.external_url AS externalUrl,
+               m.remark,
+               m.is_keepalive AS isKeepalive,
+               m.create_time  AS createTime,
+               m.create_by    AS createBy,
+               m.update_time  AS updateTime,
+               m.update_by    AS updateBy,
+               m.deleted
+        FROM iam_role_menu rm
+        JOIN iam_menu m ON rm.menu_id = m.id
+        WHERE rm.role_id = #{roleId}
+          AND m.menu_type = 2
+    </select>
 
 </mapper>

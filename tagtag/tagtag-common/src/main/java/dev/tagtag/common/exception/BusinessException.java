@@ -1,7 +1,14 @@
 package dev.tagtag.common.exception;
 
+import lombok.Getter;
+
+@Getter
 public class BusinessException extends RuntimeException {
 
+    /**
+     * -- GETTER --
+     *  获取错误码枚举
+     */
     private final ErrorCode errorCode;
 
     public BusinessException(ErrorCode errorCode) {
@@ -22,14 +29,6 @@ public class BusinessException extends RuntimeException {
     public BusinessException(ErrorCode errorCode, String message, Throwable cause) {
         super(message, cause);
         this.errorCode = errorCode;
-    }
-
-    /**
-     * 获取错误码枚举
-     * @return 错误码
-     */
-    public ErrorCode getErrorCode() {
-        return errorCode;
     }
 
     /**

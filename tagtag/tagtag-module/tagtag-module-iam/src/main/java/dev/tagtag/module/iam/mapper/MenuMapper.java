@@ -20,5 +20,5 @@ public interface MenuMapper extends BaseMapper<Menu> {
      * @param orderList 排序字段列表
      * @return 分页结果
      */
-    IPage<Menu> selectPage(IPage<Menu> page, @Param("q") MenuQueryDTO q, @Param("orderList") List<SortField> orderList);
+    IPage<Menu> selectPage(IPage<Menu> page, @Param("q") MenuQueryDTO q, @Param("orderBySql") String orderBySql);
 }

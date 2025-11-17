@@ -22,6 +22,8 @@ spring:
     baseline-on-migrate: false
     group: true
     clean-disabled: false
+    validate-on-migrate: true
+
 
 mybatis-plus:
   configuration:
@@ -40,4 +42,9 @@ logging:
     com.baomidou.mybatisplus: info
 
 jwt:
-  secret: ${JWT_SECRET:change-me-please}
+  secret: ${JWT_SECRET:change-me-please1234567894563214454545455454545}
+
+security:
+  jwt:
+    access-ttl-seconds: 3600
+    refresh-ttl-seconds: 604800

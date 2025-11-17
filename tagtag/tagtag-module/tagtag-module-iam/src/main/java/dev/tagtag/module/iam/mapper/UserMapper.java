@@ -21,7 +21,7 @@ public interface UserMapper extends BaseMapper<User> {
      * @param orderList 排序字段列表
      * @return 分页结果
      */
-    IPage<User> selectPage(IPage<User> page, @Param("q") UserQueryDTO q, @Param("orderList") List<SortField> orderList);
+    IPage<User> selectPage(IPage<User> page, @Param("q") UserQueryDTO q, @Param("orderBySql") String orderBySql);
 
     /** 根据用户ID查询角色ID列表 */
     List<Long> selectRoleIdsByUserId(@Param("userId") Long userId);
@@ -31,4 +31,5 @@ public interface UserMapper extends BaseMapper<User> {
 
     /** 批量插入用户角色关联 */
     int insertUserRoles(@Param("userId") Long userId, @Param("roleIds") List<Long> roleIds);
+
 }

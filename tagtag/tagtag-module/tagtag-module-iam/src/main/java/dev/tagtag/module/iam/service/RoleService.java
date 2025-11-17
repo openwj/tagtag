@@ -7,6 +7,7 @@ import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RoleService {
 
@@ -30,4 +31,35 @@ public interface RoleService {
 
     /** 查询指定角色的菜单列表（含按钮） */
     List<MenuDTO> listMenusByRole(Long roleId);
+
+    /** 按角色ID集合批量查询权限编码（按钮型菜单的 menu_code） */
+    Set<String> listMenuCodesByRoleIds(List<Long> roleIds);
+
+    /**
+     * 根据角色编码查询角色详情
+     * @param code 角色编码
+     * @return 角色详情
+     */
+    RoleDTO getByCode(String code);
+
+    /**
+     * 根据角色名称查询角色详情
+     * @param name 角色名称
+     * @return 角色详情
+     */
+    RoleDTO getByName(String name);
+
+    /**
+     * 判断角色编码是否存在
+     * @param code 角色编码
+     * @return 是否存在
+     */
+    boolean existsByCode(String code);
+
+    /**
+     * 判断角色名称是否存在
+     * @param name 角色名称
+     * @return 是否存在
+     */
+    boolean existsByName(String name);
 }

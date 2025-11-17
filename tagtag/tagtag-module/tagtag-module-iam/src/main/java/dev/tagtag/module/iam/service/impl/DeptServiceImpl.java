@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
+import dev.tagtag.framework.util.OrderByBuilder;
+import dev.tagtag.framework.util.PageNormalizer;
 import dev.tagtag.framework.util.Pages;
-import dev.tagtag.framework.util.SortWhitelists;
+import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.module.iam.convert.DeptConvert;
@@ -14,18 +16,28 @@ import dev.tagtag.module.iam.entity.Dept;
 import dev.tagtag.module.iam.mapper.DeptMapper;
 import dev.tagtag.module.iam.service.DeptService;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements DeptService {
+
+    private final PageProperties pageProperties;
+
+    
 
     /** 部门分页查询 */
     @Override
     public PageResult<DeptDTO> page(DeptQueryDTO query, PageQuery pageQuery) {
-        pageQuery.filterSortByWhitelist(SortWhitelists.dept());
-        IPage<Dept> page = baseMapper.selectPage(Pages.toPage(pageQuery), query, pageQuery.getSortFields());
+        IPage<Dept> page = Pages.selectPage(pageQuery, pageProperties, Dept.class, pageProperties.getDept(),
+                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
         IPage<DeptDTO> dtoPage = page.convert(DeptConvert::toDTO);
         return PageResults.of(dtoPage);
     }
@@ -40,6 +52,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     /** 创建部门 */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "deptTree", allEntries = true)
     public void create(DeptDTO dept) {
         validateForCreate(dept);
         Dept entity = DeptConvert.toEntity(dept);
@@ -47,11 +60,13 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         if (dept != null) {
             dept.setId(entity.getId());
         }
+        log.info("dept create: id={}, name={}", entity.getId(), entity.getName());
     }
 
     /** 更新部门（忽略源对象中的空值） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "deptTree", allEntries = true)
     public void update(DeptDTO dept) {
         if (dept == null || dept.getId() == null) {
             return;
@@ -63,20 +78,24 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         }
         DeptConvert.mergeNonNull(dept, entity);
         super.updateById(entity);
+        log.info("dept update: id={}", entity.getId());
     }
 
     /** 删除部门 */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "deptTree", allEntries = true)
     public void delete(Long id) {
         if (id == null) {
             return;
         }
         super.removeById(id);
+        log.info("dept delete: id={}", id);
     }
 
     /** 部门树列表 */
     @Override
+    @Cacheable(cacheNames = "deptTree", key = "'all'")
     public java.util.List<DeptDTO> listTree() {
         java.util.List<Dept> all = this.lambdaQuery().orderByAsc(Dept::getSort, Dept::getId).list();
         java.util.Map<Long, DeptDTO> map = new java.util.HashMap<>(all.size());

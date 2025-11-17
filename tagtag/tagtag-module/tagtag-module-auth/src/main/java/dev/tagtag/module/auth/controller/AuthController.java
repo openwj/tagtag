@@ -7,11 +7,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import dev.tagtag.common.constant.GlobalConstants;
 
 /**
  * 认证控制器，提供登录、刷新与注销接口
@@ -19,10 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @AllArgsConstructor
-@RequestMapping("/api/auth")
+@RequestMapping(GlobalConstants.API_PREFIX + "/auth")
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
@@ -57,6 +60,7 @@ public class AuthController {
         return Result.ok();
     }
 
+
     @Data
     public static class LoginRequest {
         @NotBlank(message = "用户名不能为空")
@@ -76,4 +80,5 @@ public class AuthController {
         @NotBlank(message = "访问令牌不能为空")
         private String accessToken;
     }
+
 }

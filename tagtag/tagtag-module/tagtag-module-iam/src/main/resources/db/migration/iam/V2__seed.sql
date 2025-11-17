@@ -1,12 +1,16 @@
--- IAM 模块基础数据（幂等）
-INSERT INTO iam_user (username, password, email, status)
-SELECT 'admin', NULL, 'admin@example.com', 1
+-- 基础数据（幂等）
+
+-- 管理员用户（默认密码：password）
+INSERT INTO iam_user (username, password, nickname, status)
+SELECT 'admin', '$2a$10$HjiHzDZRiuq5S94wYy/W0eHrAXJ1lcEUROYjZ5yR2Gd4LxZBu0s3C', '管理员', 1
 WHERE NOT EXISTS (SELECT 1 FROM iam_user WHERE username='admin');
 
-INSERT INTO iam_role (code, name)
-SELECT 'ADMIN', '管理员'
+-- 管理员角色
+INSERT INTO iam_role (code, name, status)
+SELECT 'ADMIN', '管理员', 1
 WHERE NOT EXISTS (SELECT 1 FROM iam_role WHERE code='ADMIN');
 
+-- 按钮型菜单（作为后端权限码）
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, create_time)
 SELECT 0, '创建用户', 'user:create', 2, 1, 0, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='user:create');
@@ -28,7 +32,7 @@ WHERE u.username='admin' AND r.code='ADMIN'
     SELECT 1 FROM iam_user_role ur WHERE ur.user_id=u.id AND ur.role_id=r.id
   );
 
--- 为 ADMIN 绑定权限
+-- 为 ADMIN 绑定按钮权限
 INSERT INTO iam_role_menu (role_id, menu_id)
 SELECT r.id, m.id FROM iam_role r, iam_menu m
 WHERE r.code='ADMIN' AND m.menu_code='user:create'

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
+import dev.tagtag.framework.util.OrderByBuilder;
+import dev.tagtag.framework.util.PageNormalizer;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
@@ -14,11 +16,17 @@ import dev.tagtag.module.iam.mapper.UserMapper;
 import dev.tagtag.module.iam.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import dev.tagtag.framework.util.SortWhitelists;
+import dev.tagtag.framework.config.PageProperties;
+import lombok.RequiredArgsConstructor;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    private final PageProperties pageProperties;
+
+    
 
     /**
      * 用户分页查询（XML 构建 WHERE/ORDER BY，服务层保持轻薄）
@@ -28,8 +36,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
-        pageQuery.filterSortByWhitelist(SortWhitelists.user());
-        IPage<User> page = baseMapper.selectPage(Pages.toPage(pageQuery), query, pageQuery.getSortFields());
+        IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
+                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
         IPage<UserDTO> dtoPage = page.convert(UserConvert::toDTO);
         return PageResults.of(dtoPage);
     }
@@ -93,5 +101,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (roleIds != null && !roleIds.isEmpty()) {
             baseMapper.insertUserRoles(userId, roleIds);
         }
+    }
+
+    /**
+     * 根据用户名查询用户详情（包含密码与角色ID）
+     * @param username 用户名
+     * @return 用户数据
+     */
+    @Override
+    public UserDTO getByUsername(String username) {
+        if (username == null || username.isEmpty()) {
+            return null;
+        }
+        User entity = this.lambdaQuery()
+                .eq(User::getUsername, username)
+                .last("LIMIT 1")
+                .one();
+        UserDTO dto = UserConvert.toDTO(entity);
+        if (dto != null && dto.getId() != null) {
+            java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
+            dto.setRoleIds(roleIds);
+        }
+        return dto;
     }
 }

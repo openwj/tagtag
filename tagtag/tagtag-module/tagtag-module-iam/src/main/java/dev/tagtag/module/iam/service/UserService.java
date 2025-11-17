@@ -24,4 +24,11 @@ public interface UserService {
 
     /** 为用户分配角色 */
     void assignRoles(Long userId, java.util.List<Long> roleIds);
+
+    /**
+     * 根据用户名查询用户详情（包含密码与角色ID）
+     * @param username 用户名
+     * @return 用户数据
+     */
+    UserDTO getByUsername(String username);
 }

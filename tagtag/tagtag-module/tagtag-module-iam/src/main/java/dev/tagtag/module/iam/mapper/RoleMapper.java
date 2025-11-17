@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import dev.tagtag.common.model.SortField;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.module.iam.entity.Role;
+import dev.tagtag.module.iam.entity.Menu;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,7 +21,7 @@ public interface RoleMapper extends BaseMapper<Role> {
      * @param orderList 排序字段列表
      * @return 分页结果
      */
-    IPage<Role> selectPage(IPage<Role> page, @Param("q") RoleQueryDTO q, @Param("orderList") List<SortField> orderList);
+    IPage<Role> selectPage(IPage<Role> page, @Param("q") RoleQueryDTO q, @Param("orderBySql") String orderBySql);
 
     /** 根据角色ID查询权限ID列表 */
     List<Long> selectPermissionIdsByRoleId(@Param("roleId") Long roleId);
@@ -30,4 +31,10 @@ public interface RoleMapper extends BaseMapper<Role> {
 
     /** 批量插入角色权限关联 */
     int insertRolePermissions(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds);
+
+    /** 按角色ID集合批量查询按钮型菜单的权限编码（menu_code） */
+    List<String> selectPermissionCodesByRoleIds(@Param("roleIds") List<Long> roleIds);
+
+    /** 根据角色ID查询按钮型菜单实体列表（JOIN 查询） */
+    List<Menu> selectMenusByRoleId(@Param("roleId") Long roleId);
 }

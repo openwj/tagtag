@@ -2,7 +2,6 @@ package dev.tagtag.framework.config;
 
 import dev.tagtag.framework.security.CustomAccessDeniedHandler;
 import dev.tagtag.framework.security.CustomAuthenticationEntryPoint;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,10 +15,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.kernel.constant.SecurityClaims;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Spring Security 核心配置
@@ -27,7 +31,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtProperties jwtProperties;
+
 
     /**
      * 配置安全过滤链（无状态、开放认证端点）
@@ -40,7 +48,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    CustomAuthenticationEntryPoint entryPoint,
                                                    CustomAccessDeniedHandler accessDeniedHandler,
-                                                   JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+                                                   JwtAuthenticationConverter jwtAuthenticationConverter,
+                                                   dev.tagtag.framework.security.TokenVersionFilter tokenVersionFilter) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -51,6 +60,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+        http.addFilterBefore(tokenVersionFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -60,7 +70,7 @@ public class SecurityConfig {
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     /**
@@ -68,8 +78,8 @@ public class SecurityConfig {
      * @return 解码器
      */
     @Bean
-    public JwtDecoder jwtDecoder(@Value("${jwt.secret:tagtag-default-secret}") String secret) {
-        javax.crypto.spec.SecretKeySpec key = new javax.crypto.spec.SecretKeySpec(secret.getBytes(dev.tagtag.common.constant.GlobalConstants.CHARSET_UTF8), "HmacSHA256");
+    public JwtDecoder jwtDecoder() {
+        SecretKeySpec key = new SecretKeySpec(jwtProperties.getSecret().getBytes(GlobalConstants.CHARSET_UTF8), "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(key).build();
     }
 
@@ -80,21 +90,21 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new Converter<Jwt, java.util.Collection<GrantedAuthority>>() {
+        converter.setJwtGrantedAuthoritiesConverter(new Converter<Jwt, Collection<GrantedAuthority>>() {
             /**
              * 读取 claims 中的 roles/perms 并映射为权限集合
              * @param jwt JWT
              * @return 权限集合
              */
             @Override
-            public java.util.Collection<GrantedAuthority> convert(Jwt jwt) {
-                java.util.Set<GrantedAuthority> auths = new java.util.HashSet<>();
-                Object rolesObj = jwt.getClaims().get("roles");
-                if (rolesObj instanceof java.util.Collection<?> rc) {
+            public Collection<GrantedAuthority> convert(Jwt jwt) {
+                Set<GrantedAuthority> auths = new HashSet<>();
+                Object rolesObj = jwt.getClaims().get(SecurityClaims.ROLES);
+                if (rolesObj instanceof Collection<?> rc) {
                     for (Object r : rc) if (r != null) auths.add(new SimpleGrantedAuthority("ROLE_" + String.valueOf(r)));
                 }
-                Object permsObj = jwt.getClaims().get("perms");
-                if (permsObj instanceof java.util.Collection<?> pc) {
+                Object permsObj = jwt.getClaims().get(SecurityClaims.PERMS);
+                if (permsObj instanceof Collection<?> pc) {
                     for (Object p : pc) if (p != null) auths.add(new SimpleGrantedAuthority("PERM_" + String.valueOf(p)));
                 }
                 return auths;

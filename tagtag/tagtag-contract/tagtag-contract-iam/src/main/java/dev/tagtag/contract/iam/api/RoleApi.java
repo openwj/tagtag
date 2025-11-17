@@ -8,6 +8,7 @@ import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 角色契约接口
@@ -56,4 +57,11 @@ public interface RoleApi {
      * @return 菜单列表
      */
     Result<List<MenuDTO>> listMenusByRole(Long roleId);
+
+    /**
+     * 按角色ID集合批量查询权限编码（按钮型菜单的 menu_code）
+     * @param roleIds 角色ID集合
+     * @return 权限编码集合
+     */
+    Result<Set<String>> listMenuCodesByRoleIds(List<Long> roleIds);
 }

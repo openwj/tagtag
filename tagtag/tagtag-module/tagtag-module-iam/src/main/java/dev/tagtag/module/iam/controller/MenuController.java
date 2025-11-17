@@ -3,6 +3,8 @@ package dev.tagtag.module.iam.controller;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
+import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import dev.tagtag.module.iam.service.MenuService;
@@ -11,11 +13,14 @@ import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import dev.tagtag.kernel.constant.Permissions;
 
 @RestController
 @Validated
 @AllArgsConstructor
-@RequestMapping("/iam/menus")
+@RequestMapping(GlobalConstants.API_PREFIX + "/iam/menus")
 public class MenuController {
 
     private final MenuService menuService;
@@ -33,25 +38,48 @@ public class MenuController {
         return Result.ok(menuService.getById(id));
     }
 
+    /**
+     * 根据父ID查询子菜单列表
+     * @param parentId 父菜单ID
+     * @return 子菜单列表
+     */
+    @GetMapping("/parent/{parentId}")
+    public Result<List<MenuDTO>> listByParent(@PathVariable("parentId") Long parentId) {
+        return Result.ok(menuService.listByParentId(parentId));
+    }
+
+    /**
+     * 根据菜单编码查询单条
+     * @param menuCode 菜单编码
+     * @return 菜单详情
+     */
+    @GetMapping("/code/{menuCode}")
+    public Result<MenuDTO> getByCode(@PathVariable("menuCode") String menuCode) {
+        return Result.ok(menuService.getByMenuCode(menuCode));
+    }
+
     /** 创建菜单 */
     @PostMapping
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_CREATE + "')")
     public Result<Void> create(@Valid @RequestBody MenuDTO menu) {
         menuService.create(menu);
-        return Result.okMsg("创建成功");
+        return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
 
     /** 更新菜单（忽略源对象中的空值） */
     @PutMapping
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
     public Result<Void> update(@Valid @RequestBody MenuDTO menu) {
         menuService.update(menu);
-        return Result.okMsg("更新成功");
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
     /** 删除菜单 */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_DELETE + "')")
     public Result<Void> delete(@PathVariable("id") Long id) {
         menuService.delete(id);
-        return Result.okMsg("删除成功");
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     @Data

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -56,5 +57,11 @@ public class RoleApiImpl implements RoleApi {
     @Override
     public Result<List<MenuDTO>> listMenusByRole(Long roleId) {
         return Result.ok(roleService.listMenusByRole(roleId));
+    }
+
+    /** 批量查询角色的权限编码集合 */
+    @Override
+    public Result<Set<String>> listMenuCodesByRoleIds(List<Long> roleIds) {
+        return Result.ok(roleService.listMenuCodesByRoleIds(roleIds));
     }
 }

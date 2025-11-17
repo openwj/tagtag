@@ -13,8 +13,6 @@ import org.apache.ibatis.annotations.Param;
 public interface DeptMapper extends BaseMapper<Dept> {
 
     /** 分页查询部门（由 XML 构建 WHERE/ORDER BY） */
-    IPage<Dept> selectPage(IPage<Dept> page, @Param("q") DeptQueryDTO q, @Param("orderList") List<SortField> orderList);
+    IPage<Dept> selectPage(IPage<Dept> page, @Param("q") DeptQueryDTO q, @Param("orderBySql") String orderBySql);
 
-    /** 查询部门的父ID */
-    Long selectParentId(@Param("id") Long id);
 }

@@ -21,4 +21,18 @@ public interface MenuService {
 
     /** 删除权限 */
     void delete(Long id);
+
+    /**
+     * 根据父ID查询子菜单列表
+     * @param parentId 父菜单ID
+     * @return 子菜单列表
+     */
+    java.util.List<MenuDTO> listByParentId(Long parentId);
+
+    /**
+     * 根据菜单编码查询单条
+     * @param menuCode 菜单编码
+     * @return 菜单详情
+     */
+    MenuDTO getByMenuCode(String menuCode);
 }

@@ -6,7 +6,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.springframework.beans.factory.annotation.Value;
+import dev.tagtag.framework.config.JwtProperties;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -20,8 +20,15 @@ import java.util.UUID;
 @Component
 public class JwtService {
 
-    @Value("${jwt.secret:tagtag-default-secret}")
-    private String secret;
+    private final JwtProperties jwtProperties;
+
+    /**
+     * 构造函数：注入 JWT 配置
+     * @param jwtProperties JWT 配置
+     */
+    public JwtService(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+    }
 
     /**
      * 生成 HS256 签名的 JWT
@@ -47,7 +54,7 @@ public class JwtService {
             }
             JWTClaimsSet claimSet = builder.build();
             SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimSet);
-            jwt.sign(new MACSigner(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            jwt.sign(new MACSigner(jwtProperties.getSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             return jwt.serialize();
         } catch (Exception e) {
             throw new RuntimeException("JWT 生成失败", e);
@@ -62,7 +69,7 @@ public class JwtService {
     public boolean validateToken(String token) {
         try {
             SignedJWT jwt = SignedJWT.parse(token);
-            boolean sigOk = jwt.verify(new MACVerifier(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            boolean sigOk = jwt.verify(new MACVerifier(jwtProperties.getSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             if (!sigOk) return false;
             Date exp = jwt.getJWTClaimsSet().getExpirationTime();
             return exp != null && Instant.now().isBefore(exp.toInstant());
