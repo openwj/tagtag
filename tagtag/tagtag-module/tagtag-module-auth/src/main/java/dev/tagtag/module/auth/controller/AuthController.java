@@ -2,11 +2,13 @@ package dev.tagtag.module.auth.controller;
 
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.auth.dto.TokenDTO;
+import dev.tagtag.contract.auth.dto.LoginRequest;
+import dev.tagtag.contract.auth.dto.RefreshRequest;
+import dev.tagtag.contract.auth.dto.LogoutRequest;
+import dev.tagtag.contract.auth.dto.RegisterRequest;
 import dev.tagtag.module.auth.service.AuthService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import dev.tagtag.common.constant.GlobalConstants;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import dev.tagtag.framework.security.JwtService;
+import dev.tagtag.contract.iam.api.UserApi;
+import dev.tagtag.contract.iam.dto.UserDTO;
+import dev.tagtag.module.auth.service.PermissionResolver;
+import java.util.Set;
 
 /**
  * 认证控制器，提供登录、刷新与注销接口
@@ -26,6 +35,9 @@ public class AuthController {
 
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final UserApi userApi;
+    private final PermissionResolver permissionResolver;
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
@@ -60,25 +72,49 @@ public class AuthController {
         return Result.ok();
     }
 
-
-    @Data
-    public static class LoginRequest {
-        @NotBlank(message = "用户名不能为空")
-        private String username;
-        @NotBlank(message = "密码不能为空")
-        private String password;
+    /**
+     * 用户注册（公开接口）
+     * @param req 注册请求
+     * @return 操作结果
+     */
+    @PostMapping("/register")
+    public Result<Void> register(@Valid @RequestBody RegisterRequest req) {
+        authService.register(req.getUsername(), req.getPassword());
+        return Result.ok();
     }
 
-    @Data
-    public static class RefreshRequest {
-        @NotBlank(message = "刷新令牌不能为空")
-        private String refreshToken;
+    /**
+     * 获取当前登录用户信息
+     * @param authorization Authorization头（Bearer Token）
+     * @return 用户信息
+     */
+    @GetMapping("/me")
+    public Result<UserDTO> me(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
+        String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        String subject = jwtService.getSubject(token);
+        UserDTO user = userApi.getUserByUsername(subject).getData();
+        if (user != null) {
+            user.setPassword(null);
+        }
+        return Result.ok(user);
     }
 
-    @Data
-    public static class LogoutRequest {
-        @NotBlank(message = "访问令牌不能为空")
-        private String accessToken;
+    /**
+     * 获取当前用户的权限编码集合
+     * @param authorization Authorization头（Bearer Token）
+     * @return 权限码列表
+     */
+    @GetMapping("/codes")
+    public Result<Set<String>> codes(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
+        String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        String subject = jwtService.getSubject(token);
+        UserDTO user = userApi.getUserByUsername(subject).getData();
+        java.util.List<Long> roleIds = user == null ? java.util.Collections.emptyList() : java.util.Objects.requireNonNullElse(user.getRoleIds(), java.util.Collections.emptyList());
+        Set<String> perms = permissionResolver.resolvePermissions(roleIds);
+        return Result.ok(perms);
     }
+
+
+    
 
 }

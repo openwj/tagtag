@@ -147,7 +147,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     /** 查询指定角色的菜单列表（仅返回按钮型作为权限；单次 JOIN 查询） */
     @Override
-    @Cacheable(cacheNames = "roleMenus", key = "#roleId")
+    @Cacheable(cacheNames = "roleMenus", key = "#root.args[0]")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<MenuDTO> listMenusByRole(Long roleId) {
         if (roleId == null) return java.util.Collections.emptyList();
@@ -157,7 +157,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     /** 批量查询角色的权限编码集合（按钮型菜单的 menu_code，去重） */
     @Override
-    @Cacheable(cacheNames = "roleMenuCodes", key = "#roleIds")
+    @Cacheable(cacheNames = "roleMenuCodes", key = "#root.args[0]")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Set<String> listMenuCodesByRoleIds(List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptySet();

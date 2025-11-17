@@ -15,9 +15,9 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     /**
-     * 配置统一的 RedisTemplate（String key + JSON value）
+     * 配置统一的 RedisTemplate（启用值类型信息，保持集合类型）
      * @param connectionFactory 连接工厂
-     * @param objectMapper 全局 ObjectMapper
+     * @param objectMapper 全局 ObjectMapper（不参与 Redis 序列化器）
      * @return RedisTemplate
      */
     @Bean
@@ -25,7 +25,7 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         StringRedisSerializer keySerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer();
         template.setKeySerializer(keySerializer);
         template.setValueSerializer(valueSerializer);
         template.setHashKeySerializer(keySerializer);

@@ -5,11 +5,14 @@ import type { Recordable } from '@vben/types';
 import { computed, h, ref } from 'vue';
 
 import { AuthenticationRegister, z } from '@vben/common-ui';
+import { registerApi, loginApi } from '#/api/core/auth';
+import { useAuthStore } from '#/store';
 import { $t } from '@vben/locales';
 
 defineOptions({ name: 'Register' });
 
 const loading = ref(false);
+const authStore = useAuthStore();
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -81,9 +84,18 @@ const formSchema = computed((): VbenFormSchema[] => {
   ];
 });
 
-function handleSubmit(value: Recordable<any>) {
-  // eslint-disable-next-line no-console
-  console.log('register submit:', value);
+/**
+ * 提交注册，并自动登录
+ */
+async function handleSubmit(value: Recordable<any>) {
+  try {
+    loading.value = true;
+    const { username, password } = value ?? {};
+    await registerApi({ username, password });
+    await authStore.authLogin({ username, password });
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 

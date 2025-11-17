@@ -33,11 +33,13 @@ export const useAuthStore = defineStore('auth', () => {
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
-      const { accessToken } = await loginApi(params);
+      /** 登录并获取令牌 */
+      const { accessToken, refreshToken } = await loginApi(params);
 
       // 如果成功获取到 accessToken
       if (accessToken) {
         accessStore.setAccessToken(accessToken);
+        accessStore.setRefreshToken(refreshToken ?? null);
 
         // 获取用户信息并存储到 accessStore 中
         const [fetchUserInfoResult, accessCodes] = await Promise.all([
@@ -77,9 +79,13 @@ export const useAuthStore = defineStore('auth', () => {
     };
   }
 
+  /** 退出登录 */
   async function logout(redirect: boolean = true) {
     try {
-      await logoutApi();
+      const token = accessStore.accessToken ?? '';
+      if (token) {
+        await logoutApi(token);
+      }
     } catch {
       // 不做任何处理
     }

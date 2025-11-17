@@ -27,4 +27,11 @@ public interface AuthService {
      * @param accessToken 访问令牌
      */
     void logout(String accessToken);
+
+    /**
+     * 用户注册（创建新用户并加密存储密码）
+     * @param username 用户名
+     * @param password 明文密码
+     */
+    void register(String username, String password);
 }

@@ -46,14 +46,20 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   }
 
   /**
-   * 刷新token逻辑
+   * 刷新令牌，使用持久化的 refreshToken 获取新的 accessToken
    */
   async function doRefreshToken() {
     const accessStore = useAccessStore();
-    const resp = await refreshTokenApi();
-    const newToken = resp.data;
-    accessStore.setAccessToken(newToken);
-    return newToken;
+    const refreshToken = accessStore.refreshToken;
+    if (!refreshToken) {
+      await doReAuthenticate();
+      return '';
+    }
+    const resp = await refreshTokenApi({ refreshToken });
+    const { accessToken, refreshToken: newRefresh } = resp;
+    accessStore.setAccessToken(accessToken ?? null);
+    accessStore.setRefreshToken(newRefresh ?? null);
+    return accessToken ?? '';
   }
 
   function formatToken(token: null | string) {
@@ -76,7 +82,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     defaultResponseInterceptor({
       codeField: 'code',
       dataField: 'data',
-      successCode: 0,
+      successCode: 200,
     }),
   );
 

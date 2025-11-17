@@ -67,7 +67,8 @@ public class AuthServiceImpl implements AuthService {
 
         UserDTO full = loadUserOrFail(uname);
         String stored = Strings.normalize(full.getPassword());
-        if (!passwordEncoder.matches(pwd, stored)) {
+        boolean matched = passwordEncoder.matches(pwd, stored);
+        if (!matched) {
             log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
                     uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
@@ -138,7 +139,30 @@ public class AuthServiceImpl implements AuthService {
             log.info("logout: bumped token version for uid={}, ip={}, ua={}, traceId={}",
                     uid, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         }
-    }  
+    }
+
+    /**
+     * 用户注册：检查用户名唯一性，密码加密后创建用户
+     * @param username 用户名
+     * @param password 明文密码
+     */
+    @Override
+    public void register(String username, String password) {
+        String uname = Strings.normalize(username);
+        String pwd = Strings.normalize(password);
+        if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
+            throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
+        }
+        UserDTO exists = userApi.getUserByUsername(uname).getData();
+        if (exists != null && exists.getId() != null) {
+            throw new BusinessException(ErrorCode.CONFLICT, "用户名已存在");
+        }
+        UserDTO toCreate = new UserDTO();
+        toCreate.setUsername(uname);
+        toCreate.setPassword(passwordEncoder.encode(pwd));
+        toCreate.setStatus(1);
+        userApi.createUser(toCreate);
+    }
 
     /**
      * 按用户名加载用户，不存在或凭证为空时抛出未认证异常
@@ -158,16 +182,20 @@ public class AuthServiceImpl implements AuthService {
      * @param username 用户名
      */
     private void checkLoginRateLimit(String username) {
-        String ip = resolveClientIp();
-        String uname = Strings.normalize(username);
-        String key = "rl:login:" + (ip == null ? "unknown" : ip) + ":" + (uname == null ? "" : uname);
-        long maxPerMinute = 10L;
-        Long n = stringRedisTemplate.opsForValue().increment(key);
-        if (n != null && n == 1L) {
-            stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
-        }
-        if (n != null && n > maxPerMinute) {
-            throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+        try {
+            String ip = resolveClientIp();
+            String uname = Strings.normalize(username);
+            String key = "rl:login:" + (ip == null ? "unknown" : ip) + ":" + (uname == null ? "" : uname);
+            long maxPerMinute = 10L;
+            Long n = stringRedisTemplate.opsForValue().increment(key);
+            if (n != null && n == 1L) {
+                stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
+            }
+            if (n != null && n > maxPerMinute) {
+                throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+            }
+        } catch (Exception ignore) {
+            return;
         }
     }
 
@@ -175,15 +203,19 @@ public class AuthServiceImpl implements AuthService {
      * 刷新接口限流：基于 IP 的滑窗计数，超过阈值抛出 429
      */
     private void checkRefreshRateLimit() {
-        String ip = resolveClientIp();
-        String key = "rl:refresh:" + (ip == null ? "unknown" : ip);
-        long maxPerMinute = 30L;
-        Long n = stringRedisTemplate.opsForValue().increment(key);
-        if (n != null && n == 1L) {
-            stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
-        }
-        if (n != null && n > maxPerMinute) {
-            throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+        try {
+            String ip = resolveClientIp();
+            String key = "rl:refresh:" + (ip == null ? "unknown" : ip);
+            long maxPerMinute = 30L;
+            Long n = stringRedisTemplate.opsForValue().increment(key);
+            if (n != null && n == 1L) {
+                stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
+            }
+            if (n != null && n > maxPerMinute) {
+                throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+            }
+        } catch (Exception ignore) {
+            return;
         }
     }
 
