@@ -25,16 +25,18 @@ public class TokenVersionFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final TokenVersionService tokenVersionService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     /**
-     * 构造函数：注入 JWT 服务与令牌版本服务
+     * 构造函数：注入 JWT 服务、令牌版本服务与全局 ObjectMapper
      * @param jwtService JWT 服务
      * @param tokenVersionService 令牌版本服务
+     * @param objectMapper 全局 ObjectMapper（统一序列化配置）
      */
-    public TokenVersionFilter(JwtService jwtService, TokenVersionService tokenVersionService) {
+    public TokenVersionFilter(JwtService jwtService, TokenVersionService tokenVersionService, ObjectMapper objectMapper) {
         this.jwtService = jwtService;
         this.tokenVersionService = tokenVersionService;
+        this.objectMapper = objectMapper;
     }
 
     /**

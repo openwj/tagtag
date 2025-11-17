@@ -8,11 +8,13 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Web全局异常处理（@RestControllerAdvice）
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     /**
@@ -55,7 +57,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Result<Void>> handleDefault(Exception ex) {
-        Result<Void> body = Result.fail(ErrorCode.INTERNAL_SERVER_ERROR, ex.getMessage());
+        // 记录完整异常堆栈到日志，响应体使用通用错误消息
+        log.error("Unhandled exception", ex);
+        Result<Void> body = Result.fail(ErrorCode.INTERNAL_SERVER_ERROR);
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getCode()).body(body);
     }
 }
