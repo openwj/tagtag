@@ -50,6 +50,7 @@ security:
   jwt:
     access-ttl-seconds: 3600
     refresh-ttl-seconds: 604800
+  permit-paths: /actuator/health,/actuator/info
 
 cache:
   default-ttl: 5m
@@ -57,3 +58,13 @@ cache:
     roleMenuCodes: 10m
     roleMenus: 10m
     deptTree: 30m
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

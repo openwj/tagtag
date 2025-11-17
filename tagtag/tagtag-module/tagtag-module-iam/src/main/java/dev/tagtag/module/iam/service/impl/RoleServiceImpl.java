@@ -10,8 +10,8 @@ import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.contract.iam.dto.MenuDTO;
-import dev.tagtag.module.iam.convert.RoleConvert;
-import dev.tagtag.module.iam.convert.MenuConvert;
+import dev.tagtag.module.iam.convert.RoleMapperConvert;
+import dev.tagtag.module.iam.convert.MenuMapperConvert;
 import dev.tagtag.module.iam.entity.Role;
 import dev.tagtag.module.iam.entity.Menu;
 import dev.tagtag.module.iam.mapper.RoleMapper;
@@ -33,23 +33,27 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
     
     private final PageProperties pageProperties;
+    private final RoleMapperConvert roleMapperConvert;
+    private final MenuMapperConvert menuMapperConvert;
 
     
 
     /** 角色分页查询 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public PageResult<RoleDTO> page(RoleQueryDTO query, PageQuery pageQuery) {
         IPage<Role> page = Pages.selectPage(pageQuery, pageProperties, Role.class, pageProperties.getRole(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<RoleDTO> dtoPage = page.convert(RoleConvert::toDTO);
+        IPage<RoleDTO> dtoPage = page.convert(roleMapperConvert::toDTO);
         return PageResults.of(dtoPage);
     }
 
     /** 获取角色详情 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public RoleDTO getById(Long id) {
         Role entity = super.getById(id);
-        return RoleConvert.toDTO(entity);
+        return roleMapperConvert.toDTO(entity);
     }
 
     /**
@@ -58,10 +62,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 角色详情
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public RoleDTO getByCode(String code) {
         if (code == null || code.isBlank()) return null;
         Role entity = this.lambdaQuery().eq(Role::getCode, code).last("LIMIT 1").one();
-        return RoleConvert.toDTO(entity);
+        return roleMapperConvert.toDTO(entity);
     }
 
     /**
@@ -70,10 +75,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 角色详情
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public RoleDTO getByName(String name) {
         if (name == null || name.isBlank()) return null;
         Role entity = this.lambdaQuery().eq(Role::getName, name).last("LIMIT 1").one();
-        return RoleConvert.toDTO(entity);
+        return roleMapperConvert.toDTO(entity);
     }
 
     /**
@@ -102,7 +108,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(RoleDTO role) {
-        Role entity = RoleConvert.toEntity(role);
+        Role entity = roleMapperConvert.toEntity(role);
         super.save(entity);
         if (role != null) role.setId(entity.getId());
     }
@@ -114,7 +120,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         if (role == null || role.getId() == null) return;
         Role entity = super.getById(role.getId());
         if (entity == null) return;
-        RoleConvert.mergeNonNull(role, entity);
+        roleMapperConvert.updateEntityFromDTO(role, entity);
         super.updateById(entity);
     }
 
@@ -142,15 +148,17 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 查询指定角色的菜单列表（仅返回按钮型作为权限；单次 JOIN 查询） */
     @Override
     @Cacheable(cacheNames = "roleMenus", key = "#roleId")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<MenuDTO> listMenusByRole(Long roleId) {
         if (roleId == null) return java.util.Collections.emptyList();
         List<Menu> menus = baseMapper.selectMenusByRoleId(roleId);
-        return MenuConvert.toDTOList(menus);
+        return menuMapperConvert.toDTOList(menus);
     }
 
     /** 批量查询角色的权限编码集合（按钮型菜单的 menu_code，去重） */
     @Override
     @Cacheable(cacheNames = "roleMenuCodes", key = "#roleIds")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Set<String> listMenuCodesByRoleIds(List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptySet();
         List<String> codes = baseMapper.selectPermissionCodesByRoleIds(roleIds);

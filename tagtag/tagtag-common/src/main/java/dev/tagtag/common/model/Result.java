@@ -13,6 +13,7 @@ public class Result<T> {
     private String message;
     private T data;
     private long timestamp;
+    private java.util.List<String> errors;
 
     /**
      * 创建成功结果
@@ -76,6 +77,22 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(error.getCode())
                 .message(message)
+                .timestamp(System.currentTimeMillis())
+                .build();
+    }
+
+    /**
+     * 创建失败结果（自定义说明与错误列表）
+     * @param error 错误码
+     * @param message 失败说明
+     * @param errors 错误列表
+     * @return 失败结果
+     */
+    public static <T> Result<T> fail(ErrorCode error, String message, java.util.List<String> errors) {
+        return Result.<T>builder()
+                .code(error.getCode())
+                .message(message)
+                .errors(errors)
                 .timestamp(System.currentTimeMillis())
                 .build();
     }

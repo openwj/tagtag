@@ -50,6 +50,10 @@ public class TokenVersionFilter extends OncePerRequestFilter {
         String auth = request.getHeader("Authorization");
         if (auth != null && auth.startsWith("Bearer ")) {
             String token = auth.substring("Bearer ".length()).trim();
+            if (!jwtService.validateToken(token)) {
+                writeUnauthorized(response);
+                return;
+            }
             Map<String, Object> claims = jwtService.getClaims(token);
             Object uidObj = claims.get(SecurityClaims.UID);
             Object verObj = claims.get(SecurityClaims.VER);

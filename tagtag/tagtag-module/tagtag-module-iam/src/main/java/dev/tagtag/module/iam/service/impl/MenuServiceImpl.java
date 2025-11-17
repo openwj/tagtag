@@ -11,7 +11,7 @@ import dev.tagtag.framework.util.Pages;
 import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
-import dev.tagtag.module.iam.convert.MenuConvert;
+import dev.tagtag.module.iam.convert.MenuMapperConvert;
 import dev.tagtag.module.iam.entity.Menu;
 import dev.tagtag.module.iam.mapper.MenuMapper;
 import dev.tagtag.module.iam.service.MenuService;
@@ -24,30 +24,33 @@ import lombok.RequiredArgsConstructor;
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
     private final PageProperties pageProperties;
+    private final MenuMapperConvert menuMapperConvert;
 
     
 
     /** 菜单分页查询 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public PageResult<MenuDTO> page(MenuQueryDTO query, PageQuery pageQuery) {
         IPage<Menu> page = Pages.selectPage(pageQuery, pageProperties, Menu.class, pageProperties.getMenu(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<MenuDTO> dtoPage = page.convert(MenuConvert::toDTO);
+        IPage<MenuDTO> dtoPage = page.convert(menuMapperConvert::toDTO);
         return PageResults.of(dtoPage);
     }
 
     /** 获取菜单详情 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MenuDTO getById(Long id) {
         Menu entity = super.getById(id);
-        return MenuConvert.toDTO(entity);
+        return menuMapperConvert.toDTO(entity);
     }
 
     /** 创建菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(MenuDTO menu) {
-        Menu entity = MenuConvert.toEntity(menu);
+        Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
         if (menu != null) menu.setId(entity.getId());
     }
@@ -59,7 +62,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (menu == null || menu.getId() == null) return;
         Menu entity = super.getById(menu.getId());
         if (entity == null) return;
-        MenuConvert.mergeNonNull(menu, entity);
+        menuMapperConvert.updateEntityFromDTO(menu, entity);
         super.updateById(entity);
     }
 
@@ -77,10 +80,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 子菜单列表
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public java.util.List<MenuDTO> listByParentId(Long parentId) {
         if (parentId == null) return java.util.Collections.emptyList();
         java.util.List<Menu> list = this.lambdaQuery().eq(Menu::getParentId, parentId).orderByAsc(Menu::getSort, Menu::getId).list();
-        return MenuConvert.toDTOList(list);
+        return menuMapperConvert.toDTOList(list);
     }
 
     /**
@@ -89,9 +93,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 菜单详情
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MenuDTO getByMenuCode(String menuCode) {
         if (menuCode == null || menuCode.isBlank()) return null;
         Menu entity = this.lambdaQuery().eq(Menu::getMenuCode, menuCode).last("LIMIT 1").one();
-        return MenuConvert.toDTO(entity);
+        return menuMapperConvert.toDTO(entity);
     }
 }

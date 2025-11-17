@@ -12,6 +12,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import lombok.Data;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Configuration
 @EnableCaching
 @ConfigurationProperties(prefix = "cache")
+@Data
 public class CacheConfig {
 
     private Map<String, Duration> ttl = new HashMap<>();
@@ -57,8 +59,4 @@ public class CacheConfig {
                 .build();
     }
 
-    public Map<String, Duration> getTtl() { return ttl; }
-    public void setTtl(Map<String, Duration> ttl) { this.ttl = ttl; }
-    public Duration getDefaultTtl() { return defaultTtl; }
-    public void setDefaultTtl(Duration defaultTtl) { this.defaultTtl = defaultTtl; }
 }

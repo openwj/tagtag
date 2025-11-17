@@ -24,6 +24,12 @@ import java.util.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
+import org.springframework.core.env.Environment;
+import java.security.KeyFactory;
+import java.security.spec.X509EncodedKeySpec;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 
 /**
  * Spring Security 核心配置
@@ -35,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtProperties jwtProperties;
+    private final Environment environment;
 
 
     /**
@@ -52,9 +59,19 @@ public class SecurityConfig {
                                                    dev.tagtag.framework.security.TokenVersionFilter tokenVersionFilter) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> {
+                    String extra = environment.getProperty("security.permit-paths");
+                    java.util.List<String> permits = new java.util.ArrayList<>();
+                    if (extra != null && !extra.isBlank()) {
+                        for (String s : extra.split(",")) {
+                            if (s != null && !s.isBlank()) permits.add(s.trim());
+                        }
+                    }
+                    auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(permits.toArray(new String[0])).permitAll()
+                        .anyRequest().authenticated();
+                })
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
@@ -79,6 +96,19 @@ public class SecurityConfig {
      */
     @Bean
     public JwtDecoder jwtDecoder() {
+        try {
+            String pubPem = jwtProperties.getPublicKeyPem();
+            if (pubPem != null && !pubPem.isBlank()) {
+                String normalized = pubPem.replace("-----BEGIN PUBLIC KEY-----", "")
+                        .replace("-----END PUBLIC KEY-----", "")
+                        .replaceAll("\\s", "");
+                byte[] keyBytes = Base64.getDecoder().decode(normalized);
+                X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+                RSAPublicKey rsaPublicKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(spec);
+                return NimbusJwtDecoder.withPublicKey(rsaPublicKey).build();
+            }
+        } catch (Exception ignore) {
+        }
         SecretKeySpec key = new SecretKeySpec(jwtProperties.getSecret().getBytes(GlobalConstants.CHARSET_UTF8), "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(key).build();
     }

@@ -43,8 +43,12 @@ public class TokenVersionService {
      */
     public long bumpVersion(Long userId) {
         String key = buildKey(userId);
+        String val = stringRedisTemplate.opsForValue().get(key);
+        if (val == null) {
+            stringRedisTemplate.opsForValue().setIfAbsent(key, String.valueOf(1L));
+        }
         Long next = stringRedisTemplate.opsForValue().increment(key);
-        if (next == null) {
+        if (next == null || next == 1L) {
             stringRedisTemplate.opsForValue().set(key, String.valueOf(2L));
             return 2L;
         }

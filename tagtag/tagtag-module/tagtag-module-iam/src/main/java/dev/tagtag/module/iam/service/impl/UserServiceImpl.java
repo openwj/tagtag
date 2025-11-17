@@ -10,7 +10,7 @@ import dev.tagtag.framework.util.PageNormalizer;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
-import dev.tagtag.module.iam.convert.UserConvert;
+import dev.tagtag.module.iam.convert.UserMapperConvert;
 import dev.tagtag.module.iam.entity.User;
 import dev.tagtag.module.iam.mapper.UserMapper;
 import dev.tagtag.module.iam.service.UserService;
@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private final PageProperties pageProperties;
+    private final UserMapperConvert userMapperConvert;
 
     
 
@@ -35,18 +36,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户分页结果
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
         IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<UserDTO> dtoPage = page.convert(UserConvert::toDTO);
+        IPage<UserDTO> dtoPage = page.convert(userMapperConvert::toDTO);
         return PageResults.of(dtoPage);
     }
 
     /** 获取用户详情 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public UserDTO getById(Long id) {
         User entity = super.getById(id);
-        UserDTO dto = UserConvert.toDTO(entity);
+        UserDTO dto = userMapperConvert.toDTO(entity);
         if (dto != null && dto.getId() != null) {
             java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
             dto.setRoleIds(roleIds);
@@ -58,7 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void create(UserDTO user) {
-        User entity = UserConvert.toEntity(user);
+        User entity = userMapperConvert.toEntity(user);
         super.save(entity);
         if (user != null) {
             user.setId(entity.getId());
@@ -76,7 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (entity == null) {
             return;
         }
-        UserConvert.mergeNonNull(user, entity);
+        userMapperConvert.updateEntityFromDTO(user, entity);
         super.updateById(entity);
     }
 
@@ -109,6 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户数据
      */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public UserDTO getByUsername(String username) {
         if (username == null || username.isEmpty()) {
             return null;
@@ -117,7 +121,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getUsername, username)
                 .last("LIMIT 1")
                 .one();
-        UserDTO dto = UserConvert.toDTO(entity);
+        UserDTO dto = userMapperConvert.toDTO(entity);
         if (dto != null && dto.getId() != null) {
             java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
             dto.setRoleIds(roleIds);

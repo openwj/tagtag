@@ -14,3 +14,13 @@ server:
 
 logging:
   config: classpath:logback-spring.xml
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized

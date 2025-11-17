@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.ConstraintViolationException;
+import java.util.stream.Collectors;
 
 /**
  * Web全局异常处理（@RestControllerAdvice）
@@ -37,16 +39,43 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
     public ResponseEntity<Result<Void>> handleValidation(Exception ex) {
         String msg;
+        java.util.List<String> errors = new java.util.ArrayList<>();
         if (ex instanceof MethodArgumentNotValidException manv) {
-            msg = manv.getBindingResult().getFieldErrors().stream()
-                    .findFirst().map(fe -> fe.getField() + ": " + fe.getDefaultMessage()).orElse("参数校验失败");
+            errors = manv.getBindingResult().getFieldErrors().stream()
+                    .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                    .collect(Collectors.toList());
+            msg = String.join("; ", errors);
+            if (msg == null || msg.isBlank()) msg = "参数校验失败";
         } else if (ex instanceof BindException be) {
-            msg = be.getBindingResult().getFieldErrors().stream()
-                    .findFirst().map(fe -> fe.getField() + ": " + fe.getDefaultMessage()).orElse("参数绑定失败");
+            errors = be.getBindingResult().getFieldErrors().stream()
+                    .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                    .collect(Collectors.toList());
+            msg = String.join("; ", errors);
+            if (msg == null || msg.isBlank()) msg = "参数绑定失败";
         } else {
             msg = "参数错误";
         }
-        Result<Void> body = Result.fail(ErrorCode.UNPROCESSABLE_ENTITY, msg);
+        Result<Void> body = Result.fail(ErrorCode.UNPROCESSABLE_ENTITY, msg, errors);
+        return ResponseEntity.status(ErrorCode.UNPROCESSABLE_ENTITY.getCode()).body(body);
+    }
+
+    /**
+     * 处理方法参数约束违反（如 @RequestParam/@PathVariable 校验）
+     * @param ex 异常
+     * @return 响应体
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Result<Void>> handleConstraintViolation(ConstraintViolationException ex) {
+        java.util.List<String> errors = ex.getConstraintViolations().stream()
+                .map(v -> {
+                    String path = v.getPropertyPath() == null ? "param" : v.getPropertyPath().toString();
+                    String m = v.getMessage();
+                    return path + ": " + m;
+                })
+                .collect(Collectors.toList());
+        String msg = String.join("; ", errors);
+        if (msg == null || msg.isBlank()) msg = "参数约束违反";
+        Result<Void> body = Result.fail(ErrorCode.UNPROCESSABLE_ENTITY, msg, errors);
         return ResponseEntity.status(ErrorCode.UNPROCESSABLE_ENTITY.getCode()).body(body);
     }
 

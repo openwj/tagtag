@@ -5,13 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
-import dev.tagtag.framework.util.OrderByBuilder;
-import dev.tagtag.framework.util.PageNormalizer;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
-import dev.tagtag.module.iam.convert.DeptConvert;
+import dev.tagtag.module.iam.convert.DeptMapperConvert;
 import dev.tagtag.module.iam.entity.Dept;
 import dev.tagtag.module.iam.mapper.DeptMapper;
 import dev.tagtag.module.iam.service.DeptService;
@@ -30,23 +28,26 @@ import dev.tagtag.common.exception.ErrorCode;
 public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements DeptService {
 
     private final PageProperties pageProperties;
+    private final DeptMapperConvert deptMapperConvert;
 
     
 
     /** 部门分页查询 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public PageResult<DeptDTO> page(DeptQueryDTO query, PageQuery pageQuery) {
         IPage<Dept> page = Pages.selectPage(pageQuery, pageProperties, Dept.class, pageProperties.getDept(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<DeptDTO> dtoPage = page.convert(DeptConvert::toDTO);
+        IPage<DeptDTO> dtoPage = page.convert(deptMapperConvert::toDTO);
         return PageResults.of(dtoPage);
     }
 
     /** 获取部门详情 */
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public DeptDTO getById(Long id) {
         Dept entity = super.getById(id);
-        return DeptConvert.toDTO(entity);
+        return deptMapperConvert.toDTO(entity);
     }
 
     /** 创建部门 */
@@ -55,7 +56,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     @CacheEvict(cacheNames = "deptTree", allEntries = true)
     public void create(DeptDTO dept) {
         validateForCreate(dept);
-        Dept entity = DeptConvert.toEntity(dept);
+        Dept entity = deptMapperConvert.toEntity(dept);
         super.save(entity);
         if (dept != null) {
             dept.setId(entity.getId());
@@ -76,7 +77,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         if (entity == null) {
             return;
         }
-        DeptConvert.mergeNonNull(dept, entity);
+        deptMapperConvert.updateEntityFromDTO(dept, entity);
         super.updateById(entity);
         log.info("dept update: id={}", entity.getId());
     }
@@ -96,12 +97,13 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     /** 部门树列表 */
     @Override
     @Cacheable(cacheNames = "deptTree", key = "'all'")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public java.util.List<DeptDTO> listTree() {
         java.util.List<Dept> all = this.lambdaQuery().orderByAsc(Dept::getSort, Dept::getId).list();
         java.util.Map<Long, DeptDTO> map = new java.util.HashMap<>(all.size());
         java.util.List<DeptDTO> roots = new java.util.ArrayList<>();
         for (Dept d : all) {
-            DeptDTO dto = DeptConvert.toDTO(d);
+            DeptDTO dto = deptMapperConvert.toDTO(d);
             dto.setChildren(new java.util.ArrayList<>());
             map.put(dto.getId(), dto);
         }

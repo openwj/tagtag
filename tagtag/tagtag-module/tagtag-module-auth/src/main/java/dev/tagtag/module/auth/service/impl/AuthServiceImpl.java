@@ -1,7 +1,6 @@
 package dev.tagtag.module.auth.service.impl;
 
 import dev.tagtag.contract.auth.dto.TokenDTO;
-import dev.tagtag.contract.iam.api.RoleApi;
 import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.common.exception.BusinessException;
@@ -21,6 +20,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.MDC;
+import dev.tagtag.common.constant.GlobalConstants;
 
 import java.util.*;
 
@@ -40,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final TokenFactory tokenFactory;
 
     private final SecurityJwtProperties jwtProps;
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
      * 用户登录（简单校验后发放访问与刷新令牌）
@@ -49,18 +55,21 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public TokenDTO login(String username, String password) {
+        checkLoginRateLimit(username);
 
         String uname = Strings.normalize(username);
         String pwd = Strings.normalize(password);
         if (!StringUtils.hasText(uname) || !StringUtils.hasText(pwd)) {
-            log.warn("login failed: blank credentials username='{}'", uname);
+            log.warn("login failed: blank credentials username='{}', ip={}, ua={}, traceId={}",
+                    uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
         }
 
         UserDTO full = loadUserOrFail(uname);
         String stored = Strings.normalize(full.getPassword());
         if (!passwordEncoder.matches(pwd, stored)) {
-            log.warn("login failed: invalid credentials username='{}'", uname);
+            log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
+                    uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
         }
 
@@ -70,7 +79,8 @@ public class AuthServiceImpl implements AuthService {
         long ver = tokenVersionService.getCurrentVersion(full.getId());
         Map<String, Object> claims = tokenFactory.buildClaims(full, roleIds, perms, ver);
         TokenDTO dto = tokenFactory.issueTokens(claims, uname, jwtProps.getAccessTtlSeconds(), jwtProps.getRefreshTtlSeconds());
-        log.info("login success: uid={}, roles={}, perms={}", full.getId(), roleIds.size(), perms.size());
+        log.info("login success: uid={}, roles={}, perms={}, ip={}, ua={}, traceId={}",
+                full.getId(), roleIds.size(), perms.size(), resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         return dto;
     }
 
@@ -81,8 +91,10 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public TokenDTO refresh(String refreshToken) {
+        checkRefreshRateLimit();
         if (!StringUtils.hasText(refreshToken) || !jwtService.validateToken(refreshToken)) {
-            log.warn("refresh failed: invalid token");
+            log.warn("refresh failed: invalid token, ip={}, ua={}, traceId={}",
+                    resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
         }
         String subject = jwtService.getSubject(refreshToken);
@@ -91,7 +103,8 @@ public class AuthServiceImpl implements AuthService {
         Long uid = claims.get(SecurityClaims.UID) == null ? null : Numbers.toLong(claims.get(SecurityClaims.UID));
         Long tokenVer = claims.get(SecurityClaims.VER) == null ? null : Numbers.toLong(claims.get(SecurityClaims.VER));
         if (uid == null || tokenVer == null || !tokenVersionService.isTokenVersionValid(uid, tokenVer)) {
-            log.warn("refresh failed: token version mismatch uid={} tokenVer={}", uid, tokenVer);
+            log.warn("refresh failed: token version mismatch uid={} tokenVer={}, ip={}, ua={}, traceId={}",
+                    uid, tokenVer, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
         }
         claims.put(SecurityClaims.TYP, "access");
@@ -104,6 +117,7 @@ public class AuthServiceImpl implements AuthService {
         dto.setRefreshToken(refresh);
         dto.setTokenType("Bearer");
         dto.setExpiresIn(jwtProps.getAccessTtlSeconds());
+        log.info("refresh success: uid={}, ip={}, ua={}, traceId={}", uid, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         return dto;
     }
 
@@ -121,7 +135,8 @@ public class AuthServiceImpl implements AuthService {
         Long uid = claims.get(SecurityClaims.UID) == null ? null : Numbers.toLong(claims.get(SecurityClaims.UID));
         if (uid != null) {
             tokenVersionService.bumpVersion(uid);
-            log.info("logout: bumped token version for uid={}", uid);
+            log.info("logout: bumped token version for uid={}, ip={}, ua={}, traceId={}",
+                    uid, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         }
     }  
 
@@ -136,5 +151,77 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
         }
         return full;
+    }
+
+    /**
+     * 登录接口限流：基于用户名 + IP 的滑窗计数，超过阈值抛出 429
+     * @param username 用户名
+     */
+    private void checkLoginRateLimit(String username) {
+        String ip = resolveClientIp();
+        String uname = Strings.normalize(username);
+        String key = "rl:login:" + (ip == null ? "unknown" : ip) + ":" + (uname == null ? "" : uname);
+        long maxPerMinute = 10L;
+        Long n = stringRedisTemplate.opsForValue().increment(key);
+        if (n != null && n == 1L) {
+            stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
+        }
+        if (n != null && n > maxPerMinute) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+        }
+    }
+
+    /**
+     * 刷新接口限流：基于 IP 的滑窗计数，超过阈值抛出 429
+     */
+    private void checkRefreshRateLimit() {
+        String ip = resolveClientIp();
+        String key = "rl:refresh:" + (ip == null ? "unknown" : ip);
+        long maxPerMinute = 30L;
+        Long n = stringRedisTemplate.opsForValue().increment(key);
+        if (n != null && n == 1L) {
+            stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
+        }
+        if (n != null && n > maxPerMinute) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+        }
+    }
+
+    /**
+     * 解析客户端 IP（优先使用反向代理头部）
+     * @return 客户端 IP
+     */
+    private String resolveClientIp() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs == null) return null;
+            HttpServletRequest req = attrs.getRequest();
+            String xff = req.getHeader("X-Forwarded-For");
+            if (StringUtils.hasText(xff)) {
+                int idx = xff.indexOf(',');
+                return idx > 0 ? xff.substring(0, idx).trim() : xff.trim();
+            }
+            String rip = req.getHeader("X-Real-IP");
+            if (StringUtils.hasText(rip)) return rip.trim();
+            return req.getRemoteAddr();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 读取客户端 User-Agent
+     * @return UA 字符串
+     */
+    private String getUserAgent() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs == null) return null;
+            HttpServletRequest req = attrs.getRequest();
+            String ua = req.getHeader(GlobalConstants.HEADER_USER_AGENT);
+            return (ua == null ? null : ua.trim());
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
