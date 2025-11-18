@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
-import dev.tagtag.framework.util.OrderByBuilder;
-import dev.tagtag.framework.util.PageNormalizer;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
@@ -36,7 +34,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户分页结果
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
         IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
@@ -112,15 +110,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户数据
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public UserDTO getByUsername(String username) {
         if (username == null || username.isEmpty()) {
             return null;
         }
         User entity = this.lambdaQuery()
-                .eq(User::getUsername, username)
-                .last("LIMIT 1")
-                .one();
+                .eq(User::getUsername, username).one();
+        if (entity == null) {
+            return null;
+        }
+        /**
+         * 将实体转换为DTO并补充角色ID
+         * Convert entity to DTO via MapStruct and enrich roleIds
+         */
         UserDTO dto = userMapperConvert.toDTO(entity);
         if (dto != null && dto.getId() != null) {
             java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());

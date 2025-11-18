@@ -2,7 +2,7 @@
 
 -- 管理员用户（默认密码：password）
 INSERT INTO iam_user (username, password, nickname, status)
-SELECT 'admin', '{bcrypt}$2a$10$HjiHzDZRiuq5S94wYy/W0eHrAXJ1lcEUROYjZ5yR2Gd4LxZBu0s3C', '管理员', 1
+SELECT 'admin', '{bcrypt}$2a$10$QwZFYsCblPhgBHXBgmTdPeJ9IWAb25jOuscU6pvt6dFSmX2rTtO/O', '管理员', 1
 WHERE NOT EXISTS (SELECT 1 FROM iam_user WHERE username='admin');
 
 -- 管理员角色

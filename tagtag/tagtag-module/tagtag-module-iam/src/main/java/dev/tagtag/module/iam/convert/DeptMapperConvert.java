@@ -1,12 +1,11 @@
 package dev.tagtag.module.iam.convert;
 
 import org.mapstruct.BeanMapping;
-import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import dev.tagtag.framework.mapstruct.MapStructConfig;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.module.iam.entity.Dept;
 import java.util.List;
@@ -14,12 +13,7 @@ import java.util.List;
 /**
  * 使用 MapStruct 的部门实体与DTO转换器
  */
-@Mapper(
-        componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        builder = @Builder(disableBuilder = true)
-)
+@Mapper(config = MapStructConfig.class)
 public interface DeptMapperConvert {
 
     /** 将实体转换为DTO */

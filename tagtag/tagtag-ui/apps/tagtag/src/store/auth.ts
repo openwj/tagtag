@@ -24,6 +24,8 @@ export const useAuthStore = defineStore('auth', () => {
    * 异步处理登录操作
    * Asynchronously handle the login process
    * @param params 登录表单数据
+   * @param onSuccess 登录成功后的回调；若未提供，则跳转到用户首页或默认首页
+   * @returns 包含 `userInfo` 的对象，表示登录成功后的用户信息
    */
   async function authLogin(
     params: Recordable<any>,
@@ -79,7 +81,11 @@ export const useAuthStore = defineStore('auth', () => {
     };
   }
 
-  /** 退出登录 */
+  /**
+   * 退出登录
+   * Logout current user and reset local stores
+   * @param redirect 是否在注销后携带当前路由用于重定向
+   */
   async function logout(redirect: boolean = true) {
     try {
       const token = accessStore.accessToken ?? '';
@@ -103,6 +109,11 @@ export const useAuthStore = defineStore('auth', () => {
     });
   }
 
+  /**
+   * 获取并缓存当前用户信息
+   * Fetch current user info from server and cache into store
+   * @returns 当前用户信息 `UserInfo`，若失败则为 `null`
+   */
   async function fetchUserInfo() {
     let userInfo: null | UserInfo = null;
     userInfo = await getUserInfoApi();
@@ -110,6 +121,10 @@ export const useAuthStore = defineStore('auth', () => {
     return userInfo;
   }
 
+  /**
+   * 重置本 Store 的运行态
+   * Reset runtime flags of this auth store
+   */
   function $reset() {
     loginLoading.value = false;
   }

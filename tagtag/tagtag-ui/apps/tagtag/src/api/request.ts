@@ -21,6 +21,13 @@ import { refreshTokenApi } from './core';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
+/**
+ * 创建请求客户端
+ * Create an HTTP request client with standardized interceptors
+ * @param baseURL 接口基础地址
+ * @param options 客户端配置项（响应返回策略等）
+ * @returns 配置完成的 `RequestClient` 实例
+ */
 function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   const client = new RequestClient({
     ...options,
@@ -29,6 +36,8 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 
   /**
    * 重新认证逻辑
+   * Re-authenticate when access or refresh token is invalid/expired
+   * 清空本地令牌，根据偏好设置选择弹窗或跳转登录
    */
   async function doReAuthenticate() {
     console.warn('Access token or refresh token is invalid or expired. ');
@@ -46,7 +55,9 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   }
 
   /**
-   * 刷新令牌，使用持久化的 refreshToken 获取新的 accessToken
+   * 刷新令牌
+   * Refresh access token using persisted `refreshToken`
+   * @returns 刷新后的 `accessToken`，若失败返回空字符串
    */
   async function doRefreshToken() {
     const accessStore = useAccessStore();
@@ -62,6 +73,12 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     return accessToken ?? '';
   }
 
+  /**
+   * 格式化令牌
+   * Format token into `Bearer <token>` string for Authorization header
+   * @param token 原始令牌
+   * @returns 格式化后的令牌或 `null`
+   */
   function formatToken(token: null | string) {
     return token ? `Bearer ${token}` : null;
   }

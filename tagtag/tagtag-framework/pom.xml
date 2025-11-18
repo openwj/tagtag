@@ -66,6 +66,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- MapStruct 注解（用于共享配置类） -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
         <!-- 内部模块依赖 -->
         <dependency>
             <groupId>dev.tagtag</groupId>

@@ -1,5 +1,6 @@
 package dev.tagtag.module.auth.service.impl;
 
+import dev.tagtag.common.constant.CacheConstants;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
@@ -65,6 +66,7 @@ public class AuthServiceImpl implements AuthService {
             throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
         }
 
+
         UserDTO full = loadUserOrFail(uname);
         String stored = Strings.normalize(full.getPassword());
         boolean matched = passwordEncoder.matches(pwd, stored);
@@ -84,6 +86,7 @@ public class AuthServiceImpl implements AuthService {
                 full.getId(), roleIds.size(), perms.size(), resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         return dto;
     }
+
 
     /**
      * 刷新令牌（校验刷新令牌有效后重新生成访问与刷新令牌）

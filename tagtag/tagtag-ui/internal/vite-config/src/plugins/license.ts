@@ -33,7 +33,7 @@ async function viteLicensePlugin(
   * Tagtag
   * Version: ${version}
   * Author: vben
-  * Copyright (C) 2024 Vben
+  * Copyright (C) 2025 Tagtag
   * License: MIT License
   * Description: ${description}
   * Date Created: ${date}
