@@ -25,7 +25,6 @@
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-common</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <!-- Lombok -->
         <dependency>

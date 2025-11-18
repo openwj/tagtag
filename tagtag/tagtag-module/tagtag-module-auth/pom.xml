@@ -25,21 +25,18 @@
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-framework</artifactId>
-            <version>1.0.0</version>
         </dependency>
 
         <!-- 契约层（令牌 DTO 与接口定义） -->
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-contract-auth</artifactId>
-            <version>1.0.0</version>
         </dependency>
 
         <!-- IAM 契约层（User/Role/Permission 合同） -->
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-contract-iam</artifactId>
-            <version>1.0.0</version>
         </dependency>
 
         <!-- Lombok（提供） -->

@@ -25,32 +25,26 @@
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-framework</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-module-auth</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-module-iam</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>dev.tagtag</groupId>
             <artifactId>tagtag-module-system</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>11.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-mysql</artifactId>
-            <version>11.17.0</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
