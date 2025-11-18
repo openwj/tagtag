@@ -28,15 +28,15 @@ public class CacheConfig {
     private Duration defaultTtl = Duration.ofMinutes(5);
 
     /**
-     * 注册 RedisCacheManager（启用值类型信息，避免集合类型反序列化丢失）
+     * 注册 RedisCacheManager（统一值序列化为带类型信息的 JSON）
      * @param connectionFactory Redis 连接工厂
-     * @param objectMapper 全局 ObjectMapper（不参与缓存值序列化）
+     * @param redisObjectMapper 仅用于 Redis 的 ObjectMapper（启用类型信息）
      * @return 缓存管理器
      */
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper) {
         StringRedisSerializer keySerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer();
+        GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(keySerializer))

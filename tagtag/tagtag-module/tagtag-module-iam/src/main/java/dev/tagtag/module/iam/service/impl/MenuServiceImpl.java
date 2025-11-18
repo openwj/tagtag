@@ -18,6 +18,8 @@ import dev.tagtag.module.iam.service.MenuService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 获取菜单详情 */
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Cacheable(cacheNames = "menuById", key = "#root.args[0]")
     public MenuDTO getById(Long id) {
         Menu entity = super.getById(id);
         return menuMapperConvert.toDTO(entity);
@@ -49,6 +52,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 创建菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode"}, allEntries = true)
     public void create(MenuDTO menu) {
         Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
@@ -58,6 +62,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 更新菜单（忽略源对象中的空值） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode"}, allEntries = true)
     public void update(MenuDTO menu) {
         if (menu == null || menu.getId() == null) return;
         Menu entity = super.getById(menu.getId());
@@ -69,6 +74,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 删除菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode"}, allEntries = true)
     public void delete(Long id) {
         if (id == null) return;
         super.removeById(id);
@@ -81,6 +87,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Cacheable(cacheNames = "menusByParent", key = "#root.args[0]")
     public java.util.List<MenuDTO> listByParentId(Long parentId) {
         if (parentId == null) return java.util.Collections.emptyList();
         java.util.List<Menu> list = this.lambdaQuery().eq(Menu::getParentId, parentId).orderByAsc(Menu::getSort, Menu::getId).list();
@@ -94,6 +101,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Cacheable(cacheNames = "menuByCode", key = "#root.args[0]")
     public MenuDTO getByMenuCode(String menuCode) {
         if (menuCode == null || menuCode.isBlank()) return null;
         Menu entity = this.lambdaQuery().eq(Menu::getMenuCode, menuCode).last("LIMIT 1").one();

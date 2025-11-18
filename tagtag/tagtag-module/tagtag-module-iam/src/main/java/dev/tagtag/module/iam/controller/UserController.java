@@ -39,6 +39,7 @@ public class UserController {
      * @return 分页结果
      */
     @PostMapping("/page")
+    @PreAuthorize("hasAuthority('" + Permissions.USER_READ + "')")
     public Result<PageResult<UserDTO>> page(@Valid @RequestBody UserPageRequest req) {
         PageResult<UserDTO> pr = userService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -46,6 +47,7 @@ public class UserController {
 
     /** 获取用户详情 */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.USER_READ + "')")
     public Result<UserDTO> get(@PathVariable("id") Long id) {
         return Result.ok(userService.getById(id));
     }

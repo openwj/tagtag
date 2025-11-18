@@ -23,6 +23,7 @@ import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import java.util.Set;
+import dev.tagtag.kernel.annotation.RateLimit;
 
 /**
  * 认证控制器，提供登录、刷新与注销接口
@@ -44,6 +45,7 @@ public class AuthController {
      * @param req 登录请求
      * @return 令牌结果
      */
+    @RateLimit(key = "auth:login", periodSeconds = 60, permits = 10, message = "登录请求过多，请稍后再试")
     @PostMapping("/login")
     public Result<TokenDTO> login(@Valid @RequestBody LoginRequest req) {
         TokenDTO dto = authService.login(req.getUsername(), req.getPassword());
@@ -55,6 +57,7 @@ public class AuthController {
      * @param req 刷新请求
      * @return 令牌结果
      */
+    @RateLimit(key = "auth:refresh", periodSeconds = 60, permits = 30, message = "刷新频率过快，请稍后再试")
     @PostMapping("/refresh")
     public Result<TokenDTO> refresh(@Valid @RequestBody RefreshRequest req) {
         TokenDTO dto = authService.refresh(req.getRefreshToken());

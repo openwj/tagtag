@@ -27,6 +27,7 @@ public class MenuController {
 
     /** 菜单分页查询 */
     @PostMapping("/page")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
     public Result<PageResult<MenuDTO>> page(@Valid @RequestBody MenuPageRequest req) {
         PageResult<MenuDTO> pr = menuService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -34,6 +35,7 @@ public class MenuController {
 
     /** 获取菜单详情 */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
     public Result<MenuDTO> get(@PathVariable("id") Long id) {
         return Result.ok(menuService.getById(id));
     }
@@ -44,6 +46,7 @@ public class MenuController {
      * @return 子菜单列表
      */
     @GetMapping("/parent/{parentId}")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
     public Result<List<MenuDTO>> listByParent(@PathVariable("parentId") Long parentId) {
         return Result.ok(menuService.listByParentId(parentId));
     }
@@ -54,6 +57,7 @@ public class MenuController {
      * @return 菜单详情
      */
     @GetMapping("/code/{menuCode}")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
     public Result<MenuDTO> getByCode(@PathVariable("menuCode") String menuCode) {
         return Result.ok(menuService.getByMenuCode(menuCode));
     }

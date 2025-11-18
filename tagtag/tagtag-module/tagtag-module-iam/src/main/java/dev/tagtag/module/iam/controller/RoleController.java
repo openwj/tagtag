@@ -28,6 +28,7 @@ public class RoleController {
 
     /** 角色分页查询 */
     @PostMapping("/page")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
     public Result<PageResult<RoleDTO>> page(@Valid @RequestBody RolePageRequest req) {
         PageResult<RoleDTO> pr = roleService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -35,6 +36,7 @@ public class RoleController {
 
     /** 获取角色详情 */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
     public Result<RoleDTO> get(@PathVariable("id") Long id) {
         return Result.ok(roleService.getById(id));
     }
@@ -45,6 +47,7 @@ public class RoleController {
      * @return 角色详情
      */
     @GetMapping("/code/{code}")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
     public Result<RoleDTO> getByCode(@PathVariable("code") String code) {
         return Result.ok(roleService.getByCode(code));
     }
@@ -55,6 +58,7 @@ public class RoleController {
      * @return 角色详情
      */
     @GetMapping("/name/{name}")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
     public Result<RoleDTO> getByName(@PathVariable("name") String name) {
         return Result.ok(roleService.getByName(name));
     }
@@ -85,6 +89,7 @@ public class RoleController {
 
     /** 查询角色的菜单列表（含按钮） */
     @GetMapping("/{id}/menus")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
     public Result<java.util.List<MenuDTO>> listMenus(@PathVariable("id") Long roleId) {
         return Result.ok(roleService.listMenusByRole(roleId));
     }

@@ -26,6 +26,7 @@ public class DeptController {
 
     /** 部门分页查询接口 */
     @PostMapping("/page")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
     public Result<PageResult<DeptDTO>> page(@Valid @RequestBody DeptPageRequest req) {
         PageResult<DeptDTO> pr = deptService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -33,6 +34,7 @@ public class DeptController {
 
     /** 获取部门详情 */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
     public Result<DeptDTO> get(@PathVariable("id") Long id) {
         return Result.ok(deptService.getById(id));
     }
@@ -63,6 +65,7 @@ public class DeptController {
 
     /** 部门树列表 */
     @GetMapping("/tree")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
     public Result<java.util.List<DeptDTO>> listTree() {
         return Result.ok(deptService.listTree());
     }

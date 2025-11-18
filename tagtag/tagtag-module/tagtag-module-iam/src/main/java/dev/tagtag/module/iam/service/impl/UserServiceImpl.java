@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.tagtag.framework.config.PageProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 
 @Service
@@ -45,6 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /** 获取用户详情 */
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Cacheable(cacheNames = "userById", key = "#root.args[0]")
     public UserDTO getById(Long id) {
         User entity = super.getById(id);
         UserDTO dto = userMapperConvert.toDTO(entity);
@@ -58,6 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /** 创建用户（使用 MetaObjectHandler 自动填充审计字段） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void create(UserDTO user) {
         User entity = userMapperConvert.toEntity(user);
         super.save(entity);
@@ -69,6 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /** 更新用户（忽略源对象中的空值，实现 PATCH 语义） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void update(UserDTO user) {
         if (user == null || user.getId() == null) {
             return;
@@ -84,6 +89,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /** 删除用户（物理删除；如需逻辑删除可调整实体与全局配置） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void delete(Long id) {
         if (id == null) {
             return;
@@ -94,6 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /** 为用户分配角色（覆盖式：先删后插） */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void assignRoles(Long userId, java.util.List<Long> roleIds) {
         if (userId == null) {
             return;
@@ -111,6 +118,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "userByUsername", key = "#root.args[0]")
     public UserDTO getByUsername(String username) {
         if (username == null || username.isEmpty()) {
             return null;

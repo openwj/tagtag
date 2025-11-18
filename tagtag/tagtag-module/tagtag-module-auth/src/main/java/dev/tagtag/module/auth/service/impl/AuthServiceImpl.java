@@ -1,6 +1,5 @@
 package dev.tagtag.module.auth.service.impl;
 
-import dev.tagtag.common.constant.CacheConstants;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;

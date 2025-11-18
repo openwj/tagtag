@@ -65,13 +65,18 @@ cache:
     roleMenuCodes: 10m
     roleMenus: 10m
     deptTree: 30m
+    userById: 10m
+    userByUsername: 10m
+    menuById: 10m
+    menuByCode: 10m
+    menusByParent: 5m
 
 management:
   endpoints:
     web:
       base-path: /actuator
       exposure:
-        include: health,info,metrics
+        include: health,info
   endpoint:
     health:
       show-details: when_authorized
