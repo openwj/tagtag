@@ -4,14 +4,15 @@ import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.kernel.annotation.RateLimit;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.Duration;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.List;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -26,6 +27,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class RateLimitAspect {
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final DefaultRedisScript<Long> rateLimitScript;
+    private static final String KEY_PREFIX = "rl:";
 
     /**
      * 构造函数：注入 Redis 模板
@@ -33,6 +36,13 @@ public class RateLimitAspect {
      */
     public RateLimitAspect(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.rateLimitScript = new DefaultRedisScript<>();
+        this.rateLimitScript.setScriptText(
+                "local current = redis.call('INCR', KEYS[1]);" +
+                "if current == 1 then redis.call('EXPIRE', KEYS[1], tonumber(ARGV[1])); end;" +
+                "if current > tonumber(ARGV[2]) then return 0 else return 1 end"
+        );
+        this.rateLimitScript.setResultType(Long.class);
     }
 
     /**
@@ -44,21 +54,24 @@ public class RateLimitAspect {
      */
     @Around("@annotation(limit)")
     public Object around(ProceedingJoinPoint pjp, RateLimit limit) throws Throwable {
-        if (limit == null || !limit.enabled()) {
-            return pjp.proceed();
-        }
+        if (limit == null || !limit.enabled()) return pjp.proceed();
         String key = buildKey(pjp, limit);
+        int period = Math.max(limit.periodSeconds(), 1);
+        int permits = Math.max(limit.permits(), 1);
         try {
-            Long n = stringRedisTemplate.opsForValue().increment(key);
-            if (n != null && n == 1L) {
-                stringRedisTemplate.expire(key, Duration.ofSeconds(Math.max(limit.periodSeconds(), 1)));
-            }
-            if (n != null && n > Math.max(limit.permits(), 1)) {
+            List<String> keys = Collections.singletonList(key);
+            Long allowed = stringRedisTemplate.execute(
+                    rateLimitScript,
+                    keys,
+                    String.valueOf(period),
+                    String.valueOf(permits)
+            );
+            if (allowed != null && allowed == 0L) {
                 throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, limit.message());
             }
         } catch (BusinessException be) {
             throw be;
-        } catch (Exception ignore) {
+        } catch (RuntimeException re) {
         }
         return pjp.proceed();
     }
@@ -72,12 +85,12 @@ public class RateLimitAspect {
     private String buildKey(ProceedingJoinPoint pjp, RateLimit limit) {
         String key = limit.key();
         if (StringUtils.hasText(key)) {
-            return "rl:" + key.trim();
+            return KEY_PREFIX + key.trim();
         }
         String ip = resolveClientIp();
         MethodSignature ms = (MethodSignature) pjp.getSignature();
         String sig = ms.getDeclaringTypeName() + "#" + ms.getName();
-        return "rl:" + sig + ":" + (ip == null ? "unknown" : ip);
+        return KEY_PREFIX + sig + ":" + (ip == null ? "unknown" : ip);
     }
 
     /**
