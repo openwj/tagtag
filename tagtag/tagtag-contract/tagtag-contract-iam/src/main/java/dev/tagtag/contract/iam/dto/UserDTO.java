@@ -21,6 +21,7 @@ public class UserDTO {
     private String email;
     private String mobile;
     private Integer gender;
+    private Long deptId;
     private Integer status;
     private List<Long> roleIds;
     private LocalDateTime createTime;

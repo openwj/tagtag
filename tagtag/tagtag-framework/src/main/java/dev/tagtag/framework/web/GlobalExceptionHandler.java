@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Web全局异常处理（@RestControllerAdvice）
@@ -39,7 +43,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
     public ResponseEntity<Result<Void>> handleValidation(Exception ex) {
         String msg;
-        java.util.List<String> errors = new java.util.ArrayList<>();
+        List<String> errors = new ArrayList<>();
         if (ex instanceof MethodArgumentNotValidException manv) {
             errors = manv.getBindingResult().getFieldErrors().stream()
                     .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
@@ -66,7 +70,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Result<Void>> handleConstraintViolation(ConstraintViolationException ex) {
-        java.util.List<String> errors = ex.getConstraintViolations().stream()
+        List<String> errors = ex.getConstraintViolations().stream()
                 .map(v -> {
                     String path = v.getPropertyPath() == null ? "param" : v.getPropertyPath().toString();
                     String m = v.getMessage();
@@ -90,5 +94,16 @@ public class GlobalExceptionHandler {
         log.error("Unhandled exception", ex);
         Result<Void> body = Result.fail(ErrorCode.INTERNAL_SERVER_ERROR);
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getCode()).body(body);
+    }
+
+    /**
+     * 处理权限不足异常（方法级与过滤链级）
+     * @param ex 异常
+     * @return 403 响应体
+     */
+    @ExceptionHandler({AuthorizationDeniedException.class, AccessDeniedException.class})
+    public ResponseEntity<Result<Void>> handleForbidden(Exception ex) {
+        Result<Void> body = Result.fail(ErrorCode.FORBIDDEN, "没有权限");
+        return ResponseEntity.status(ErrorCode.FORBIDDEN.getCode()).body(body);
     }
 }

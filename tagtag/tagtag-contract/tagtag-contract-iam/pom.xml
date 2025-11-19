@@ -30,7 +30,11 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-kernel</artifactId>
+        </dependency>
+    </dependencies>
 
   <build>
     <plugins>

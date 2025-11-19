@@ -90,7 +90,7 @@ public class RoleController {
     /** 查询角色的菜单列表（含按钮） */
     @GetMapping("/{id}/menus")
     @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
-    public Result<java.util.List<MenuDTO>> listMenus(@PathVariable("id") Long roleId) {
+    public Result<List<MenuDTO>> listMenus(@PathVariable("id") Long roleId) {
         return Result.ok(roleService.listMenusByRole(roleId));
     }
 

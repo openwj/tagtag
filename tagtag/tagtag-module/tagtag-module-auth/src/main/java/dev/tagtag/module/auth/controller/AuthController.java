@@ -11,7 +11,6 @@ import dev.tagtag.contract.auth.dto.RegisterRequest;
 import dev.tagtag.module.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +39,6 @@ import dev.tagtag.kernel.annotation.RateLimit;
 public class AuthController {
 
     private final AuthService authService;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserApi userApi;
     private final PermissionResolver permissionResolver;

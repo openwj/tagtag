@@ -1,4 +1,4 @@
-import { baseRequestClient, requestClient } from '#/api/request';
+import { requestClient } from '#/api/request';
 
 export namespace AuthApi {
   /** 登录接口参数 */
@@ -71,7 +71,7 @@ export async function getAccessCodesApi() {
  * @returns 空响应
  */
 export async function registerApi(data: AuthApi.RegisterParams) {
-  return requestClient.post<void>('/auth/register', data);
+  return requestClient.post('/auth/register', data);
 }
 
 /**

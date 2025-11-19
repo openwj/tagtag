@@ -32,4 +32,6 @@ public interface UserMapper extends BaseMapper<User> {
     /** 批量插入用户角色关联 */
     int insertUserRoles(@Param("userId") Long userId, @Param("roleIds") List<Long> roleIds);
 
+    
+
 }

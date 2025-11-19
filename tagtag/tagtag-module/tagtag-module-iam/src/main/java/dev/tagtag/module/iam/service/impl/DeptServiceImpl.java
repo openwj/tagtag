@@ -12,6 +12,7 @@ import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.module.iam.convert.DeptMapperConvert;
 import dev.tagtag.module.iam.entity.Dept;
 import dev.tagtag.module.iam.mapper.DeptMapper;
+import dev.tagtag.module.iam.mapper.UserMapper;
 import dev.tagtag.module.iam.service.DeptService;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 @Service
 @Slf4j
@@ -29,6 +35,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
 
     private final PageProperties pageProperties;
     private final DeptMapperConvert deptMapperConvert;
+    private final UserMapper userMapper;
 
     
 
@@ -90,6 +97,12 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         if (id == null) {
             return;
         }
+        if (hasChildren(id)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "该部门下存在子部门，无法删除");
+        }
+        if (hasUsers(id)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "该部门下存在用户，无法删除");
+        }
         super.removeById(id);
         log.info("dept delete: id={}", id);
     }
@@ -98,13 +111,13 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     @Override
     @Cacheable(cacheNames = "deptTree", key = "'all'")
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public java.util.List<DeptDTO> listTree() {
-        java.util.List<Dept> all = this.lambdaQuery().orderByAsc(Dept::getSort, Dept::getId).list();
-        java.util.Map<Long, DeptDTO> map = new java.util.HashMap<>(all.size());
-        java.util.List<DeptDTO> roots = new java.util.ArrayList<>();
+    public List<DeptDTO> listTree() {
+        List<Dept> all = this.lambdaQuery().orderByAsc(Dept::getSort, Dept::getId).list();
+        Map<Long, DeptDTO> map = new HashMap<>(all.size());
+        List<DeptDTO> roots = new ArrayList<>();
         for (Dept d : all) {
             DeptDTO dto = deptMapperConvert.toDTO(d);
-            dto.setChildren(new java.util.ArrayList<>());
+            dto.setChildren(new ArrayList<>());
             map.put(dto.getId(), dto);
         }
         for (Dept d : all) {
@@ -120,9 +133,63 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         return roots;
     }
 
+    /**
+     * 判断指定部门是否存在子部门
+     * @param deptId 部门ID
+     * @return 是否存在子部门
+     */
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public boolean hasChildren(Long deptId) {
+        if (deptId == null) return false;
+        Dept one = this.lambdaQuery().eq(Dept::getParentId, deptId).last("LIMIT 1").one();
+        return one != null;
+    }
+
+    /**
+     * 判断指定部门是否存在用户
+     * @param deptId 部门ID
+     * @return 是否存在用户
+     */
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public boolean hasUsers(Long deptId) {
+        if (deptId == null) return false;
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<dev.tagtag.module.iam.entity.User> qw = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        qw.eq(dev.tagtag.module.iam.entity.User::getDeptId, deptId).last("LIMIT 1");
+        dev.tagtag.module.iam.entity.User one = userMapper.selectOne(qw);
+        return one != null;
+    }
+
+    /**
+     * 检查部门编码是否占用
+     * @param code 部门编码
+     * @param excludeId 可选排除的部门ID
+     * @return 是否已占用
+     */
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public boolean existsByCode(String code, Long excludeId) {
+        if (code == null || code.isBlank()) return false;
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Dept> qw = new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        qw.eq(Dept::getCode, code);
+        if (excludeId != null) {
+            qw.ne(Dept::getId, excludeId);
+        }
+        Long count = this.baseMapper.selectCount(qw);
+        return count != null && count > 0;
+    }
+
     /** 创建校验：唯一性、父ID合法、状态合法 */
     private void validateForCreate(DeptDTO dept) {
         if (dept == null) return;
+        if (dept.getCode() == null || dept.getCode().isBlank()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "部门编码不能为空");
+        }
+        long codeCount = this.lambdaQuery().eq(Dept::getCode, dept.getCode()).count();
+        if (codeCount > 0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "部门编码已存在");
+        }
         if (dept.getName() == null || dept.getName().isBlank()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "部门名称不能为空");
         }
@@ -146,6 +213,12 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     /** 更新校验：唯一性、父ID合法、状态合法 */
     private void validateForUpdate(DeptDTO dept) {
         if (dept == null) return;
+        if (dept.getCode() != null && !dept.getCode().isBlank()) {
+            long codeCount = this.lambdaQuery().eq(Dept::getCode, dept.getCode()).ne(Dept::getId, dept.getId()).count();
+            if (codeCount > 0) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "部门编码已存在");
+            }
+        }
         if (dept.getName() != null && !dept.getName().isBlank()) {
             long nameCount = this.lambdaQuery().eq(Dept::getName, dept.getName()).ne(Dept::getId, dept.getId()).count();
             if (nameCount > 0) {
@@ -167,7 +240,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
 
     /** 判断 ancestorId 是否为 nodeId 的祖先 */
     private boolean isAncestor(Long ancestorId, Long nodeId) {
-        java.util.Map<Long, Long> parentMap = loadParentMap();
+        Map<Long, Long> parentMap = loadParentMap();
         Long p = nodeId;
         int guard = 0;
         while (p != null && guard++ < 1000) {
@@ -178,9 +251,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     /** 加载 id->parentId 映射，仅取必要字段 */
-    private java.util.Map<Long, Long> loadParentMap() {
-        java.util.List<Dept> all = this.lambdaQuery().select(Dept::getId, Dept::getParentId).list();
-        java.util.Map<Long, Long> map = new java.util.HashMap<>(all.size());
+    private Map<Long, Long> loadParentMap() {
+        List<Dept> all = this.lambdaQuery().select(Dept::getId, Dept::getParentId).list();
+        Map<Long, Long> map = new HashMap<>(all.size());
         for (Dept d : all) {
             map.put(d.getId(), d.getParentId());
         }
@@ -188,9 +261,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     /** 递归为每个节点的 children 排序（按 sort、id） */
-    private void sortTree(java.util.List<DeptDTO> nodes) {
+    private void sortTree(List<DeptDTO> nodes) {
         if (nodes == null || nodes.isEmpty()) return;
-        nodes.sort(java.util.Comparator
+        nodes.sort(Comparator
                 .comparing((DeptDTO d) -> d.getSort() == null ? Integer.MAX_VALUE : d.getSort())
                 .thenComparing(DeptDTO::getId));
         for (DeptDTO n : nodes) {

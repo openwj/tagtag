@@ -6,10 +6,14 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.module.iam.service.DeptService;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.validation.annotation.Validated;
+import dev.tagtag.kernel.validation.CreateGroup;
+import dev.tagtag.kernel.validation.UpdateGroup;
 import jakarta.validation.Valid;
 import dev.tagtag.kernel.constant.AppMessages;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +46,7 @@ public class DeptController {
     /** 创建部门 */
     @PostMapping
     @PreAuthorize("hasAuthority('" + Permissions.DEPT_CREATE + "')")
-    public Result<Void> create(@Valid @RequestBody DeptDTO dept) {
+    public Result<Void> create(@Validated(CreateGroup.class) @RequestBody DeptDTO dept) {
         deptService.create(dept);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
@@ -50,7 +54,7 @@ public class DeptController {
     /** 更新部门（忽略源对象中的空值） */
     @PutMapping
     @PreAuthorize("hasAuthority('" + Permissions.DEPT_UPDATE + "')")
-    public Result<Void> update(@Valid @RequestBody DeptDTO dept) {
+    public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody DeptDTO dept) {
         deptService.update(dept);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -66,8 +70,44 @@ public class DeptController {
     /** 部门树列表 */
     @GetMapping("/tree")
     @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<java.util.List<DeptDTO>> listTree() {
+    public Result<List<DeptDTO>> listTree() {
         return Result.ok(deptService.listTree());
+    }
+
+    /**
+     * 检查部门是否存在用户
+     * @param deptId 部门ID
+     * @return 是否存在用户
+     */
+    @GetMapping("/check/users")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
+    public Result<Boolean> checkUsers(@RequestParam("deptId") Long deptId) {
+        return Result.ok(deptService.hasUsers(deptId));
+    }
+
+    /**
+     * 检查部门是否存在子部门
+     * @param deptId 部门ID
+     * @return 是否存在子部门
+     */
+    @GetMapping("/check/children")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
+    public Result<Boolean> checkChildren(@RequestParam("deptId") Long deptId) {
+        return Result.ok(deptService.hasChildren(deptId));
+    }
+
+    /**
+     * 检查部门编码是否占用
+     * @param code 部门编码
+     * @param excludeId 可选排除的部门ID（用于编辑场景）
+     * @return 是否已占用
+     */
+    @GetMapping("/check/code")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
+    public Result<Boolean> checkCode(@RequestParam("code") String code,
+                                     @RequestParam(value = "excludeId", required = false) Long excludeId) {
+        if (code == null || code.isBlank()) return Result.ok(false);
+        return Result.ok(deptService.existsByCode(code, excludeId));
     }
 
     @Data

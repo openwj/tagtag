@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import java.util.List;
 import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.kernel.constant.Permissions;
 
@@ -79,7 +80,7 @@ public class UserController {
     /** 为用户分配角色（覆盖式分配） */
     @PostMapping("/{id}/roles")
     @PreAuthorize("hasAuthority('" + Permissions.USER_ASSIGN_ROLE + "')")
-    public Result<Void> assignRoles(@PathVariable("id") Long id, @RequestBody java.util.List<Long> roleIds) {
+    public Result<Void> assignRoles(@PathVariable("id") Long id, @RequestBody List<Long> roleIds) {
         userService.assignRoles(id, roleIds);
         return Result.okMsg(AppMessages.ASSIGN_SUCCESS);
     }

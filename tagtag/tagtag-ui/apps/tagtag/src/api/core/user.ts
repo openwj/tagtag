@@ -18,6 +18,10 @@ export async function getUserInfoApi() {
     homePath: '/analytics',
     // password 字段前端不使用
     password: '',
+    desc: data?.desc ?? '',
+    token: data?.token ?? '',
+    avatar: data?.avatar ?? '',
+    userId: data?.userId ?? 0,
   } as UserInfo;
   return userInfo;
 }

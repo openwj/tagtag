@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     String extra = environment.getProperty("security.permit-paths");
-                    java.util.List<String> permits = new java.util.ArrayList<>();
+                    List<String> permits = new ArrayList<>();
                     if (extra != null && !extra.isBlank()) {
                         for (String s : extra.split(",")) {
                             if (s != null && !s.isBlank()) permits.add(s.trim());

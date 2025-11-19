@@ -15,6 +15,7 @@
             email,
             mobile,
             gender,
+            dept_id AS deptId,
             status,
             create_time AS createTime,
             update_time AS updateTime,
