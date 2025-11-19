@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
-import dev.tagtag.framework.util.OrderByBuilder;
-import dev.tagtag.framework.util.PageNormalizer;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.MenuDTO;
@@ -104,7 +102,12 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Cacheable(cacheNames = "menuByCode", key = "#root.args[0]")
     public MenuDTO getByMenuCode(String menuCode) {
         if (menuCode == null || menuCode.isBlank()) return null;
-        Menu entity = getOne(this.lambdaQuery().eq(Menu::getMenuCode, menuCode));
+        Menu entity = this.lambdaQuery()
+                .eq(Menu::getMenuCode, menuCode)
+                .list()
+                .stream()
+                .findFirst()
+                .orElse(null);
         return menuMapperConvert.toDTO(entity);
     }
 }

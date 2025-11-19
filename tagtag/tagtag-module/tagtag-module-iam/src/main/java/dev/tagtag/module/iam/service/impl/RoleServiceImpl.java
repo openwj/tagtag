@@ -65,7 +65,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(readOnly = true)
     public RoleDTO getByCode(String code) {
         if (code == null || code.isBlank()) return null;
-        Role entity = getOne(this.lambdaQuery().eq(Role::getCode, code));
+        Role entity = this.lambdaQuery()
+                .eq(Role::getCode, code)
+                .list()
+                .stream()
+                .findFirst()
+                .orElse(null);
         return roleMapperConvert.toDTO(entity);
     }
 
@@ -78,7 +83,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(readOnly = true)
     public RoleDTO getByName(String name) {
         if (name == null || name.isBlank()) return null;
-        Role entity = getOne(this.lambdaQuery().eq(Role::getName, name));
+        Role entity = this.lambdaQuery()
+                .eq(Role::getName, name)
+                .list()
+                .stream()
+                .findFirst()
+                .orElse(null);
         return roleMapperConvert.toDTO(entity);
     }
 

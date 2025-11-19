@@ -123,7 +123,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (username == null || username.isEmpty()) {
             return null;
         }
-        User entity = getOne(this.lambdaQuery().eq(User::getUsername, username));
+        User entity = this.lambdaQuery()
+                .eq(User::getUsername, username)
+                .list()
+                .stream()
+                .findFirst()
+                .orElse(null);
         if (entity == null) {
             return null;
         }
