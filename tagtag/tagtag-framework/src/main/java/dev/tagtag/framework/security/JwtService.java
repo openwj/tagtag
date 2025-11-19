@@ -15,12 +15,16 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import java.util.List;
+import java.util.Collections;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * 基于 Nimbus 的 JWT 服务，负责令牌的生成与校验
@@ -59,7 +63,7 @@ public class JwtService {
                 builder.issuer(jwtProperties.getIssuer());
             }
             if (jwtProperties.getAudience() != null && !jwtProperties.getAudience().isBlank()) {
-                builder.audience(java.util.List.of(jwtProperties.getAudience()));
+                builder.audience(List.of(jwtProperties.getAudience()));
             }
             if (claims != null) {
                 for (Map.Entry<String, Object> e : claims.entrySet()) {
@@ -74,7 +78,7 @@ public class JwtService {
                 jwt.sign(new RSASSASigner(loadPrivateKey(privPem)));
             } else {
                 jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimSet);
-                jwt.sign(new MACSigner(jwtProperties.getSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                jwt.sign(new MACSigner(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)));
             }
             return jwt.serialize();
         } catch (Exception e) {
@@ -93,9 +97,9 @@ public class JwtService {
             boolean sigOk;
             String pubPem = jwtProperties.getPublicKeyPem();
             if (pubPem != null && !pubPem.isBlank()) {
-                sigOk = jwt.verify(new RSASSAVerifier((java.security.interfaces.RSAPublicKey) loadPublicKey(pubPem)));
+                sigOk = jwt.verify(new RSASSAVerifier((RSAPublicKey) loadPublicKey(pubPem)));
             } else {
-                sigOk = jwt.verify(new MACVerifier(jwtProperties.getSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                sigOk = jwt.verify(new MACVerifier(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)));
             }
             if (!sigOk) return false;
             Date exp = jwt.getJWTClaimsSet().getExpirationTime();
@@ -129,7 +133,7 @@ public class JwtService {
             SignedJWT jwt = SignedJWT.parse(token);
             return jwt.getJWTClaimsSet().getClaims();
         } catch (Exception e) {
-            return java.util.Collections.emptyMap();
+            return Collections.emptyMap();
         }
     }
 

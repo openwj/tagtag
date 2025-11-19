@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User entity = super.getById(id);
         UserDTO dto = userMapperConvert.toDTO(entity);
         if (dto != null && dto.getId() != null) {
-            java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
+            List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
             dto.setRoleIds(roleIds);
         }
         return dto;
@@ -101,7 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
-    public void assignRoles(Long userId, java.util.List<Long> roleIds) {
+    public void assignRoles(Long userId, List<Long> roleIds) {
         if (userId == null) {
             return;
         }
@@ -123,12 +124,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (username == null || username.isEmpty()) {
             return null;
         }
-        User entity = this.lambdaQuery()
+        User entity = this.getOne(this.lambdaQuery()
                 .eq(User::getUsername, username)
-                .list()
-                .stream()
-                .findFirst()
-                .orElse(null);
+                .getWrapper(), false);
         if (entity == null) {
             return null;
         }
@@ -138,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
          */
         UserDTO dto = userMapperConvert.toDTO(entity);
         if (dto != null && dto.getId() != null) {
-            java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
+            List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
             dto.setRoleIds(roleIds);
         }
         return dto;

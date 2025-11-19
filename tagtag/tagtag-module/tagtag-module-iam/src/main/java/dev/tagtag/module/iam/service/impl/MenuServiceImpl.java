@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import java.util.List;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -86,9 +88,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "menusByParent", key = "#root.args[0]")
-    public java.util.List<MenuDTO> listByParentId(Long parentId) {
-        if (parentId == null) return java.util.Collections.emptyList();
-        java.util.List<Menu> list = this.lambdaQuery().eq(Menu::getParentId, parentId).orderByAsc(Menu::getSort, Menu::getId).list();
+    public List<MenuDTO> listByParentId(Long parentId) {
+        if (parentId == null) return Collections.emptyList();
+        List<Menu> list = this.lambdaQuery().eq(Menu::getParentId, parentId).orderByAsc(Menu::getSort, Menu::getId).list();
         return menuMapperConvert.toDTOList(list);
     }
 
@@ -99,15 +101,12 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "menuByCode", key = "#root.args[0]")
+    @Cacheable(cacheNames = "menuByCode", key = "#root.args[0]", unless = "#result == null")
     public MenuDTO getByMenuCode(String menuCode) {
         if (menuCode == null || menuCode.isBlank()) return null;
-        Menu entity = this.lambdaQuery()
+        Menu entity = this.getOne(this.lambdaQuery()
                 .eq(Menu::getMenuCode, menuCode)
-                .list()
-                .stream()
-                .findFirst()
-                .orElse(null);
+                .getWrapper(), false);
         return menuMapperConvert.toDTO(entity);
     }
 }

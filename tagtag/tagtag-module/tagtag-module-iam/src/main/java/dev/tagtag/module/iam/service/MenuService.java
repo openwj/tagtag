@@ -4,6 +4,7 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
+import java.util.List;
 
 public interface MenuService {
 
@@ -27,7 +28,7 @@ public interface MenuService {
      * @param parentId 父菜单ID
      * @return 子菜单列表
      */
-    java.util.List<MenuDTO> listByParentId(Long parentId);
+    List<MenuDTO> listByParentId(Long parentId);
 
     /**
      * 根据菜单编码查询单条

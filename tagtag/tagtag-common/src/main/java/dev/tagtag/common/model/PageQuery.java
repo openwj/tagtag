@@ -1,11 +1,10 @@
 package dev.tagtag.common.model;
 
 import dev.tagtag.common.constant.GlobalConstants;
-import dev.tagtag.common.exception.BusinessException;
-import dev.tagtag.common.exception.ErrorCode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -121,7 +120,7 @@ public class PageQuery {
      */
     public String buildOrderBy(ColumnResolver resolver, Collection<String> whitelist,
                                String defaultProperty, boolean defaultAsc) {
-        java.util.List<String> parts = new java.util.ArrayList<>();
+        List<String> parts = new ArrayList<>();
         if (this.sortFields != null) {
             for (SortField sf : this.sortFields) {
                 if (sf == null || sf.getField() == null) continue;
@@ -130,7 +129,7 @@ public class PageQuery {
                 if (!containsIgnoreCase(whitelist, field)) continue;
                 String column = resolver == null ? null : resolver.resolve(field);
                 if (!isSafeColumn(column)) continue;
-                boolean asc = sf.getAsc() == null || java.util.Objects.equals(sf.getAsc(), Boolean.TRUE);
+                boolean asc = sf.getAsc() == null || Objects.equals(sf.getAsc(), Boolean.TRUE);
                 parts.add(column + (asc ? " ASC" : " DESC"));
             }
         }

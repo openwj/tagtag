@@ -147,6 +147,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
             chain.like(StringUtils.hasText(query.getName()), Dept::getName, query.getName())
                     .eq(query.getStatus() != null, Dept::getStatus, query.getStatus() == null ? null : query.getStatus().getCode())
                     .eq(query.getParentId() != null, Dept::getParentId, query.getParentId())
+                    .eq(StringUtils.hasText(query.getCode()), Dept::getCode, query.getCode())
                     .orderByAsc(Dept::getSort, Dept::getId);
         }
         List<Dept> all = chain.list();

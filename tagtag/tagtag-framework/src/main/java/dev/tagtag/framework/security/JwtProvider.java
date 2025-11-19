@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * JWT 生成与验证工具
@@ -104,7 +105,7 @@ public class JwtProvider {
             Map<String, Object> payload = objectMapper.readValue(payloadBytes, Map.class);
             return payload;
         } catch (Exception e) {
-            return java.util.Collections.emptyMap();
+            return Collections.emptyMap();
         }
     }
 

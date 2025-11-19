@@ -4,6 +4,7 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
+import java.util.List;
 
 public interface UserService {
 
@@ -23,7 +24,7 @@ public interface UserService {
     void delete(Long id);
 
     /** 为用户分配角色 */
-    void assignRoles(Long userId, java.util.List<Long> roleIds);
+    void assignRoles(Long userId, List<Long> roleIds);
 
     /**
      * 根据用户名查询用户详情（包含密码与角色ID）

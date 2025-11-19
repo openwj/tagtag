@@ -97,6 +97,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理非法参数异常（Bad Request）
+     * @param ex 异常
+     * @return 400 响应体
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Result<Void>> handleBadRequest(IllegalArgumentException ex) {
+        String msg = ex.getMessage();
+        if (msg == null || msg.isBlank()) msg = ErrorCode.BAD_REQUEST.getMessage();
+        Result<Void> body = Result.fail(ErrorCode.BAD_REQUEST, msg);
+        return ResponseEntity.status(ErrorCode.BAD_REQUEST.getCode()).body(body);
+    }
+
+    /**
      * 处理权限不足异常（方法级与过滤链级）
      * @param ex 异常
      * @return 403 响应体

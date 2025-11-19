@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Arrays;
 
 /**
  * 字符串工具
@@ -79,9 +81,9 @@ public class StringUtils {
      * @return 拆分列表
      */
     public static List<String> splitAndTrim(String str, String delimiter) {
-        if (isBlank(str)) return java.util.Collections.emptyList();
+        if (isBlank(str)) return Collections.emptyList();
         String[] arr = str.split(delimiter);
-        return java.util.Arrays.stream(arr)
+        return Arrays.stream(arr)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());

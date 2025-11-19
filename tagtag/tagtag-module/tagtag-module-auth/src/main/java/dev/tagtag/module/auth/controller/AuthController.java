@@ -26,6 +26,9 @@ import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.CaptchaService;
 
 import java.util.Set;
+import java.util.List;
+import java.util.Collections;
+import java.util.Objects;
 
 import dev.tagtag.kernel.annotation.RateLimit;
 
@@ -130,7 +133,7 @@ public class AuthController {
         String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
         String subject = jwtService.getSubject(token);
         UserDTO user = userApi.getUserByUsername(subject).getData();
-        java.util.List<Long> roleIds = user == null ? java.util.Collections.emptyList() : java.util.Objects.requireNonNullElse(user.getRoleIds(), java.util.Collections.emptyList());
+        List<Long> roleIds = user == null ? Collections.emptyList() : Objects.requireNonNullElse(user.getRoleIds(), Collections.emptyList());
         Set<String> perms = permissionResolver.resolvePermissions(roleIds);
         return Result.ok(perms);
     }

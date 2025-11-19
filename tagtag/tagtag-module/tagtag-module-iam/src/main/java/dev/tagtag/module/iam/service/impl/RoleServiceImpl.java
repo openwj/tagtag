@@ -26,6 +26,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.LinkedHashSet;
 
 @Service
 @Slf4j
@@ -65,12 +68,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(readOnly = true)
     public RoleDTO getByCode(String code) {
         if (code == null || code.isBlank()) return null;
-        Role entity = this.lambdaQuery()
+        Role entity = this.getOne(this.lambdaQuery()
                 .eq(Role::getCode, code)
-                .list()
-                .stream()
-                .findFirst()
-                .orElse(null);
+                .getWrapper(), false);
         return roleMapperConvert.toDTO(entity);
     }
 
@@ -83,12 +83,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Transactional(readOnly = true)
     public RoleDTO getByName(String name) {
         if (name == null || name.isBlank()) return null;
-        Role entity = this.lambdaQuery()
+        Role entity = this.getOne(this.lambdaQuery()
                 .eq(Role::getName, name)
-                .list()
-                .stream()
-                .findFirst()
-                .orElse(null);
+                .getWrapper(), false);
         return roleMapperConvert.toDTO(entity);
     }
 
@@ -160,7 +157,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Cacheable(cacheNames = "roleMenus", key = "#root.args[0]")
     @Transactional(readOnly = true)
     public List<MenuDTO> listMenusByRole(Long roleId) {
-        if (roleId == null) return java.util.Collections.emptyList();
+        if (roleId == null) return Collections.emptyList();
         List<Menu> menus = baseMapper.selectMenusByRoleId(roleId);
         return menuMapperConvert.toDTOList(menus);
     }
@@ -170,9 +167,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Cacheable(cacheNames = "roleMenuCodes", key = "#root.args[0]")
     @Transactional(readOnly = true)
     public Set<String> listMenuCodesByRoleIds(List<Long> roleIds) {
-        if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptySet();
+        if (roleIds == null || roleIds.isEmpty()) return Collections.emptySet();
         List<String> codes = baseMapper.selectPermissionCodesByRoleIds(roleIds);
-        if (codes == null || codes.isEmpty()) return java.util.Collections.emptySet();
-        return codes.stream().filter(java.util.Objects::nonNull).collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+        if (codes == null || codes.isEmpty()) return Collections.emptySet();
+        return codes.stream().filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

@@ -14,4 +14,5 @@ public class DeptQueryDTO {
     private String name;
     private StatusEnum status;
     private Long parentId;
+    private String code;
 }

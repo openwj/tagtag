@@ -4,6 +4,7 @@ import dev.tagtag.common.exception.ErrorCode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -13,7 +14,7 @@ public class Result<T> {
     private String message;
     private T data;
     private long timestamp;
-    private java.util.List<String> errors;
+    private List<String> errors;
 
     /**
      * 创建成功结果
@@ -88,7 +89,7 @@ public class Result<T> {
      * @param errors 错误列表
      * @return 失败结果
      */
-    public static <T> Result<T> fail(ErrorCode error, String message, java.util.List<String> errors) {
+    public static <T> Result<T> fail(ErrorCode error, String message, List<String> errors) {
         return Result.<T>builder()
                 .code(error.getCode())
                 .message(message)

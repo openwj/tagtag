@@ -2,6 +2,7 @@ package dev.tagtag.framework.config;
 
 import dev.tagtag.framework.security.CustomAccessDeniedHandler;
 import dev.tagtag.framework.security.CustomAuthenticationEntryPoint;
+import dev.tagtag.framework.security.TokenVersionFilter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -56,7 +57,7 @@ public class SecurityConfig {
                                                    CustomAuthenticationEntryPoint entryPoint,
                                                    CustomAccessDeniedHandler accessDeniedHandler,
                                                    JwtAuthenticationConverter jwtAuthenticationConverter,
-                                                   dev.tagtag.framework.security.TokenVersionFilter tokenVersionFilter) throws Exception {
+                                                   TokenVersionFilter tokenVersionFilter) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {

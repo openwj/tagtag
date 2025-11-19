@@ -53,7 +53,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     },
     proxyConfig: {
       ajax: {
-        query: async (_params, formValues: any) => {
+        query: async (_params: any, formValues: any) => {
           const data = await getDeptTree(formValues);
           return { items: data };
         },
@@ -147,7 +147,6 @@ const handleSuccess = () => {
           "
         />
       </template>
-
 
       <template #action="{ row }">
         <div class="flex items-center justify-center">

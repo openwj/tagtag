@@ -3,6 +3,7 @@ package dev.tagtag.framework.util;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import dev.tagtag.common.model.PageResult;
 import lombok.experimental.UtilityClass;
+import java.util.Collections;
 
 /**
  * 分页结果适配工具（MyBatis Plus IPage → PageResult）
@@ -18,7 +19,7 @@ public class PageResults {
      */
     public static <T> PageResult<T> of(IPage<T> page) {
         if (page == null) {
-            return PageResult.of(java.util.Collections.emptyList(), 0L, 1, 1);
+            return PageResult.of(Collections.emptyList(), 0L, 1, 1);
         }
         return PageResult.of(page.getRecords(), page.getTotal(), (int) page.getCurrent(), (int) page.getSize());
     }

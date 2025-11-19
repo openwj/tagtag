@@ -7,6 +7,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.slf4j.MDC;
 
 import java.util.concurrent.Executor;
+import java.util.Map;
 
 /**
  * 异步线程池配置
@@ -29,7 +30,7 @@ public class AsyncConfig {
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(20);
         executor.setTaskDecorator(r -> {
-            java.util.Map<String, String> contextMap = MDC.getCopyOfContextMap();
+            Map<String, String> contextMap = MDC.getCopyOfContextMap();
             return () -> {
                 if (contextMap != null) {
                     MDC.setContextMap(contextMap);
