@@ -1,5 +1,7 @@
 package dev.tagtag.module.auth.controller;
 
+import dev.tagtag.common.exception.BusinessException;
+import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.auth.dto.LoginRequest;
@@ -22,7 +24,10 @@ import dev.tagtag.framework.security.JwtService;
 import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.module.auth.service.PermissionResolver;
+import dev.tagtag.module.auth.service.CaptchaService;
+
 import java.util.Set;
+
 import dev.tagtag.kernel.annotation.RateLimit;
 
 /**
@@ -39,21 +44,32 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserApi userApi;
     private final PermissionResolver permissionResolver;
+    private final CaptchaService captchaService;
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
+     *
      * @param req 登录请求
      * @return 令牌结果
      */
     @RateLimit(key = "auth:login", periodSeconds = 60, permits = 10, message = "登录请求过多，请稍后再试")
     @PostMapping("/login")
     public Result<TokenDTO> login(@Valid @RequestBody LoginRequest req) {
+        // 验证码前置校验（兼容嵌套与扁平两种入参）：优先使用 req.getCaptcha() 的值
+        String inCode = req.getCaptcha().getCode();
+        String inId = req.getCaptcha().getCaptchaId();
+        if (!captchaService.validate(inId, inCode)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码错误或已过期");
+        }
         TokenDTO dto = authService.login(req.getUsername(), req.getPassword());
+        // 登录成功后再消费验证码，防止重复使用（同样兼容两种入参）
+        captchaService.validateAndConsume(inId, inCode);
         return Result.ok(dto);
     }
 
     /**
      * 刷新令牌（返回新的访问令牌与刷新令牌）
+     *
      * @param req 刷新请求
      * @return 令牌结果
      */
@@ -66,6 +82,7 @@ public class AuthController {
 
     /**
      * 注销登录（无状态 JWT 下返回成功）
+     *
      * @param req 注销请求
      * @return 操作结果
      */
@@ -77,6 +94,7 @@ public class AuthController {
 
     /**
      * 用户注册（公开接口）
+     *
      * @param req 注册请求
      * @return 操作结果
      */
@@ -88,6 +106,7 @@ public class AuthController {
 
     /**
      * 获取当前登录用户信息
+     *
      * @param authorization Authorization头（Bearer Token）
      * @return 用户信息
      */
@@ -104,6 +123,7 @@ public class AuthController {
 
     /**
      * 获取当前用户的权限编码集合
+     *
      * @param authorization Authorization头（Bearer Token）
      * @return 权限码列表
      */
@@ -117,7 +137,5 @@ public class AuthController {
         return Result.ok(perms);
     }
 
-
-    
 
 }

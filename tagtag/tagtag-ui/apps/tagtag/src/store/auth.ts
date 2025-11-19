@@ -35,7 +35,6 @@ export const useAuthStore = defineStore('auth', () => {
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
-      /** 登录并获取令牌 */
       const { accessToken, refreshToken } = await loginApi(params);
 
       // 如果成功获取到 accessToken

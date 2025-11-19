@@ -68,7 +68,7 @@ public class SecurityConfig {
                         }
                     }
                     auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/captcha/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(permits.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated();
                 })

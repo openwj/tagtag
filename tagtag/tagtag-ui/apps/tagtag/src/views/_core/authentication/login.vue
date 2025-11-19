@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 import type { VbenFormSchema } from '@vben/common-ui';
 
-import { computed, ref } from 'vue';
+import { computed, markRaw, ref } from 'vue';
 
-import { AuthenticationLogin, z } from '@vben/common-ui';
+import { AuthenticationLogin, ImageCaptchaInput, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { fetchImageCaptchaApi } from '#/api/core/captcha';
 import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
 const loginRef = ref<any>(null);
-
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -34,6 +34,28 @@ const formSchema = computed((): VbenFormSchema[] => {
       label: $t('authentication.password'),
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
     },
+    {
+      component: markRaw(ImageCaptchaInput),
+      componentProps: {
+        placeholder: $t('authentication.code'),
+        /**
+         * 拉取后端验证码图片
+         */
+        fetchImage: async () => {
+          const { src, captchaId } = await fetchImageCaptchaApi();
+          return { src, captchaId };
+        },
+      },
+      fieldName: 'captcha',
+      label: $t('authentication.code'),
+      rules: z.object({
+        code: z
+          .string()
+          .min(5, { message: $t('authentication.codeTip', [5]) })
+          .optional(),
+        captchaId: z.string().optional(),
+      }),
+    },
   ];
 });
 </script>
@@ -43,6 +65,6 @@ const formSchema = computed((): VbenFormSchema[] => {
     ref="loginRef"
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
-    @submit="(p)=>authStore.authLogin(p)"
+    @submit="(p) => authStore.authLogin(p)"
   />
 </template>

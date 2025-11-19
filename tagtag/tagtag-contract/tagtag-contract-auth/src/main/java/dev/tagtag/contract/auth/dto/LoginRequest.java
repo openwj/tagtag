@@ -17,4 +17,9 @@ public class LoginRequest {
      */
     @NotBlank(message = "密码不能为空")
     private String password;
+
+    /**
+     * 嵌套的验证码对象（兼容请求体中携带 captcha: { code, captchaId } 的格式）
+     */
+    private CaptchaValidateRequest captcha;
 }
