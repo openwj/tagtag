@@ -40,7 +40,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     /** 角色分页查询 */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public PageResult<RoleDTO> page(RoleQueryDTO query, PageQuery pageQuery) {
         IPage<Role> page = Pages.selectPage(pageQuery, pageProperties, Role.class, pageProperties.getRole(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
@@ -50,7 +50,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     /** 获取角色详情 */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public RoleDTO getById(Long id) {
         Role entity = super.getById(id);
         return roleMapperConvert.toDTO(entity);
@@ -62,10 +62,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 角色详情
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public RoleDTO getByCode(String code) {
         if (code == null || code.isBlank()) return null;
-        Role entity = this.lambdaQuery().eq(Role::getCode, code).last("LIMIT 1").one();
+        Role entity = getOne(this.lambdaQuery().eq(Role::getCode, code));
         return roleMapperConvert.toDTO(entity);
     }
 
@@ -75,10 +75,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
      * @return 角色详情
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public RoleDTO getByName(String name) {
         if (name == null || name.isBlank()) return null;
-        Role entity = this.lambdaQuery().eq(Role::getName, name).last("LIMIT 1").one();
+        Role entity = getOne(this.lambdaQuery().eq(Role::getName, name));
         return roleMapperConvert.toDTO(entity);
     }
 
@@ -90,7 +90,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public boolean existsByCode(String code) {
         if (code == null || code.isBlank()) return false;
-        return this.lambdaQuery().eq(Role::getCode, code).count() > 0;
+        return this.lambdaQuery().eq(Role::getCode, code).exists();
     }
 
     /**
@@ -101,7 +101,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public boolean existsByName(String name) {
         if (name == null || name.isBlank()) return false;
-        return this.lambdaQuery().eq(Role::getName, name).count() > 0;
+        return this.lambdaQuery().eq(Role::getName, name).exists();
     }
 
     /** 创建角色 */
@@ -148,7 +148,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 查询指定角色的菜单列表（仅返回按钮型作为权限；单次 JOIN 查询） */
     @Override
     @Cacheable(cacheNames = "roleMenus", key = "#root.args[0]")
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<MenuDTO> listMenusByRole(Long roleId) {
         if (roleId == null) return java.util.Collections.emptyList();
         List<Menu> menus = baseMapper.selectMenusByRoleId(roleId);
@@ -158,7 +158,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 批量查询角色的权限编码集合（按钮型菜单的 menu_code，去重） */
     @Override
     @Cacheable(cacheNames = "roleMenuCodes", key = "#root.args[0]")
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public Set<String> listMenuCodesByRoleIds(List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptySet();
         List<String> codes = baseMapper.selectPermissionCodesByRoleIds(roleIds);

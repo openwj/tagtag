@@ -27,6 +27,13 @@ public interface DeptService {
     List<DeptDTO> listTree();
 
     /**
+     * 部门树列表（支持查询条件）
+     * @param query 查询条件：名称模糊、状态精确、父部门精确
+     * @return 部门树（按 sort、id 升序）
+     */
+    List<DeptDTO> listTree(DeptQueryDTO query);
+
+    /**
      * 判断指定部门是否存在子部门
      * @param deptId 部门ID
      * @return 是否存在子部门

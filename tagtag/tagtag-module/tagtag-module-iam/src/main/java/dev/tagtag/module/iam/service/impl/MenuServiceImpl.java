@@ -32,7 +32,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     /** 菜单分页查询 */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public PageResult<MenuDTO> page(MenuQueryDTO query, PageQuery pageQuery) {
         IPage<Menu> page = Pages.selectPage(pageQuery, pageProperties, Menu.class, pageProperties.getMenu(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
@@ -42,7 +42,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     /** 获取菜单详情 */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = "menuById", key = "#root.args[0]")
     public MenuDTO getById(Long id) {
         Menu entity = super.getById(id);
@@ -86,7 +86,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 子菜单列表
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = "menusByParent", key = "#root.args[0]")
     public java.util.List<MenuDTO> listByParentId(Long parentId) {
         if (parentId == null) return java.util.Collections.emptyList();
@@ -100,11 +100,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      * @return 菜单详情
      */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = "menuByCode", key = "#root.args[0]")
     public MenuDTO getByMenuCode(String menuCode) {
         if (menuCode == null || menuCode.isBlank()) return null;
-        Menu entity = this.lambdaQuery().eq(Menu::getMenuCode, menuCode).last("LIMIT 1").one();
+        Menu entity = getOne(this.lambdaQuery().eq(Menu::getMenuCode, menuCode));
         return menuMapperConvert.toDTO(entity);
     }
 }

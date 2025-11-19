@@ -67,11 +67,11 @@ public class DeptController {
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
-    /** 部门树列表 */
+    /** 部门树列表（支持查询条件） */
     @GetMapping("/tree")
     @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<List<DeptDTO>> listTree() {
-        return Result.ok(deptService.listTree());
+    public Result<List<DeptDTO>> listTree(DeptQueryDTO query) {
+        return Result.ok(deptService.listTree(query));
     }
 
     /**

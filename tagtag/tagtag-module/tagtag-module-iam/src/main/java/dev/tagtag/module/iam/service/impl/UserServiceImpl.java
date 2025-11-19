@@ -46,7 +46,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /** 获取用户详情 */
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     @Cacheable(cacheNames = "userById", key = "#root.args[0]", unless = "#result == null")
     public UserDTO getById(Long id) {
         User entity = super.getById(id);
@@ -123,8 +123,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (username == null || username.isEmpty()) {
             return null;
         }
-        User entity = this.lambdaQuery()
-                .eq(User::getUsername, username).one();
+        User entity = getOne(this.lambdaQuery().eq(User::getUsername, username));
         if (entity == null) {
             return null;
         }
