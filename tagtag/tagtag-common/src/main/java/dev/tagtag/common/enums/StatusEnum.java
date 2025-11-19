@@ -3,7 +3,7 @@ package dev.tagtag.common.enums;
 import lombok.Getter;
 
 @Getter
-public enum StatusEnum {
+public enum StatusEnum implements CodeEnum {
 
     DISABLED(0),
     ENABLED(1);
