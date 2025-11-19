@@ -19,6 +19,15 @@ const routes: RouteRecordRaw[] = [
           title: '部门管理',
         },
       },
+      {
+        name: 'IamUser',
+        path: '/iam/user',
+        component: () => import('#/views/modules/iam/user/index.vue'),
+        meta: {
+          icon: 'lucide:user',
+          title: '用户管理',
+        },
+      },
     ],
   },
 ];

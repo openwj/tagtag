@@ -29,6 +29,9 @@ WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='user:delete');
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, create_time)
 SELECT 0, '分配角色', 'user:assignRole', 2, 1, 0, CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='user:assignRole');
+INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, create_time)
+SELECT 0, '读取用户', 'user:read', 2, 1, 0, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='user:read');
 
 -- 管理员绑定用户权限
 INSERT INTO iam_role_menu (role_id, menu_id)
@@ -52,6 +55,12 @@ WHERE r.code='ADMIN' AND m.menu_code='user:delete'
 INSERT INTO iam_role_menu (role_id, menu_id)
 SELECT r.id, m.id FROM iam_role r, iam_menu m
 WHERE r.code='ADMIN' AND m.menu_code='user:assignRole'
+  AND NOT EXISTS (
+    SELECT 1 FROM iam_role_menu rm WHERE rm.role_id=r.id AND rm.menu_id=m.id
+  );
+INSERT INTO iam_role_menu (role_id, menu_id)
+SELECT r.id, m.id FROM iam_role r, iam_menu m
+WHERE r.code='ADMIN' AND m.menu_code='user:read'
   AND NOT EXISTS (
     SELECT 1 FROM iam_role_menu rm WHERE rm.role_id=r.id AND rm.menu_id=m.id
   );

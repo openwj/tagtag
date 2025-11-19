@@ -22,5 +22,8 @@ public class UserQueryDTO {
     private String email;
     private String mobile;
     private TimeRangeDTO createTimeRange;
+    private Long deptId;
+    private String employeeNo;
+    private TimeRangeDTO entryDateRange;
 }
 

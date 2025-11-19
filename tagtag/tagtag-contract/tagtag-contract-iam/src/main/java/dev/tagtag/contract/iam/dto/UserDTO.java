@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -25,5 +26,14 @@ public class UserDTO {
     private Integer status;
     private List<Long> roleIds;
     private LocalDateTime createTime;
+    private String avatar;
+    private String remark;
+    private String employeeNo;
+    private String jobTitle;
+    private LocalDate birthday;
+    private LocalDate entryDate;
+    private LocalDateTime lastLoginTime;
+    private String lastLoginIp;
+    private LocalDateTime passwordUpdatedAt;
 }
 

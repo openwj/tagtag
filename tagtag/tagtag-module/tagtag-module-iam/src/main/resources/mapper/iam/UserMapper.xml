@@ -17,6 +17,15 @@
             gender,
             dept_id AS deptId,
             status,
+            avatar,
+            remark,
+            employee_no AS employeeNo,
+            job_title AS jobTitle,
+            birthday,
+            entry_date AS entryDate,
+            last_login_time AS lastLoginTime,
+            last_login_ip AS lastLoginIp,
+            password_updated_at AS passwordUpdatedAt,
             create_time AS createTime,
             update_time AS updateTime,
             create_by AS createBy,
@@ -41,6 +50,18 @@
                 </if>
                 <if test="q.mobile != null and q.mobile != ''">
                     AND mobile LIKE CONCAT('%', #{q.mobile}, '%')
+                </if>
+                <if test="q.deptId != null">
+                    AND dept_id = #{q.deptId}
+                </if>
+                <if test="q.employeeNo != null and q.employeeNo != ''">
+                    AND employee_no LIKE CONCAT('%', #{q.employeeNo}, '%')
+                </if>
+                <if test="q.entryDateRange != null and q.entryDateRange.start != null">
+                    AND entry_date &gt;= #{q.entryDateRange.start}
+                </if>
+                <if test="q.entryDateRange != null and q.entryDateRange.end != null">
+                    AND entry_date &lt;= #{q.entryDateRange.end}
                 </if>
                 <if test="q.createTimeRange != null and q.createTimeRange.start != null">
                     AND create_time &gt;= #{q.createTimeRange.start}

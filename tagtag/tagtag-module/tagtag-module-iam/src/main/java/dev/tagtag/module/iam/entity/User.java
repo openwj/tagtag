@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @TableName("iam_user")
@@ -22,6 +23,15 @@ public class User {
     private Integer gender;
     private Long deptId;
     private Integer status;
+    private String avatar;
+    private String remark;
+    private String employeeNo;
+    private String jobTitle;
+    private LocalDate birthday;
+    private LocalDate entryDate;
+    private LocalDateTime lastLoginTime;
+    private String lastLoginIp;
+    private LocalDateTime passwordUpdatedAt;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)

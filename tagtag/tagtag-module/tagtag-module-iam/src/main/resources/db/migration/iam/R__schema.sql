@@ -15,6 +15,15 @@ CREATE TABLE iam_user (
   gender TINYINT,
   dept_id BIGINT,
   status TINYINT DEFAULT 1,
+  avatar VARCHAR(256),
+  remark VARCHAR(500),
+  employee_no VARCHAR(64),
+  job_title VARCHAR(128),
+  birthday DATE,
+  entry_date DATE,
+  last_login_time DATETIME,
+  last_login_ip VARCHAR(64),
+  password_updated_at DATETIME,
   create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   create_by BIGINT,
   update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -23,7 +32,9 @@ CREATE TABLE iam_user (
   UNIQUE KEY uk_username (username),
   KEY idx_status (status),
   KEY idx_dept_id (dept_id),
-  KEY idx_create_time (create_time)
+  KEY idx_create_time (create_time),
+  KEY idx_employee_no (employee_no),
+  KEY idx_entry_date (entry_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE iam_role (
