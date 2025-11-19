@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         name: 'IamDept',
-        path: '/dept',
+        path: '/iam/dept',
         component: () => import('#/views/modules/iam/dept/index.vue'),
         meta: {
           icon: 'lucide:shield',

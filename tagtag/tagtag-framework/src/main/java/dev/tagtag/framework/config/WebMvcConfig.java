@@ -1,7 +1,6 @@
 package dev.tagtag.framework.config;
 
-import dev.tagtag.framework.web.converter.StatusEnumConverter;
-import dev.tagtag.framework.web.converter.StringToCodeEnumConverterFactory;
+import dev.tagtag.framework.web.converter.StringToEnumConverterFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,7 +17,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addFormatters(FormatterRegistry registry) {
-        registry.addConverterFactory(new StringToCodeEnumConverterFactory());
-        registry.addConverter(new StatusEnumConverter());
+        registry.addConverterFactory(new StringToEnumConverterFactory());
     }
 }

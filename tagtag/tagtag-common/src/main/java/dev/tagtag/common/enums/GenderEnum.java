@@ -3,7 +3,7 @@ package dev.tagtag.common.enums;
 import lombok.Getter;
 
 @Getter
-public enum GenderEnum {
+public enum GenderEnum implements CodeEnum {
 
     UNKNOWN(0),
     MALE(1),
