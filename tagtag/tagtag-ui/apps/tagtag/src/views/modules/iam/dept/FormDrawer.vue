@@ -39,7 +39,6 @@ const [Drawer, drawerApi] = useVbenDrawer({
   onConfirm: async () => {
     const { valid } = await formApi.validate();
 
-    console.log("保存"+ isUpdate.value)
     if (valid) {
       const data = await formApi.getValues();
       await (isUpdate.value ? editDept(data) : addDept(data));
@@ -58,7 +57,6 @@ const [Drawer, drawerApi] = useVbenDrawer({
       // 同步外部传入的新增/编辑标记到本地状态
       isUpdate.value = Boolean(values?.isUpdate);
 
-      console.log(values)
       if (isUpdate.value) {
         formApi.setValues(values);
       } else {
