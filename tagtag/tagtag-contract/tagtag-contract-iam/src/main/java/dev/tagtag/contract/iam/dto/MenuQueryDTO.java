@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 public class MenuQueryDTO {
     private String menuCode;
     private String menuName;
+    private Integer status;
+    private Integer menuType;
 }
 

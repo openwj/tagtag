@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 @Data
 @Builder
@@ -24,4 +25,20 @@ public class MenuDTO {
 
     @Size(max = 500, message = "备注长度不能超过500")
     private String remark;
+
+    private Long parentId;
+    private String path;
+    private String component;
+    private String icon;
+    private Integer sort;
+    private Integer status;
+    /** 0目录 1菜单 2按钮 */
+    private Integer menuType;
+    private Integer isHidden;
+    private Integer isExternal;
+    private String externalUrl;
+    private Integer isKeepalive;
+
+    /** 树结构子节点（树接口返回时使用） */
+    private List<MenuDTO> children;
 }

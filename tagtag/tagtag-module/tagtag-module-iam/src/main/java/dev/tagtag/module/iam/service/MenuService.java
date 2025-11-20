@@ -36,4 +36,18 @@ public interface MenuService {
      * @return 菜单详情
      */
     MenuDTO getByMenuCode(String menuCode);
+
+    /**
+     * 菜单树查询（不分页）
+     * @param query 查询条件
+     * @return 树形菜单
+     */
+    List<MenuDTO> listTree(MenuQueryDTO query);
+
+    /**
+     * 判断菜单编码是否存在
+     * @param menuCode 菜单编码
+     * @return 是否存在
+     */
+    boolean existsByCode(String menuCode);
 }

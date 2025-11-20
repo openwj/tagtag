@@ -50,6 +50,22 @@ export async function getMenuByCode(menuCode: string) {
 }
 
 /**
+ * 菜单树查询（不分页）
+ * @param query 菜单查询条件
+ */
+export async function getMenuTree(query: MenuApiParams.MenuQuery & { status?: number; menuType?: number } = {}) {
+  return requestClient.get(`${Api.BaseApi}/tree`, { params: { ...query } });
+}
+
+/**
+ * 判断菜单编码是否存在
+ * @param menuCode 菜单编码
+ */
+export async function existsByCode(menuCode: string) {
+  return requestClient.get(`${Api.BaseApi}/exist/code/${menuCode}`);
+}
+
+/**
  * 新增菜单
  * @param data 菜单表单数据
  */

@@ -18,8 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import dev.tagtag.common.exception.BusinessException;
+import dev.tagtag.common.exception.ErrorCode;
 import java.util.List;
 import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +57,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 创建菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
     public void create(MenuDTO menu) {
         Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
@@ -62,7 +67,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 更新菜单（忽略源对象中的空值） */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
     public void update(MenuDTO menu) {
         if (menu == null || menu.getId() == null) return;
         Menu entity = super.getById(menu.getId());
@@ -74,9 +79,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 删除菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
     public void delete(Long id) {
         if (id == null) return;
+        // 保护：存在子菜单禁止删除
+        boolean hasChildren = this.lambdaQuery().eq(Menu::getParentId, id).count() > 0;
+        if (hasChildren) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "该菜单下存在子菜单，无法删除");
+        }
         super.removeById(id);
     }
 
@@ -108,5 +118,67 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
                 .eq(Menu::getMenuCode, menuCode)
                 .getWrapper(), false);
         return menuMapperConvert.toDTO(entity);
+    }
+
+    /**
+     * 菜单树查询（不分页，一次性查询后在内存构树）
+     * @param query 查询条件
+     * @return 树形菜单列表
+     */
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "menuTree", key = "#query == null ? 'all' : #query.toString()")
+    public List<MenuDTO> listTree(MenuQueryDTO query) {
+        var lq = this.lambdaQuery();
+        if (query != null) {
+            if (query.getMenuCode() != null && !query.getMenuCode().isBlank()) {
+                lq.like(Menu::getMenuCode, query.getMenuCode());
+            }
+            if (query.getMenuName() != null && !query.getMenuName().isBlank()) {
+                lq.like(Menu::getMenuName, query.getMenuName());
+            }
+            if (query.getStatus() != null) {
+                lq.eq(Menu::getStatus, query.getStatus());
+            }
+            if (query.getMenuType() != null) {
+                lq.eq(Menu::getMenuType, query.getMenuType());
+            }
+        }
+        List<Menu> all = lq.orderByAsc(Menu::getSort, Menu::getId).list();
+        // 映射为 DTO
+        List<MenuDTO> dtos = menuMapperConvert.toDTOList(all);
+        Map<Long, MenuDTO> byId = new HashMap<>();
+        for (MenuDTO dto : dtos) {
+            byId.put(dto.getId(), dto);
+        }
+        List<MenuDTO> roots = new ArrayList<>();
+        for (MenuDTO dto : dtos) {
+            Long pid = dto.getParentId() == null ? 0L : dto.getParentId();
+            if (pid == 0L) {
+                roots.add(dto);
+            } else {
+                MenuDTO parent = byId.get(pid);
+                if (parent != null) {
+                    if (parent.getChildren() == null) parent.setChildren(new ArrayList<>());
+                    parent.getChildren().add(dto);
+                } else {
+                    roots.add(dto); // 无父节点数据时作为根返回
+                }
+            }
+        }
+        return roots;
+    }
+
+    /**
+     * 判断菜单编码是否存在
+     * @param menuCode 菜单编码
+     * @return 是否存在
+     */
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "menuCodeExists", key = "#menuCode", unless = "#result == false")
+    public boolean existsByCode(String menuCode) {
+        if (menuCode == null || menuCode.isBlank()) return false;
+        return this.lambdaQuery().eq(Menu::getMenuCode, menuCode).count() > 0;
     }
 }

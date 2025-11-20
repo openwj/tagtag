@@ -33,6 +33,16 @@ public class MenuController {
         return Result.ok(pr);
     }
 
+    /**
+     * 菜单树查询（不分页）
+     * @param query 菜单过滤条件
+     */
+    @GetMapping("/tree")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
+    public Result<List<MenuDTO>> tree(MenuQueryDTO query) {
+        return Result.ok(menuService.listTree(query));
+    }
+
     /** 获取菜单详情 */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
@@ -84,6 +94,17 @@ public class MenuController {
     public Result<Void> delete(@PathVariable("id") Long id) {
         menuService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
+    }
+
+    /**
+     * 判断菜单编码是否存在（唯一性校验）
+     * @param menuCode 菜单编码
+     * @return 是否存在
+     */
+    @GetMapping("/exist/code/{menuCode}")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
+    public Result<Boolean> existsByCode(@PathVariable("menuCode") String menuCode) {
+        return Result.ok(menuService.existsByCode(menuCode));
     }
 
     @Data
