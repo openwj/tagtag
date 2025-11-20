@@ -1,16 +1,8 @@
 {
   "folders": [
     {
-      "name": "@vben/backend-mock",
-      "path": "apps/backend-mock",
-    },
-    {
       "name": "@vben/tagtag",
       "path": "apps/tagtag",
-    },
-    {
-      "name": "@vben/docs",
-      "path": "docs",
     },
     {
       "name": "@vben/commitlint-config",
