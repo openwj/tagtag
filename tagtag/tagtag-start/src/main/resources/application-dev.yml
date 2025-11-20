@@ -29,15 +29,16 @@ spring:
     enabled: true
     locations: classpath:/db/migration
     baseline-on-migrate: false
-    group: true
-    clean-disabled: false
-    validate-on-migrate: true
+    group: false
+    clean-disabled: true
+    validate-on-migrate: false
 
 
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       id-type: auto
@@ -48,7 +49,8 @@ mybatis-plus:
 logging:
   level:
     root: info
-    com.baomidou.mybatisplus: info
+    com.baomidou.mybatisplus: debug
+    org.apache.ibatis: debug
 
 jwt:
   secret: ${JWT_SECRET:change-me-please1234567894563214454545455454545}

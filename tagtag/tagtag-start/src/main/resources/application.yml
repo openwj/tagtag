@@ -1,6 +1,7 @@
 spring:
   application:
     name: tagtag-admin
+    version: 1.0.0
   profiles:
     active: dev
   jackson:
@@ -24,3 +25,7 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+mybatis-plus:
+  global-config:
+    banner: false

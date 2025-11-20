@@ -1,0 +1,13 @@
+${AnsiColor.BRIGHT_BLUE}
+████████╗ █████╗  ██████╗████████╗ █████╗  ██████╗
+╚══██╔══╝██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝
+   ██║   ███████║██║  ███╗  ██║   ███████║██║  ███╗
+   ██║   ██╔══██║██║   ██║  ██║   ██╔══██║██║   ██║
+   ██║   ██║  ██║╚██████╔╝  ██║   ██║  ██║╚██████╔╝
+   ╚═╝   ╚═╝  ╚═╝ ╚═════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝
+${AnsiColor.BRIGHT_GREEN}
+  tagtag Admin Platform
+  ${spring.application.name}  |  profile: ${spring.profiles.active}
+  Version: ${spring.application.version}
+  Java: ${java.version}  |  OS: ${os.name}
+ ${AnsiColor.DEFAULT}

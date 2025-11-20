@@ -11,8 +11,6 @@ export const columns: VxeGridProps['columns'] = [
   { field: 'mobile', title: '手机号', width: 140 },
   { field: 'gender', title: '性别', width: 80 },
   { field: 'status', title: '状态', slots: { default: 'status' }, width: 90 },
-  { field: 'entryDate', title: '入职日期', width: 120 },
-  { field: 'createTime', title: '创建时间', width: 160 },
   { field: 'remark', title: '备注' },
   {
     field: 'action',
@@ -24,9 +22,24 @@ export const columns: VxeGridProps['columns'] = [
 ];
 
 export const searchFormSchema: VbenFormProps['schema'] = [
-  { component: 'Input', fieldName: 'username', label: '用户名', componentProps: { placeholder: '请输入用户名' } },
-  { component: 'Input', fieldName: 'nickname', label: '姓名', componentProps: { placeholder: '请输入姓名' } },
-  { component: 'Input', fieldName: 'employeeNo', label: '工号', componentProps: { placeholder: '请输入工号' } },
+  {
+    component: 'Input',
+    fieldName: 'username',
+    label: '用户名',
+    componentProps: { placeholder: '请输入用户名' },
+  },
+  {
+    component: 'Input',
+    fieldName: 'nickname',
+    label: '姓名',
+    componentProps: { placeholder: '请输入姓名' },
+  },
+  {
+    component: 'Input',
+    fieldName: 'employeeNo',
+    label: '工号',
+    componentProps: { placeholder: '请输入工号' },
+  },
   {
     component: 'Select',
     fieldName: 'status',
@@ -128,15 +141,23 @@ export const formSchema: VbenFormProps['schema'] = [
   },
   {
     component: 'DatePicker',
-    componentProps: { class: 'w-full' },
     fieldName: 'birthday',
     label: '生日',
+    componentProps: {
+      class: 'w-full',
+      format: 'YYYY-MM-DD',
+      valueFormat: 'YYYY-MM-DD',
+    },
   },
   {
     component: 'DatePicker',
-    componentProps: { class: 'w-full' },
     fieldName: 'entryDate',
     label: '入职日期',
+    componentProps: {
+      class: 'w-full',
+      format: 'YYYY-MM-DD',
+      valueFormat: 'YYYY-MM-DD',
+    },
   },
   {
     component: 'Select',
