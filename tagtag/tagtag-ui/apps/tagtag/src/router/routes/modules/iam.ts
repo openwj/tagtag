@@ -28,6 +28,24 @@ const routes: RouteRecordRaw[] = [
           title: '用户管理',
         },
       },
+      {
+        name: 'IamRole',
+        path: '/iam/role',
+        component: () => import('#/views/modules/iam/role/index.vue'),
+        meta: {
+          icon: 'lucide:shield-question',
+          title: '角色管理',
+        },
+      },
+      {
+        name: 'IamMenu',
+        path: '/iam/menu',
+        component: () => import('#/views/modules/iam/menu/index.vue'),
+        meta: {
+          icon: 'lucide:list-tree',
+          title: '菜单管理',
+        },
+      },
     ],
   },
 ];

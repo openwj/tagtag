@@ -1,4 +1,3 @@
-@ -0,0 +1,85 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 
@@ -6,8 +5,7 @@ import { useVbenDrawer, useVbenForm } from '@vben/common-ui';
 
 import { message } from 'ant-design-vue';
 
-import { getDeptTree } from '#/api/modules/iam/dept';
-import { addUser, editUser } from '#/api/modules/iam/user';
+import { addRole, editRole } from '#/api/modules/iam/role';
 
 import { formSchema } from './data';
 
@@ -27,8 +25,8 @@ const [Form, formApi] = useVbenForm({
 });
 
 /**
- * 用户表单抽屉
- * 负责新增/编辑用户，并在打开时加载部门树作为部门选择
+ * 角色表单抽屉
+ * 负责新增/编辑角色
  */
 const [Drawer, drawerApi] = useVbenDrawer({
   onCancel() {
@@ -41,14 +39,14 @@ const [Drawer, drawerApi] = useVbenDrawer({
     const { valid } = await formApi.validate();
     if (valid) {
       const data = await formApi.getValues();
-      await (isUpdate.value ? editUser(data) : addUser(data));
-      message.success(isUpdate.value ? '编辑用户成功' : '新增用户成功');
+      await (isUpdate.value ? editRole(data) : addRole(data));
+      message.success(isUpdate.value ? '编辑角色成功' : '新增角色成功');
       drawerApi.close();
       emit('success');
     }
   },
   /**
-   * 抽屉开关：打开时加载部门树并设置表单初始值
+   * 抽屉开关：打开时设置表单初始值
    */
   onOpenChange: async (isOpen: boolean) => {
     if (isOpen) {
@@ -62,17 +60,8 @@ const [Drawer, drawerApi] = useVbenDrawer({
       }
 
       drawerApi.setState({
-        title: isUpdate.value ? '编辑用户' : '新增用户',
+        title: isUpdate.value ? '编辑角色' : '新增角色',
       });
-
-      const tree = await getDeptTree({});
-      const treeData = [{ id: 0, name: '顶级组织架构', children: tree }];
-      formApi.updateSchema([
-        {
-          componentProps: { treeData },
-          fieldName: 'deptId',
-        },
-      ]);
     }
   },
 });
@@ -81,4 +70,5 @@ const [Drawer, drawerApi] = useVbenDrawer({
   <Drawer>
     <Form />
   </Drawer>
+  
 </template>

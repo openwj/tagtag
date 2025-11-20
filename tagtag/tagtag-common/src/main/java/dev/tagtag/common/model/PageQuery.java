@@ -8,22 +8,27 @@ import java.util.Objects;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageQuery {
     @NotNull
     @Min(1)
+    @JsonAlias({"pageNumber", "currentPage"})
     private Integer pageNo = GlobalConstants.DEFAULT_PAGE_NO;
     @NotNull
     @Min(1)
     @Max(GlobalConstants.MAX_PAGE_SIZE)
+    @JsonAlias({"pageSize", "limit"})
     private Integer pageSize = GlobalConstants.DEFAULT_PAGE_SIZE;
     private List<SortField> sortFields;
 
@@ -38,9 +43,9 @@ public class PageQuery {
     }
 
     /**
-        * 计算查询偏移量（(pageNo-1)*pageSize）
-        * @return 偏移量
-        */
+     * 计算查询偏移量（(pageNo-1)*pageSize）
+     * @return 偏移量
+     */
     public int toOffset() {
         int pn = GlobalConstants.normalizePageNo(this.pageNo);
         int ps = GlobalConstants.clampPageSize(this.pageSize);
@@ -148,3 +153,4 @@ public class PageQuery {
         return c.matches("[A-Za-z0-9_.]+");
     }
 }
+

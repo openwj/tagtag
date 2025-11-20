@@ -4,7 +4,7 @@ export namespace UserApiParams {
   export interface PageQuery {
     pageNo?: number;
     pageSize?: number;
-    sortFields?: Array<{ field: string; asc: boolean }>;
+    sortFields?: Array<{ asc: boolean; field: string }>;
   }
   export interface UserQuery {
     username?: string;
@@ -16,8 +16,8 @@ export namespace UserApiParams {
     mobile?: string;
     deptId?: number;
     employeeNo?: string;
-    createTimeRange?: { start?: string; end?: string };
-    entryDateRange?: { start?: string; end?: string };
+    createTimeRange?: { end?: string; start?: string };
+    entryDateRange?: { end?: string; start?: string };
   }
   export interface UserForm {
     id?: number;
@@ -48,7 +48,10 @@ const Api = {
  * @param query 用户查询条件
  * @param page 分页与排序参数
  */
-export async function getUserPage(query: UserApiParams.UserQuery, page: UserApiParams.PageQuery) {
+export async function getUserPage(
+  query: UserApiParams.UserQuery,
+  page: UserApiParams.PageQuery,
+) {
   return requestClient.post(`${Api.BaseApi}/page`, { query, page });
 }
 

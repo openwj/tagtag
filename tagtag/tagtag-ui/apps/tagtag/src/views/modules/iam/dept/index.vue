@@ -12,6 +12,7 @@ import {
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteDept, editDept, getDeptTree } from '#/api/modules/iam/dept';
+// 注：不再依赖分页封装，页面内直接适配后端字段
 
 import { columns, searchFormSchema } from './data';
 import FormDrawer from './FormDrawer.vue';
@@ -36,7 +37,6 @@ const [Grid, gridApi] = useVbenVxeGrid({
     rowConfig: {
       keyField: 'id',
     },
-
     treeConfig: {
       // 树形结构配置
       childrenField: 'children',
@@ -52,10 +52,20 @@ const [Grid, gridApi] = useVbenVxeGrid({
       zoom: true,
     },
     proxyConfig: {
+      enabled: true,
+      autoLoad: true,
+      response: { result: 'list', total: 'total' },
       ajax: {
-        query: async (_params: any, formValues: any) => {
-          const data = await getDeptTree(formValues);
-          return { items: data };
+        /**
+         * 部门树查询（不分页）
+         * @param _page 未使用的分页参数
+         * @param formValues 搜索表单值
+         */
+        query: async (_page: any, formValues: any) => {
+          const tree = await getDeptTree(formValues);
+          const list = Array.isArray(tree) ? tree : [];
+          const total = list.length;
+          return { list, total };
         },
       },
     },
@@ -120,11 +130,7 @@ const handleSuccess = () => {
 
 <template>
   <Page auto-content-height>
-    <Grid
-      :all-tree-expand="true"
-      table-title="部门信息"
-      table-title-help="公司组织架构信息"
-    >
+    <Grid :all-tree-expand="true" table-title="部门信息" table-title-help="公司组织架构信息">
       <template #toolbar-tools>
         <AButton class="flex items-center" type="primary" @click="handleAdd">
           <template #icon>
@@ -134,31 +140,20 @@ const handleSuccess = () => {
         </AButton>
       </template>
       <template #status="{ row }">
-        <ASwitch
-          :checked="row.status === 1"
-          checked-children="启用"
-          un-checked-children="禁用"
-          @change="
-            (checked: boolean | string | number) => {
-              const isChecked = Boolean(checked);
-              row.status = isChecked ? 1 : 0;
-              handleStatusChange(row);
-            }
-          "
-        />
+        <ASwitch :checked="row.status === 1" checked-children="启用" un-checked-children="禁用" @change="
+          (checked: boolean | string | number) => {
+            const isChecked = Boolean(checked);
+            row.status = isChecked ? 1 : 0;
+            handleStatusChange(row);
+          }
+        " />
       </template>
 
       <template #action="{ row }">
         <div class="flex items-center justify-center">
           <ATooltip title="新增">
-            <AButton
-              class="flex items-center justify-center"
-              ghost
-              shape="circle"
-              size="small"
-              type="primary"
-              @click="handleAdd(row)"
-            >
+            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary"
+              @click="handleAdd(row)">
               <template #icon>
                 <div class="icon-[material-symbols--add-circle]"></div>
               </template>
@@ -167,14 +162,8 @@ const handleSuccess = () => {
 
           <ADivider type="vertical" />
           <ATooltip title="编辑">
-            <AButton
-              class="flex items-center justify-center"
-              ghost
-              shape="circle"
-              size="small"
-              type="primary"
-              @click="handleEdit(row)"
-            >
+            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary"
+              @click="handleEdit(row)">
               <template #icon>
                 <div class="icon-[material-symbols--edit-square-rounded]"></div>
               </template>
@@ -183,22 +172,9 @@ const handleSuccess = () => {
 
           <ADivider type="vertical" />
 
-          <APopconfirm
-            cancel-text="取消"
-            ok-text="确定"
-            placement="left"
-            title="确定删除此数据?"
-            @confirm="handleDelete(row.id)"
-          >
+          <APopconfirm cancel-text="取消" ok-text="确定" placement="left" title="确定删除此数据?" @confirm="handleDelete(row.id)">
             <ATooltip title="删除">
-              <AButton
-                class="flex items-center justify-center"
-                danger
-                ghost
-                shape="circle"
-                size="small"
-                type="primary"
-              >
+              <AButton class="flex items-center justify-center" danger ghost shape="circle" size="small" type="primary">
                 <template #icon>
                   <div class="icon-[material-symbols--delete-rounded]"></div>
                 </template>

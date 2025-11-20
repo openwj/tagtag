@@ -104,6 +104,17 @@ export const formSchema: VbenFormProps['schema'] = [
   {
     component: 'Select',
     componentProps: {
+      placeholder: '请选择角色',
+      class: 'w-full',
+      mode: 'multiple',
+      options: [],
+    },
+    fieldName: 'roleIds',
+    label: '角色',
+  },
+  {
+    component: 'Select',
+    componentProps: {
       placeholder: '请选择性别',
       class: 'w-full',
       options: [
