@@ -37,15 +37,6 @@ const routes: RouteRecordRaw[] = [
           title: '角色管理',
         },
       },
-      {
-        name: 'IamMenu',
-        path: '/iam/menu',
-        component: () => import('#/views/modules/iam/menu/index.vue'),
-        meta: {
-          icon: 'lucide:list-tree',
-          title: '菜单管理',
-        },
-      },
     ],
   },
 ];
