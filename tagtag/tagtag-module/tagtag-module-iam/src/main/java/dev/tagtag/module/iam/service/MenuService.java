@@ -50,4 +50,24 @@ public interface MenuService {
      * @return 是否存在
      */
     boolean existsByCode(String menuCode);
+
+    /**
+     * 更新菜单状态
+     * @param id 菜单ID
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    void updateStatus(Long id, boolean disabled);
+
+    /**
+     * 批量更新菜单状态
+     * @param ids 菜单ID列表
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    void batchUpdateStatus(java.util.List<Long> ids, boolean disabled);
+
+    /**
+     * 批量删除菜单（含子菜单保护）
+     * @param ids 菜单ID列表
+     */
+    void batchDelete(java.util.List<Long> ids);
 }

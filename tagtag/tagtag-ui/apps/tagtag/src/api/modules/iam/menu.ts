@@ -42,6 +42,14 @@ export async function getMenuById(id: number | string) {
 }
 
 /**
+ * 获取菜单详情（别名）
+ * @param id 菜单ID
+ */
+export async function getMenu(id: number | string) {
+  return requestClient.get(`${Api.BaseApi}/${id}`);
+}
+
+/**
  * 根据菜单编码查询单条
  * @param menuCode 菜单编码
  */
@@ -82,9 +90,45 @@ export function editMenu(data: Record<string, any>) {
 }
 
 /**
+ * 更新菜单（别名）
+ * @param data 菜单表单数据（包含 id）
+ */
+export function updateMenu(data: Record<string, any>) {
+  return requestClient.put(`${Api.BaseApi}`, data);
+}
+
+/**
  * 删除菜单
  * @param id 菜单ID
  */
 export function deleteMenu(id: number | string) {
   return requestClient.delete(`${Api.BaseApi}/${id}`);
+}
+
+/**
+ * 批量删除菜单
+ * @param ids 菜单ID列表
+ */
+export function batchDeleteMenu(ids: Array<number | string>) {
+  return requestClient.delete(`${Api.BaseApi}/batch`, { data: { ids } });
+}
+
+/**
+ * 更新单条菜单状态
+ * @param id 菜单ID
+ * @param disabled 是否禁用（true=禁用，false=启用）
+ */
+export function updateMenuStatus(id: number | string, disabled: boolean) {
+  return requestClient.put(`${Api.BaseApi}/${id}/status`, undefined, {
+    params: { disabled },
+  });
+}
+
+/**
+ * 批量更新菜单状态
+ * @param ids 菜单ID列表
+ * @param disabled 是否禁用（true=禁用，false=启用）
+ */
+export function batchUpdateMenuStatus(ids: Array<number | string>, disabled: boolean) {
+  return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, disabled });
 }

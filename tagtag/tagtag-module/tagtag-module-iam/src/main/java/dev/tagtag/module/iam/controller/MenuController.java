@@ -97,6 +97,40 @@ public class MenuController {
     }
 
     /**
+     * 更新菜单状态
+     * @param id 菜单ID
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestParam("disabled") boolean disabled) {
+        menuService.updateStatus(id, disabled);
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 批量更新菜单状态
+     * @param req 包含 id 列表与禁用标记
+     */
+    @PutMapping("/status/batch")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
+    public Result<Void> batchUpdateStatus(@RequestBody MenuStatusBatchRequest req) {
+        menuService.batchUpdateStatus(req.getIds(), req.isDisabled());
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 批量删除菜单
+     * @param req 包含 id 列表
+     */
+    @DeleteMapping("/batch")
+    @PreAuthorize("hasAuthority('" + Permissions.MENU_DELETE + "')")
+    public Result<Void> batchDelete(@RequestBody MenuBatchDeleteRequest req) {
+        menuService.batchDelete(req.getIds());
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
+    }
+
+    /**
      * 判断菜单编码是否存在（唯一性校验）
      * @param menuCode 菜单编码
      * @return 是否存在
@@ -112,5 +146,16 @@ public class MenuController {
         private MenuQueryDTO query;
         @Valid
         private PageQuery page;
+    }
+
+    @Data
+    public static class MenuStatusBatchRequest {
+        private List<Long> ids;
+        private boolean disabled;
+    }
+
+    @Data
+    public static class MenuBatchDeleteRequest {
+        private List<Long> ids;
     }
 }

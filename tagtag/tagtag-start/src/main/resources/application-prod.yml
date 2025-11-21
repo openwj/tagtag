@@ -16,11 +16,6 @@ spring:
       database: ${REDIS_DB:0}
   cache:
     type: redis
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    group: true
 
 server:
   port: ${SERVER_PORT:8080}

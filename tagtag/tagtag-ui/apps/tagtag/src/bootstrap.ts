@@ -7,6 +7,8 @@ import { initStores } from '@vben/stores';
 import '@vben/styles';
 import '@vben/styles/antd';
 
+import Lucide from '@iconify/json/json/lucide.json';
+import { addCollection } from '@iconify/vue';
 import { useTitle } from '@vueuse/core';
 
 import { $t, setupI18n } from '#/locales';
@@ -15,6 +17,8 @@ import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
 import { router } from './router';
+
+addCollection(Lucide); // 注册引入的图标集
 
 async function bootstrap(namespace: string) {
   // 初始化组件适配器

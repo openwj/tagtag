@@ -181,4 +181,59 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (menuCode == null || menuCode.isBlank()) return false;
         return this.lambdaQuery().eq(Menu::getMenuCode, menuCode).count() > 0;
     }
+
+    /**
+     * 更新菜单状态
+     * @param id 菜单ID
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    public void updateStatus(Long id, boolean disabled) {
+        if (id == null) return;
+        Menu entity = super.getById(id);
+        if (entity == null) return;
+        entity.setStatus(disabled ? 0 : 1);
+        super.updateById(entity);
+    }
+
+    /**
+     * 批量更新菜单状态
+     * @param ids 菜单ID列表
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    public void batchUpdateStatus(List<Long> ids, boolean disabled) {
+        if (ids == null || ids.isEmpty()) return;
+        int status = disabled ? 0 : 1;
+        for (Long id : ids) {
+            if (id == null) continue;
+            Menu entity = super.getById(id);
+            if (entity == null) continue;
+            entity.setStatus(status);
+            super.updateById(entity);
+        }
+    }
+
+    /**
+     * 批量删除菜单（含子菜单保护）
+     * @param ids 菜单ID列表
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    public void batchDelete(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return;
+        for (Long id : ids) {
+            if (id == null) continue;
+            boolean hasChildren = this.lambdaQuery().eq(Menu::getParentId, id).count() > 0;
+            if (hasChildren) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST, "存在包含子菜单的项，无法批量删除");
+            }
+        }
+        super.removeBatchByIds(ids);
+    }
 }

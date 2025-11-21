@@ -1,6 +1,12 @@
 <script lang="ts" setup>
-import { Page, useVbenDrawer } from '@vben/common-ui';
+import type { VbenFormProps } from '#/adapter/form';
+import type { VxeGridProps } from '#/adapter/vxe-table';
 
+import { ref } from 'vue';
+
+import { Page, useVbenModal } from '@vben/common-ui';
+
+import { Icon } from '@iconify/vue';
 import {
   Button as AButton,
   Divider as ADivider,
@@ -12,163 +18,401 @@ import {
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { addMenu, deleteMenu, editMenu, getMenuTree } from '#/api/modules/iam/menu';
+import {
+  batchDeleteMenu,
+  batchUpdateMenuStatus,
+  deleteMenu,
+  getMenuTree,
+  updateMenuStatus,
+} from '#/api/modules/iam/menu';
 
 import { columns, searchFormSchema } from './data';
-import FormDrawer from './FormDrawer.vue';
+import FormModal from './FormModal.vue';
 
-/**
- * 菜单管理页
- * - 树形表格展示所有菜单
- * - 支持搜索筛选、状态切换、增删改
- */
-const [Grid, gridApi] = useVbenVxeGrid({
-  formOptions: {
-    schema: searchFormSchema,
-    collapsed: true,
-    showCollapseButton: true,
+const formOptions: VbenFormProps = {
+  // 默认折叠
+  schema: searchFormSchema,
+  // 控制表单是否显示折叠按钮
+  showCollapseButton: true,
+  // 默认折叠状态
+  collapsed: true,
+};
+
+const gridOptions: VxeGridProps = {
+  columns,
+  height: 'auto',
+  pagerConfig: {
+    enabled: false,
   },
-  gridOptions: {
-    columns,
-    height: 'auto',
-    columnConfig: { minWidth: 120 },
-    showOverflow: 'tooltip',
-    pagerConfig: { enabled: false },
-    rowConfig: { keyField: 'id' },
-    treeConfig: {
-      childrenField: 'children',
-      hasChild: 'hasChildren',
-      expandAll: true,
-      rowField: 'id',
-    },
-    toolbarConfig: { custom: true, export: true, refresh: true, zoom: true },
-    proxyConfig: {
-      enabled: true,
-      autoLoad: true,
-      response: { result: 'list', total: 'total' },
-      ajax: {
-        /**
-         * 菜单树查询（不分页）
-         * @param _page 未使用的分页参数
-         * @param formValues 搜索表单值
-         */
-        query: async (_page: any, formValues: any) => {
-          const tree = await getMenuTree(formValues);
-          const list = Array.isArray(tree) ? tree : [];
-          const total = list.length;
-          return { list, total };
-        },
+  exportConfig: {},
+  // importConfig: {},
+  resizeConfig: {},
+  proxyConfig: {
+    ajax: {
+      // eslint-disable-next-line no-empty-pattern
+      query: async ({}, formValues) => {
+        const data = await getMenuTree(formValues);
+        return { items: data };
       },
     },
   },
+  toolbarConfig: {
+    custom: true,
+    export: true,
+    // import: true,
+    refresh: true,
+    zoom: true,
+  },
+  treeConfig: {
+    // parentField: 'parentId',
+    rowField: 'id',
+    expandAll: true,
+  },
+};
+
+const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
+
+const [VFormModal, formModalApi] = useVbenModal({
+  connectedComponent: FormModal,
+  draggable: true,
 });
 
-const [VFormDrawer, VFormDrawerApi] = useVbenDrawer({ connectedComponent: FormDrawer });
+// 加载状态管理
+const loading = ref(false);
+const batchLoading = ref(false);
 
-/**
- * 新增菜单：可选父节点
- */
-const handleAdd = (row?: Record<string, any>) => {
-  const values = { isUpdate: false, parentId: 0 };
-  if (row?.id) values.parentId = row.id;
-  VFormDrawerApi.setData({ values });
-  VFormDrawerApi.open();
+const handleAdd = (row: Record<string, any>) => {
+  const values = { isUpdate: false, parentId: '' };
+  if (row?.id) {
+    values.parentId = row.id;
+  }
+  // 处理新增
+  formModalApi.setData({
+    // 表单值
+    values,
+  });
+  formModalApi.open();
 };
 
 /**
- * 切换菜单状态
- * @param record 菜单记录
+ * 检查菜单是否有子菜单
+ * @param menuId 菜单ID
  */
-const handleStatusChange = async (record: any) => {
+const hasChildren = (menuId: string) => {
+  const allData = gridApi.grid.getTableData().fullData;
+  return allData.some((item: any) => item.parentId === menuId);
+};
+
+/**
+ * 处理删除
+ * @param id 菜单ID
+ */
+const handleDelete = async (id: string) => {
+  // 检查是否有子菜单
+  if (hasChildren(id)) {
+    message.warning('该菜单下存在子菜单，请先删除子菜单');
+    return;
+  }
+
+  loading.value = true;
   try {
-    const statusValue = record.status ? 1 : 0;
-    await editMenu({ id: record.id, status: statusValue });
-    message.success('状态更新成功');
+    await deleteMenu(id);
+    message.success('删除成功');
+    gridApi.reload();
   } finally {
-    await gridApi.query();
+    loading.value = false;
   }
 };
 
-/**
- * 删除菜单
- * @param id 菜单ID
- */
-const handleDelete = async (id: string | number) => {
-  await deleteMenu(id);
-  message.success('删除成功');
-  await gridApi.query();
-};
-
-/**
- * 编辑菜单
- * @param row 行数据
- */
 const handleEdit = (row: Record<string, any>) => {
-  VFormDrawerApi.setData({ values: { ...row, isUpdate: true } });
-  VFormDrawerApi.open();
+  // 处理编辑
+  formModalApi.setData({
+    // 表单值
+    values: { ...row, isUpdate: true },
+  });
+  formModalApi.open();
 };
 
 const handleSuccess = () => {
   gridApi.reload();
 };
+
+/**
+ * 获取选中的行数据
+ */
+const getSelectedRows = () => {
+  return gridApi.grid.getCheckboxRecords();
+};
+
+/**
+ * 批量删除菜单
+ */
+const handleBatchDelete = async () => {
+  const selectedRows = getSelectedRows();
+  if (selectedRows.length === 0) {
+    message.warning('请选择要删除的菜单');
+    return;
+  }
+
+  // 检查选中的菜单是否有子菜单
+  const hasChildrenMenus = selectedRows.some((row) => hasChildren(row.id));
+  if (hasChildrenMenus) {
+    message.warning('选中的菜单中存在有子菜单的项，请先删除子菜单');
+    return;
+  }
+
+  batchLoading.value = true;
+
+  const ids = selectedRows.map((row) => row.id);
+  await batchDeleteMenu(ids);
+  message.success(`成功删除 ${selectedRows.length} 个菜单`);
+  gridApi.reload();
+
+  batchLoading.value = false;
+};
+
+/**
+ * 批量启用菜单
+ */
+const handleBatchEnable = async () => {
+  const selectedRows = getSelectedRows();
+  if (selectedRows.length === 0) {
+    message.warning('请选择要启用的菜单');
+    return;
+  }
+
+  batchLoading.value = true;
+
+  const ids = selectedRows.map((row) => row.id);
+  await batchUpdateMenuStatus(ids, false); // false表示不禁用，即启用
+  message.success(`成功启用 ${selectedRows.length} 个菜单`);
+  gridApi.reload();
+
+  batchLoading.value = false;
+};
+
+/**
+ * 批量禁用菜单
+ */
+const handleBatchDisable = async () => {
+  const selectedRows = getSelectedRows();
+  if (selectedRows.length === 0) {
+    message.warning('请选择要禁用的菜单');
+    return;
+  }
+
+  batchLoading.value = true;
+
+  const ids = selectedRows.map((row) => row.id);
+  await batchUpdateMenuStatus(ids, true); // true表示禁用
+  message.success(`成功禁用 ${selectedRows.length} 个菜单`);
+  gridApi.reload();
+
+  batchLoading.value = false;
+};
+
+/**
+ * 处理状态切换
+ * @param row 行数据
+ * @param checked 是否选中
+ */
+const handleStatusChange = async (
+  row: Record<string, any>,
+  checked: boolean,
+) => {
+  try {
+    // 设置加载状态
+    row.statusLoading = true;
+
+    // 调用API更新状态
+    await updateMenuStatus(row.id, !checked); // 转换为disabled布尔值
+
+    // 更新本地状态
+    row.status = checked ? 1 : 0;
+
+    message.success(`菜单${checked ? '启用' : '禁用'}成功`);
+  } finally {
+    // 清除加载状态
+    row.statusLoading = false;
+  }
+};
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid table-title="菜单管理" table-title-help="系统导航与权限节点配置">
+    <Grid
+      :all-tree-expand="true"
+      table-title="菜单信息"
+      table-title-help="系统菜单信息"
+    >
       <template #toolbar-tools>
-        <AButton class="flex items-center" type="primary" @click="handleAdd()">
-          <template #icon>
-            <span class="icon-[material-symbols--add-circle] mr-1"></span>
-          </template>
-          新增
-        </AButton>
-      </template>
+        <div class="flex items-center gap-3">
+          <AButton class="flex items-center" type="primary" @click="handleAdd">
+            <template #icon>
+              <span class="icon-[lucide--plus] mr-1"></span>
+            </template>
+            新增
+          </AButton>
 
-      <template #menuType="{ row }">
-        <ATag :color="row.menuType === 0 ? 'blue' : row.menuType === 1 ? 'green' : 'orange'">
-          {{ row.menuType === 0 ? '目录' : row.menuType === 1 ? '菜单' : '按钮' }}
+          <APopconfirm
+            title="确定要删除选中的菜单吗？"
+            ok-text="确定"
+            cancel-text="取消"
+            @confirm="handleBatchDelete"
+          >
+            <AButton class="flex items-center" danger :loading="batchLoading">
+              <template #icon>
+                <span class="icon-[lucide--trash-2] mr-1"></span>
+              </template>
+              批量删除
+            </AButton>
+          </APopconfirm>
+
+          <APopconfirm
+            title="确定要启用选中的菜单吗？"
+            ok-text="确定"
+            cancel-text="取消"
+            @confirm="handleBatchEnable"
+          >
+            <AButton class="flex items-center" :loading="batchLoading">
+              <template #icon>
+                <span class="icon-[lucide--check-circle] mr-1"></span>
+              </template>
+              批量启用
+            </AButton>
+          </APopconfirm>
+
+          <APopconfirm
+            title="确定要禁用选中的菜单吗？"
+            ok-text="确定"
+            cancel-text="取消"
+            @confirm="handleBatchDisable"
+          >
+            <AButton class="flex items-center" :loading="batchLoading">
+              <template #icon>
+                <span class="icon-[lucide--x-circle] mr-1"></span>
+              </template>
+              批量禁用
+            </AButton>
+          </APopconfirm>
+        </div>
+      </template>
+      <template #icon="{ row }">
+        <div class="group flex cursor-help items-center justify-center">
+          <div v-if="row.icon">
+            <!-- 主图标 -->
+            <!-- <Icon :icon="row.icon" /> -->
+            <Icon :icon="row.icon" color="orange" v-if="row.menuType === 0" />
+            <Icon :icon="row.icon" color="blue" v-if="row.menuType === 1" />
+            <Icon :icon="row.icon" color="green" v-if="row.menuType === 2" />
+          </div>
+          <div v-else>
+            <Icon
+              icon="lucide:folder"
+              color="orange"
+              v-if="row.menuType === 0"
+            />
+            <Icon
+              icon="lucide:file-text"
+              color="blue"
+              v-if="row.menuType === 1"
+            />
+            <Icon icon="lucide:zap" color="green" v-if="row.menuType === 2" />
+          </div>
+        </div>
+      </template>
+      <template #status="{ row }">
+        <ASwitch
+          :checked="row.status === 1"
+          :loading="row.statusLoading"
+          checked-children="启用"
+          un-checked-children="禁用"
+          @change="
+            (checked) =>
+              handleStatusChange(row, checked === true || checked === 1)
+          "
+        />
+      </template>
+      <template #type="{ row }">
+        <ATag color="orange" v-if="row.menuType === 0">
+          <span class="icon-[lucide--folder] mr-1"></span>
+          目录
+        </ATag>
+        <ATag color="blue" v-else-if="row.menuType === 1">
+          <span class="icon-[lucide--file-text] mr-1"></span>
+          菜单
+        </ATag>
+        <ATag color="green" v-else-if="row.menuType === 2">
+          <span class="icon-[lucide--zap] mr-1"></span>
+          按钮
+        </ATag>
+      </template>
+      <template #external="{ row }">
+        <ATag color="red" v-if="row.isExternal === 1" class="flex items-center">
+          <span class="icon-[lucide--external-link] mr-1"></span>
+          外链
+        </ATag>
+        <ATag color="default" v-else class="flex items-center">
+          <span class="icon-[lucide--home] mr-1"></span>
+          内部
         </ATag>
       </template>
 
-      <template #icon="{ row }">
-        <ATooltip :title="row.icon">
-          <span v-if="row.icon" class="mr-1">{{ row.icon }}</span>
-        </ATooltip>
-      </template>
-
-      <template #status="{ row }">
-        <ASwitch :checked="row.status === 1" checked-children="启用" un-checked-children="禁用"
-          @change="(checked: boolean | string | number) => { const isChecked = Boolean(checked); row.status = isChecked ? 1 : 0; handleStatusChange(row); }" />
-      </template>
-
+      <template #toolbar-actions> </template>
       <template #action="{ row }">
-        <div class="flex items-center justify-center">
+        <div class="flex items-center justify-center gap-0.5">
           <ATooltip title="新增子菜单">
-            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary" @click="handleAdd(row)">
+            <AButton
+              class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+              shape="circle"
+              size="small"
+              type="primary"
+              @click="handleAdd(row)"
+            >
               <template #icon>
-                <div class="icon-[material-symbols--add-circle]"></div>
+                <div class="icon-[lucide--plus] text-xs"></div>
               </template>
             </AButton>
           </ATooltip>
 
-          <ADivider type="vertical" />
+          <ADivider type="vertical" class="mx-1 h-4" />
 
-          <ATooltip title="编辑">
-            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary" @click="handleEdit(row)">
+          <ATooltip title="编辑菜单">
+            <AButton
+              class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+              ghost
+              shape="circle"
+              size="small"
+              type="primary"
+              @click="handleEdit(row)"
+            >
               <template #icon>
-                <div class="icon-[material-symbols--edit-square-rounded]"></div>
+                <div class="icon-[lucide--edit] text-xs"></div>
               </template>
             </AButton>
           </ATooltip>
 
-          <ADivider type="vertical" />
+          <ADivider type="vertical" class="mx-1 h-4" />
 
-          <APopconfirm cancel-text="取消" ok-text="确定" placement="left" title="确定删除此数据?" @confirm="handleDelete(row.id)">
-            <ATooltip title="删除">
-              <AButton class="flex items-center justify-center" danger ghost shape="circle" size="small" type="primary">
+          <APopconfirm
+            cancel-text="取消"
+            ok-text="确定"
+            placement="left"
+            :title="`确定要删除菜单 '${row.menuName}' 吗？`"
+            @confirm="handleDelete(row.id)"
+          >
+            <ATooltip title="删除菜单">
+              <AButton
+                class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+                danger
+                ghost
+                shape="circle"
+                size="small"
+                type="primary"
+                :loading="loading"
+              >
                 <template #icon>
-                  <div class="icon-[material-symbols--delete-rounded]"></div>
+                  <div class="icon-[lucide--trash-2] text-xs"></div>
                 </template>
               </AButton>
             </ATooltip>
@@ -177,6 +421,6 @@ const handleSuccess = () => {
       </template>
     </Grid>
 
-    <VFormDrawer @success="handleSuccess" />
+    <VFormModal class="sm:w-full md:w-1/2" @success="handleSuccess" />
   </Page>
 </template>
