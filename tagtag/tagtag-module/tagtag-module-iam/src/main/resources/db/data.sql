@@ -18,7 +18,7 @@ WHERE u.username='admin' AND r.code='ADMIN'
 
 -- 功能目录与页面
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, path, component, icon, sort, status, menu_type, is_hidden, is_external, external_url, remark, create_time)
-SELECT 0, 'IAM', 'iam', '/iam', 'Layout', 'lucide:users', 2, 1, 0, 0, 0, NULL, '身份与访问管理', CURRENT_TIMESTAMP
+SELECT 0, 'IAM', 'iam', '/iam', NULL, 'lucide:users', 2, 1, 0, 0, 0, NULL, '身份与访问管理', CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='iam');
 
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, path, component, icon, sort, status, menu_type, is_hidden, is_external, external_url, remark, create_time)

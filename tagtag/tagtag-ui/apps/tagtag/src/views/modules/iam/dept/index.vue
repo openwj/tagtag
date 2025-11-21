@@ -130,7 +130,11 @@ const handleSuccess = () => {
 
 <template>
   <Page auto-content-height>
-    <Grid :all-tree-expand="true" table-title="部门信息" table-title-help="公司组织架构信息">
+    <Grid
+      :all-tree-expand="true"
+      table-title="部门信息"
+      table-title-help="公司组织架构信息"
+    >
       <template #toolbar-tools>
         <AButton class="flex items-center" type="primary" @click="handleAdd">
           <template #icon>
@@ -140,20 +144,31 @@ const handleSuccess = () => {
         </AButton>
       </template>
       <template #status="{ row }">
-        <ASwitch :checked="row.status === 1" checked-children="启用" un-checked-children="禁用" @change="
-          (checked: boolean | string | number) => {
-            const isChecked = Boolean(checked);
-            row.status = isChecked ? 1 : 0;
-            handleStatusChange(row);
-          }
-        " />
+        <ASwitch
+          :checked="row.status === 1"
+          checked-children="启用"
+          un-checked-children="禁用"
+          @change="
+            (checked: boolean | string | number) => {
+              const isChecked = Boolean(checked);
+              row.status = isChecked ? 1 : 0;
+              handleStatusChange(row);
+            }
+          "
+        />
       </template>
 
       <template #action="{ row }">
         <div class="flex items-center justify-center">
           <ATooltip title="新增">
-            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary"
-              @click="handleAdd(row)">
+            <AButton
+              class="flex items-center justify-center"
+              ghost
+              shape="circle"
+              size="small"
+              type="primary"
+              @click="handleAdd(row)"
+            >
               <template #icon>
                 <div class="icon-[material-symbols--add-circle]"></div>
               </template>
@@ -162,8 +177,14 @@ const handleSuccess = () => {
 
           <ADivider type="vertical" />
           <ATooltip title="编辑">
-            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary"
-              @click="handleEdit(row)">
+            <AButton
+              class="flex items-center justify-center"
+              ghost
+              shape="circle"
+              size="small"
+              type="primary"
+              @click="handleEdit(row)"
+            >
               <template #icon>
                 <div class="icon-[material-symbols--edit-square-rounded]"></div>
               </template>
@@ -172,9 +193,22 @@ const handleSuccess = () => {
 
           <ADivider type="vertical" />
 
-          <APopconfirm cancel-text="取消" ok-text="确定" placement="left" title="确定删除此数据?" @confirm="handleDelete(row.id)">
+          <APopconfirm
+            cancel-text="取消"
+            ok-text="确定"
+            placement="left"
+            title="确定删除此数据?"
+            @confirm="handleDelete(row.id)"
+          >
             <ATooltip title="删除">
-              <AButton class="flex items-center justify-center" danger ghost shape="circle" size="small" type="primary">
+              <AButton
+                class="flex items-center justify-center"
+                danger
+                ghost
+                shape="circle"
+                size="small"
+                type="primary"
+              >
                 <template #icon>
                   <div class="icon-[material-symbols--delete-rounded]"></div>
                 </template>

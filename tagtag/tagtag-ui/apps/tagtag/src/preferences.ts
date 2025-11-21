@@ -12,7 +12,7 @@ export const overridesPreferences = defineOverridesPreferences({
     layout: 'sidebar-mixed-nav',
     enableRefreshToken: true,
     loginExpiredMode: 'modal',
-    accessMode: 'backend',
+    accessMode: 'mixed', // backend
   },
   sidebar: {
     collapsed: true,

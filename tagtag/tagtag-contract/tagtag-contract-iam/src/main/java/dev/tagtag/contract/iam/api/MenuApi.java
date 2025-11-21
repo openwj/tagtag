@@ -6,6 +6,8 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 
+import java.util.List;
+
 /**
  * 菜单契约接口（目录/菜单/按钮）。按钮型菜单的 menuCode 用作后端权限码
  */

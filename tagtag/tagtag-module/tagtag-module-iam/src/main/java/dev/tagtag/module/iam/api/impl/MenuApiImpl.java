@@ -10,6 +10,8 @@ import dev.tagtag.module.iam.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MenuApiImpl implements MenuApi {
@@ -47,6 +49,7 @@ public class MenuApiImpl implements MenuApi {
 
     /**
      * 菜单树查询（不分页）
+     *
      * @param filter 过滤条件
      * @return 树形菜单列表
      */
