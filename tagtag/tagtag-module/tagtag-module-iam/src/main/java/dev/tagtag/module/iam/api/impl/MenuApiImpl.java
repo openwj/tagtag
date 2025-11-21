@@ -44,4 +44,14 @@ public class MenuApiImpl implements MenuApi {
         menuService.delete(menuId);
         return Result.ok();
     }
+
+    /**
+     * 菜单树查询（不分页）
+     * @param filter 过滤条件
+     * @return 树形菜单列表
+     */
+    @Override
+    public Result<List<MenuDTO>> listMenuTree(MenuQueryDTO filter) {
+        return Result.ok(menuService.listTree(filter));
+    }
 }

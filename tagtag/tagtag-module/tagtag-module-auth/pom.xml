@@ -39,11 +39,6 @@
             <artifactId>tagtag-contract-iam</artifactId>
         </dependency>
 
-        <!-- 直接使用 IAM 的菜单服务（路由组装依赖菜单树） -->
-        <dependency>
-            <groupId>dev.tagtag</groupId>
-            <artifactId>tagtag-module-iam</artifactId>
-        </dependency>
 
         <!-- Lombok（提供） -->
         <dependency>

@@ -25,9 +25,10 @@ import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.CaptchaService;
 import dev.tagtag.contract.iam.dto.MenuDTO;
+import dev.tagtag.contract.iam.dto.MenuQueryDTO;
+import dev.tagtag.contract.iam.api.MenuApi;
 import dev.tagtag.contract.auth.dto.RouteRecordStringComponentDTO;
 import dev.tagtag.contract.auth.dto.RouteMetaDTO;
-import dev.tagtag.module.iam.service.MenuService;
 
 import java.util.Set;
 import java.util.List;
@@ -51,7 +52,7 @@ public class AuthController {
     private final UserApi userApi;
     private final PermissionResolver permissionResolver;
     private final CaptchaService captchaService;
-    private final MenuService menuService;
+    private final MenuApi menuApi;
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
@@ -149,7 +150,7 @@ public class AuthController {
      */
     @GetMapping("/menu/all")
     public Result<List<RouteRecordStringComponentDTO>> allMenus() {
-        List<MenuDTO> tree = menuService.listTree(null);
+        List<MenuDTO> tree = menuApi.listMenuTree((MenuQueryDTO) null).getData();
         List<RouteRecordStringComponentDTO> routes = new ArrayList<>();
         if (tree != null) {
             for (MenuDTO dto : tree) {

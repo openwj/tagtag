@@ -46,4 +46,11 @@ public interface MenuApi {
      * @return 操作结果
      */
     Result<Void> deleteMenu(Long menuId);
+
+    /**
+     * 菜单树查询（不分页）
+     * @param filter 过滤条件
+     * @return 树形菜单列表
+     */
+    Result<List<MenuDTO>> listMenuTree(MenuQueryDTO filter);
 }
