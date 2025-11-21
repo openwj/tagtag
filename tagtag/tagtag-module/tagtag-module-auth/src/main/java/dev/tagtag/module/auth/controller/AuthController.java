@@ -24,11 +24,16 @@ import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.CaptchaService;
+import dev.tagtag.contract.iam.dto.MenuDTO;
+import dev.tagtag.contract.auth.dto.RouteRecordStringComponentDTO;
+import dev.tagtag.contract.auth.dto.RouteMetaDTO;
+import dev.tagtag.module.iam.service.MenuService;
 
 import java.util.Set;
 import java.util.List;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.ArrayList;
 
 import dev.tagtag.kernel.annotation.RateLimit;
 
@@ -46,6 +51,7 @@ public class AuthController {
     private final UserApi userApi;
     private final PermissionResolver permissionResolver;
     private final CaptchaService captchaService;
+    private final MenuService menuService;
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
@@ -137,6 +143,74 @@ public class AuthController {
         Set<String> perms = permissionResolver.resolvePermissions(roleIds);
         return Result.ok(perms);
     }
+
+    /**
+     * 获取当前用户可访问的路由记录（后端适配）
+     */
+    @GetMapping("/menu/all")
+    public Result<List<RouteRecordStringComponentDTO>> allMenus() {
+        List<MenuDTO> tree = menuService.listTree(null);
+        List<RouteRecordStringComponentDTO> routes = new ArrayList<>();
+        if (tree != null) {
+            for (MenuDTO dto : tree) {
+                RouteRecordStringComponentDTO r = toRoute(dto);
+                if (r != null) routes.add(r);
+            }
+        }
+        return Result.ok(routes);
+    }
+
+    /**
+     * 将菜单DTO转换为前端路由记录
+     */
+    private RouteRecordStringComponentDTO toRoute(MenuDTO dto) {
+        if (dto == null) return null;
+        Integer status = dto.getStatus();
+        if (status != null && status == 0) return null;
+        Integer menuType = dto.getMenuType();
+        if (menuType != null && menuType == 2) return null;
+
+        RouteRecordStringComponentDTO r = new RouteRecordStringComponentDTO();
+        r.setPath(dto.getPath() == null || dto.getPath().isBlank() ? "/" : dto.getPath());
+        r.setName(dto.getMenuCode());
+
+        RouteMetaDTO meta = new RouteMetaDTO();
+        meta.setTitle(dto.getMenuName());
+        meta.setIcon(dto.getIcon());
+        meta.setKeepAlive(Boolean.TRUE.equals(dto.getIsKeepalive()));
+        meta.setHide(Boolean.TRUE.equals(dto.getIsHidden()));
+        meta.setOrder(dto.getSort() == null ? 0 : dto.getSort());
+
+        if (Boolean.TRUE.equals(dto.getIsExternal())) {
+            r.setComponent("IFrameView");
+            meta.setIframeSrc(dto.getExternalUrl());
+        } else if (dto.getComponent() != null && !dto.getComponent().isBlank()) {
+            String comp = dto.getComponent().startsWith("/") ? dto.getComponent() : "/" + dto.getComponent();
+            r.setComponent(comp);
+        } else {
+            r.setComponent("BasicLayout");
+        }
+
+        r.setMeta(meta);
+
+        if (dto.getChildren() != null && !dto.getChildren().isEmpty()) {
+            List<RouteRecordStringComponentDTO> children = new ArrayList<>();
+            for (MenuDTO child : dto.getChildren()) {
+                RouteRecordStringComponentDTO cr = toRoute(child);
+                if (cr != null) children.add(cr);
+            }
+            if (!children.isEmpty()) {
+                r.setChildren(children);
+                String firstPath = children.get(0).getPath();
+                if (firstPath != null && firstPath.startsWith("/")) {
+                    r.setRedirect(firstPath);
+                }
+            }
+        }
+        return r;
+    }
+
+    
 
 
 }
