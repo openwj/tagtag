@@ -64,4 +64,11 @@ public interface RoleApi {
      * @return 权限编码集合
      */
     Result<Set<String>> listMenuCodesByRoleIds(List<Long> roleIds);
+
+    /**
+     * 按角色ID集合查询已分配的菜单ID列表（包含目录/菜单/按钮），返回去重后的并集
+     * @param roleIds 角色ID集合
+     * @return 菜单ID列表（并集，去重）
+     */
+    Result<List<Long>> listMenuIdsByRoleIds(List<Long> roleIds);
 }

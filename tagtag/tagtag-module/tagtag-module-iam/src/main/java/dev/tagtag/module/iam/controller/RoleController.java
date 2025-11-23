@@ -103,6 +103,17 @@ public class RoleController {
     }
 
     /**
+     * 查询角色已分配的菜单ID列表（包含目录/菜单/按钮）
+     * @param roleId 角色ID
+     * @return 菜单ID列表
+     */
+    @GetMapping("/{id}/menu-ids")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    public Result<List<Long>> listMenuIds(@PathVariable("id") Long roleId) {
+        return Result.ok(roleService.listMenuIdsByRoleId(roleId));
+    }
+
+    /**
      * 判断角色编码是否存在
      * @param code 角色编码
      * @return 是否存在

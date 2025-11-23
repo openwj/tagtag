@@ -3,9 +3,9 @@ INSERT INTO iam_user (username, password, nickname, status)
 SELECT 'admin', '{bcrypt}$2a$10$QwZFYsCblPhgBHXBgmTdPeJ9IWAb25jOuscU6pvt6dFSmX2rTtO/O', '管理员', 1
 WHERE NOT EXISTS (SELECT 1 FROM iam_user WHERE username='admin');
 
--- 管理员角色
-INSERT INTO iam_role (code, name, status)
-SELECT 'ADMIN', '管理员', 1
+-- 管理员角色（显式包含统一字段：role_type/sort/remark）
+INSERT INTO iam_role (code, name, status, role_type, sort, remark)
+SELECT 'ADMIN', '管理员', 1, 1, 0, '管理员角色'
 WHERE NOT EXISTS (SELECT 1 FROM iam_role WHERE code='ADMIN');
 
 -- 绑定 admin 与 ADMIN 角色

@@ -26,6 +26,9 @@ public interface RoleMapper extends BaseMapper<Role> {
     /** 根据角色ID查询权限ID列表 */
     List<Long> selectPermissionIdsByRoleId(@Param("roleId") Long roleId);
 
+    /** 根据角色ID查询已分配的菜单ID列表（目录/菜单/按钮全量） */
+    List<Long> selectMenuIdsByRoleId(@Param("roleId") Long roleId);
+
     /** 删除角色的所有权限关联 */
     int deleteRolePermissions(@Param("roleId") Long roleId);
 

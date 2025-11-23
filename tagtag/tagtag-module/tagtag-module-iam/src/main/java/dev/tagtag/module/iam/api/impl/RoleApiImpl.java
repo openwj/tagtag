@@ -64,4 +64,21 @@ public class RoleApiImpl implements RoleApi {
     public Result<Set<String>> listMenuCodesByRoleIds(List<Long> roleIds) {
         return Result.ok(roleService.listMenuCodesByRoleIds(roleIds));
     }
+
+    /**
+     * 按角色ID集合查询已分配的菜单ID列表（并集、去重）
+     * @param roleIds 角色ID集合
+     * @return 菜单ID列表
+     */
+    @Override
+    public Result<List<Long>> listMenuIdsByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) return Result.ok(List.of());
+        java.util.Set<Long> set = new java.util.LinkedHashSet<>();
+        for (Long roleId : roleIds) {
+            if (roleId == null) continue;
+            List<Long> ids = roleService.listMenuIdsByRoleId(roleId);
+            if (ids != null && !ids.isEmpty()) set.addAll(ids);
+        }
+        return Result.ok(new java.util.ArrayList<>(set));
+    }
 }

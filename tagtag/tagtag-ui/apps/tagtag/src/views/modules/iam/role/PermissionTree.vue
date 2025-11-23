@@ -1,0 +1,291 @@
+<script lang="ts" setup>
+import type { DataNode } from 'ant-design-vue/es/tree';
+
+import { ref, watch } from 'vue';
+
+import { Icon } from '@iconify/vue';
+import { Button, Dropdown, Menu, Spin, Tag, Tree, Input, Tooltip } from 'ant-design-vue';
+
+import { getMenuTree } from '#/api/modules/iam/menu';
+
+interface Props {
+  roleId?: string;
+  value?: string[];
+}
+
+interface Emits {
+  (e: 'update:value', value: string[]): void;
+  (e: 'change', value: string[]): void;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  roleId: undefined,
+  value: () => [],
+});
+
+const emit = defineEmits<Emits>();
+
+// 树形数据
+const treeData = ref<DataNode[]>([]);
+const rawTreeData = ref<DataNode[]>([]);
+const loading = ref(false);
+const checkedKeys = ref<string[]>([]);
+const expandedKeys = ref<string[]>([]);
+// 控制 Tree 的 checkStrictly 属性
+const checkStrictly = ref(true);
+const storageKeyCheckStrictly = 'permissionTree.checkStrictly';
+const searchText = ref('');
+
+/**
+ * 切换父子联动/独立，并持久化到本地存储
+ */
+const toggleCheckStrictly = () => {
+  checkStrictly.value = !checkStrictly.value;
+  try {
+    localStorage.setItem(storageKeyCheckStrictly, JSON.stringify(checkStrictly.value));
+  } catch {}
+};
+
+// ...existing code...
+
+// 字段映射 - 使用TreeDataNode格式，key和title已直接映射
+const fieldNames = {
+  children: 'children',
+  title: 'title',
+  key: 'key',
+};
+
+/**
+ * 将后端菜单节点转换为 Tree DataNode
+ */
+const convertToTreeData = (menuData: any[]): DataNode[] => {
+  return menuData.map((node) => ({
+    key: String(node.id),
+    title: node.menuName,
+    menuType: node.menuType,
+    menuCode: node.menuCode,
+    children: node.children ? convertToTreeData(node.children) : undefined,
+  }));
+};
+
+// 获取所有节点key
+/**
+ * 获取所有节点 key（深度优先遍历）
+ */
+const getAllKeys = (nodes: DataNode[]): string[] => {
+  const keys: string[] = [];
+  const traverse = (nodes: DataNode[]) => {
+    nodes.forEach((node) => {
+      keys.push(String(node.key));
+      if (node.children && node.children.length > 0) {
+        traverse(node.children);
+      }
+    });
+  };
+  traverse(nodes);
+  return keys;
+};
+
+// 获取当前树中存在的节点key
+/**
+ * 过滤出当前树中有效的选中 key
+ */
+const getValidKeys = (keys: string[]): string[] => {
+  const allKeys = getAllKeys(treeData.value);
+  return keys.filter((key) => allKeys.includes(String(key)));
+};
+
+// 加载菜单树数据
+/**
+ * 加载菜单树（仅启用项），并在数据变更时校验选中项有效性
+ */
+const loadMenuTree = async () => {
+  try {
+    loading.value = true;
+    const response = await getMenuTree({ status: 1 });
+    const converted = convertToTreeData(response || []);
+    rawTreeData.value = converted;
+    treeData.value = applyFilter(converted, searchText.value);
+
+    // 数据加载完成后，重新验证已选中的权限key
+    if (Array.isArray(props.value) && props.value.length > 0) {
+      const validKeys = getValidKeys(props.value);
+      if (validKeys.length !== props.value.length) {
+        checkedKeys.value = validKeys;
+        // 通知父组件更新为有效key
+        emit('update:value', validKeys);
+        emit('change', validKeys);
+      }
+    }
+  } catch (error) {
+    console.error('加载菜单树失败:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+/**
+ * 展开全部节点
+ */
+const expandAll = () => {
+  expandedKeys.value = getAllKeys(treeData.value);
+};
+
+/**
+ * 收起全部节点
+ */
+const collapseAll = () => {
+  expandedKeys.value = [];
+};
+
+/**
+ * 全选所有权限
+ */
+const handleSelectAll = () => {
+  checkedKeys.value = getAllKeys(treeData.value);
+  // 立即同步到父组件
+  emit('update:value', checkedKeys.value);
+  emit('change', checkedKeys.value);
+};
+
+/**
+ * 取消全选（清空）
+ */
+const handleUnselectAll = () => {
+  checkedKeys.value = [];
+  // 立即同步到父组件
+  emit('update:value', checkedKeys.value);
+  emit('change', checkedKeys.value);
+};
+
+/**
+ * 处理选择变化（适配 antd Tree 返回形态）
+ */
+const handleCheck = (checked: any) => {
+  // Ant Design Vue Tree组件check事件返回{checked, halfChecked}对象
+  const checkedKeysValue = checked.checked || checked;
+  // 确保返回的是数组类型，并过滤掉空值
+  const validKeys = Array.isArray(checkedKeysValue)
+    ? checkedKeysValue.filter(Boolean)
+    : [];
+  emit('update:value', validKeys);
+  emit('change', validKeys);
+};
+
+// 保证外部 value 变化时 checkedKeys 跟随变化
+watch(
+  () => props.value,
+  (val) => {
+    checkedKeys.value = Array.isArray(val) ? [...val] : [];
+  },
+  { immediate: true },
+);
+
+/**
+ * 过滤树数据（按名称/编码模糊匹配）
+ */
+function applyFilter(source: DataNode[], keyword: string): DataNode[] {
+  const k = keyword.trim().toLowerCase();
+  if (!k) return source;
+  const match = (n: any) =>
+    String(n.title).toLowerCase().includes(k) || String(n.menuCode || '').toLowerCase().includes(k);
+  const loop = (nodes: DataNode[]): DataNode[] => {
+    const res: DataNode[] = [];
+    for (const node of nodes) {
+      const children = node.children ? loop(node.children as DataNode[]) : undefined;
+      if (match(node) || (children && children.length)) {
+        res.push({ ...node, children });
+      }
+    }
+    return res;
+  };
+  return loop(source);
+}
+
+// 初始化持久化的联动设置
+try {
+  const saved = localStorage.getItem(storageKeyCheckStrictly);
+  if (saved !== null) {
+    checkStrictly.value = JSON.parse(saved) === true;
+  }
+} catch {}
+
+// 初始化加载
+loadMenuTree();
+
+// 搜索输入监听
+watch(
+  () => searchText.value,
+  (val) => {
+    treeData.value = applyFilter(rawTreeData.value, val);
+  },
+);
+</script>
+
+<template>
+  <div class="w-full">
+  <div class="mb-3 flex items-center justify-between">
+      <span class="text-sm font-medium">权限分配</span>
+      <div class="flex items-center gap-2 w-3/4">
+        <Input v-model:value="searchText" size="small" placeholder="搜索菜单/编码" class="flex-1" />
+        <Tooltip :title="checkStrictly ? '父子独立' : '父子联动'">
+          <Button size="small" @click="toggleCheckStrictly">
+            <Icon :icon="checkStrictly ? 'lucide:git-fork' : 'lucide:git-merge'" />
+          </Button>
+        </Tooltip>
+        <Tooltip title="展开全部">
+          <Button size="small" @click="expandAll">
+            <Icon icon="lucide:chevrons-down" />
+          </Button>
+        </Tooltip>
+        <Tooltip title="收起全部">
+          <Button size="small" @click="collapseAll">
+            <Icon icon="lucide:chevrons-up" />
+          </Button>
+        </Tooltip>
+        <Dropdown.Button size="small" placement="bottomRight">
+          <template #overlay>
+            <Menu>
+              <Menu.Item key="selectAll" @click="handleSelectAll">
+                全选
+              </Menu.Item>
+              <Menu.Item key="unselectAll" @click="handleUnselectAll">
+                取消全选
+              </Menu.Item>
+            </Menu>
+          </template>
+          <template #icon>
+            <Icon icon="lucide:chevrons-down" />
+          </template>
+          更多
+        </Dropdown.Button>
+      </div>
+    </div>
+
+    <div class="rounded-md border p-4">
+      <Spin :spinning="loading">
+        <Tree
+          v-model:checked-keys="checkedKeys"
+          v-model:expanded-keys="expandedKeys"
+          :checkable="true"
+          :check-strictly="checkStrictly"
+          :field-names="fieldNames"
+          :tree-data="treeData"
+          :selectable="false"
+          check-on-click-node
+          @check="handleCheck"
+        >
+          <template #title="{ title, menuType, menuCode }">
+            <div class="flex items-center gap-2">
+              <span>{{ title }}</span>
+              <Tag v-if="menuType === 0" color="blue">目录</Tag>
+              <Tag v-else-if="menuType === 1" color="green">菜单</Tag>
+              <Tag v-else-if="menuType === 2" color="orange">按钮</Tag>
+              <span class="text-xs text-gray-500">{{ menuCode }}</span>
+            </div>
+          </template>
+        </Tree>
+      </Spin>
+    </div>
+  </div>
+</template>

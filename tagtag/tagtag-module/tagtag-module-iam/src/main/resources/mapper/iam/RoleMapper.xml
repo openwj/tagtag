@@ -9,6 +9,9 @@
             code,
             name,
             status,
+            role_type AS roleType,
+            sort,
+            remark,
             create_time AS createTime,
             update_time AS updateTime,
             create_by AS createBy,
@@ -43,6 +46,13 @@
         JOIN iam_menu m ON rm.menu_id = m.id
         WHERE rm.role_id = #{roleId}
           AND m.menu_type = 2
+    </select>
+
+    <!-- 查询角色分配的全部菜单ID（目录/菜单/按钮） -->
+    <select id="selectMenuIdsByRoleId" resultType="long">
+        SELECT rm.menu_id
+        FROM iam_role_menu rm
+        WHERE rm.role_id = #{roleId}
     </select>
 
     <!-- 删除角色的所有权限关联 -->

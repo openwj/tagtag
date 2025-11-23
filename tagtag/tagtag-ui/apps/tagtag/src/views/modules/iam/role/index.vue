@@ -1,4 +1,9 @@
 <script lang="ts" setup>
+import type { VbenFormProps } from '#/adapter/form';
+import type { VxeGridProps } from '#/adapter/vxe-table';
+
+import { ref } from 'vue';
+
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
@@ -7,103 +12,249 @@ import {
   Popconfirm as APopconfirm,
   Switch as ASwitch,
   Tooltip as ATooltip,
-  message,
+  Modal as AModal,
+  Dropdown,
+  Menu,
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteRole, editRole, getRolePage } from '#/api/modules/iam/role';
-// 注：不再依赖分页封装，页面内直接适配后端字段
+import {
+  batchDeleteRole,
+  batchUpdateRoleStatus,
+  deleteRole,
+  getRolePage,
+  updateRoleStatus,
+} from '#/api/modules/iam/role';
 
 import { columns, searchFormSchema } from './data';
 import FormDrawer from './FormDrawer.vue';
-import AssignMenuDrawer from './AssignMenuDrawer.vue';
 
-const [Grid, gridApi] = useVbenVxeGrid({
-  formOptions: {
-    schema: searchFormSchema,
-    collapsed: true,
-    showCollapseButton: true,
+const formOptions: VbenFormProps = {
+  collapsed: true,
+  schema: searchFormSchema,
+  showCollapseButton: true,
+  baseColProps: { span: 6 },
+  commonConfig: {
+    size: 'small',
+    labelWidth: 90,
   },
-  gridOptions: {
-    columns,
-    height: 'auto',
-    columnConfig: { minWidth: 120 },
-    showOverflow: 'tooltip',
-    pagerConfig: { enabled: true },
-    rowConfig: { keyField: 'id' },
-    toolbarConfig: { custom: true, export: true, refresh: true, zoom: true },
-    proxyConfig: {
-      enabled: true,
-      autoLoad: true,
-      response: { result: 'list', total: 'total' },
-      ajax: {
-        /**
-         * 角色分页查询
-         * @param page 底层分页参数（含 pageNumber 与 pageSize）
-         * @param formValues 搜索表单值
-         */
-        query: async ({ page }: any, formValues: any) => {
-          const { list, total } = await getRolePage(formValues, page);
-          return { list, total };
-        },
+};
+
+const gridOptions: VxeGridProps = {
+  stripe: true,
+  checkboxConfig: {
+    highlight: true,
+    // labelField: 'name',
+  },
+  columns,
+  height: 'auto',
+  keepSource: true,
+  pagerConfig: {
+    enabled: true,
+    pageSize: 10,
+    pageSizes: [10, 20, 50, 100],
+    layouts: [
+      'PrevPage',
+      'JumpNumber',
+      'NextPage',
+      'FullJump',
+      'Sizes',
+      'Total',
+    ],
+    perfect: true,
+  },
+  proxyConfig: {
+    enabled: true, // 启用数据代理
+    autoLoad: true, // 自动加载数据
+    // 配置数据字段映射
+    response: {
+      result: 'list', // 指定数据列表字段（与后端 PageResult 保持一致）
+      total: 'total', // 指定总数字段
+    },
+    ajax: {
+      query: async ({ page }, formValues) => {
+        const pageNo = page?.currentPage || 1;
+        const pageSize = page?.pageSize || 10;
+
+        const query: Record<string, any> = {};
+        if (formValues && typeof formValues === 'object') {
+          Object.keys(formValues).forEach((key) => {
+            const value = (formValues as Record<string, any>)[key];
+            if (value !== null && value !== undefined && value !== '') {
+              query[key] = value;
+            }
+          });
+        }
+
+        const res = await getRolePage(query, { pageNo, pageSize });
+
+        return {
+          list: Array.isArray(res?.list) ? res.list : [],
+          total: Number(res?.total ?? 0),
+        };
       },
     },
   },
-});
+  exportConfig: {
+    type: 'xlsx',
+    sheetName: '角色信息',
+    filename: `角色信息_${new Date().toISOString().slice(0, 10)}`,
+    columnFilterMethod: ({ column }: any) => column.field !== 'action',
+    mode: 'current',
+  },
+  // importConfig: {},
+  toolbarConfig: {
+    custom: true,
+    export: true,
+    // import: true,
+    refresh: true,
+    zoom: true,
+  },
+};
 
-const [VFormDrawer, VFormDrawerApi] = useVbenDrawer({ connectedComponent: FormDrawer });
-const [VAssignMenuDrawer, VAssignMenuDrawerApi] = useVbenDrawer({ connectedComponent: AssignMenuDrawer });
+const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
+
+// 加载状态管理
+const loading = ref(false);
+
+// 批量操作加载状态
+const batchLoading = ref(false);
 
 /**
- * 新增角色
- * @param row 可选：基于选中行初始化表单
+ * 获取选中的行数据
+ * @returns 选中的行数据数组
  */
-const handleAdd = (row?: Record<string, any>) => {
-  const values = { isUpdate: false };
-  VFormDrawerApi.setData({ values });
-  VFormDrawerApi.open();
+const getSelectedRows = () => {
+  return gridApi.grid?.getCheckboxRecords() || [];
 };
 
 /**
- * 切换角色状态
- * @param record 角色记录
+ * 状态切换（乐观更新，失败回滚）
+ * @param row 行数据
+ * @param checked 新状态
  */
-const handleStatusChange = async (record: any) => {
+const handleStatusChange = async (row: any, checked: boolean) => {
+  const prevStatus = row.status;
+  // 乐观更新到目标状态
+  row.status = checked ? 1 : 0;
+  row.statusLoading = true;
   try {
-    const statusValue = record.status ? 1 : 0;
-    await editRole({ id: record.id, status: statusValue });
+    // API的disabled参数：true表示禁用，false表示启用
+    // checked为true表示启用，所以disabled应该为!checked
+    await updateRoleStatus(row.id, !checked);
     message.success('状态更新成功');
+  } catch (e) {
+    // 失败回滚到原状态
+    row.status = prevStatus;
   } finally {
-    await gridApi.query();
+    row.statusLoading = false;
   }
+};
+
+/**
+ * 批量删除角色
+ */
+const handleBatchDelete = async () => {
+  const selectedRows = getSelectedRows();
+  if (selectedRows.length === 0) {
+    message.warning('请选择要删除的角色');
+    return;
+  }
+
+  batchLoading.value = true;
+  try {
+    const roleIds = selectedRows.map((row: any) => row.id);
+    await batchDeleteRole(roleIds);
+    message.success(`成功删除 ${selectedRows.length} 个角色`);
+    gridApi.grid?.clearCheckboxRow();
+    gridApi.reload();
+  } finally {
+    batchLoading.value = false;
+  }
+};
+
+/**
+ * 批量启用角色
+ */
+const handleBatchEnable = async () => {
+  const selectedRows = getSelectedRows();
+  if (selectedRows.length === 0) {
+    message.warning('请选择要启用的角色');
+    return;
+  }
+
+  batchLoading.value = true;
+  try {
+    const roleIds = selectedRows.map((row: any) => row.id);
+    // API的disabled参数：false表示启用
+    await batchUpdateRoleStatus(roleIds, false);
+    message.success(`成功启用 ${selectedRows.length} 个角色`);
+    gridApi.grid?.clearCheckboxRow();
+    gridApi.reload();
+  } finally {
+    batchLoading.value = false;
+  }
+};
+
+/**
+ * 批量禁用角色
+ */
+const handleBatchDisable = async () => {
+  const selectedRows = getSelectedRows();
+  if (selectedRows.length === 0) {
+    message.warning('请选择要禁用的角色');
+    return;
+  }
+
+  batchLoading.value = true;
+  try {
+    const roleIds = selectedRows.map((row: any) => row.id);
+    // API的disabled参数：true表示禁用
+    await batchUpdateRoleStatus(roleIds, true);
+    message.success(`成功禁用 ${selectedRows.length} 个角色`);
+    gridApi.grid?.clearCheckboxRow();
+    gridApi.reload();
+  } finally {
+    batchLoading.value = false;
+  }
+};
+
+const [VFormDrawer, VFormDrawerApi] = useVbenDrawer({
+  // 连接抽离的组件
+  connectedComponent: FormDrawer,
+});
+
+const handleAdd = () => {
+  // 处理新增
+  VFormDrawerApi.setData({
+    // 表单值
+    values: { isUpdate: false },
+  });
+  VFormDrawerApi.open();
 };
 
 /**
  * 删除角色
  * @param id 角色ID
  */
-const handleDelete = async (id: string | number) => {
-  await deleteRole(id);
-  message.success('删除成功');
-  await gridApi.query();
+const handleDelete = async (id: string) => {
+  loading.value = true;
+  try {
+    await deleteRole(id);
+    message.success('角色删除成功');
+    gridApi.reload();
+  } finally {
+    loading.value = false;
+  }
 };
 
-/**
- * 编辑角色
- * @param row 行数据
- */
 const handleEdit = (row: Record<string, any>) => {
-  VFormDrawerApi.setData({ values: { ...row, isUpdate: true } });
+  // 处理编辑
+  VFormDrawerApi.setData({
+    // 表单值
+    values: { ...row, isUpdate: true },
+  });
   VFormDrawerApi.open();
-};
-
-/**
- * 为角色分配菜单
- * @param row 行数据
- */
-const handleAssignMenus = (row: Record<string, any>) => {
-  VAssignMenuDrawerApi.setData({ values: { roleId: row.id, roleName: row.name } });
-  VAssignMenuDrawerApi.open();
 };
 
 const handleSuccess = () => {
@@ -113,52 +264,119 @@ const handleSuccess = () => {
 
 <template>
   <Page auto-content-height>
-    <Grid table-title="角色管理" table-title-help="系统角色与权限配置">
+    <Grid table-title="角色信息" table-title-help="系统角色信息">
       <template #toolbar-tools>
-        <AButton class="flex items-center" type="primary" @click="handleAdd()">
+        <div class="flex items-center gap-2">
+          <AButton class="flex items-center" type="primary" size="small" @click="handleAdd">
+            <template #icon>
+              <span class="icon-[lucide--plus] mr-1"></span>
+            </template>
+            新增
+          </AButton>
+          <Dropdown.Button size="small" :disabled="batchLoading">
+            批量操作
+            <template #icon>
+              <span class="icon-[lucide--chevrons-down]"></span>
+            </template>
+            <template #overlay>
+              <Menu>
+                <Menu.Item key="enable" @click="() => AModal.confirm({ title: '批量启用', content: '确定要启用选中的角色吗？', okText: '确定', cancelText: '取消', onOk: handleBatchEnable })">
+                  <span class="icon-[lucide--check-circle] mr-1"></span>
+                  启用
+                </Menu.Item>
+                <Menu.Item key="disable" @click="() => AModal.confirm({ title: '批量禁用', content: '确定要禁用选中的角色吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDisable })">
+                  <span class="icon-[lucide--x-circle] mr-1"></span>
+                  禁用
+                </Menu.Item>
+                <Menu.Item key="delete" @click="() => AModal.confirm({ title: '批量删除', content: '确定要删除选中的角色吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDelete })">
+                  <span class="icon-[lucide--trash-2] mr-1"></span>
+                  删除
+                </Menu.Item>
+              </Menu>
+            </template>
+          </Dropdown.Button>
+        </div>
+      </template>
+      <template #name="{ row }">
+        <div class="flex items-center gap-2">
+          <span class="icon-[lucide--user-circle] text-blue-500"></span>
+          <span>{{ row.name }}</span>
+        </div>
+      </template>
+
+      <template #roleType="{ row }">
+        <AButton v-if="row.roleType === 1" type="primary" size="small">
           <template #icon>
-            <span class="icon-[material-symbols--add-circle] mr-1"></span>
+            <span class="icon-[lucide--shield] mr-1"></span>
           </template>
-          新增
+          系统角色
+        </AButton>
+
+        <AButton v-else-if="row.roleType === 2" type="default" size="small">
+          <template #icon>
+            <span class="icon-[lucide--briefcase] mr-1"></span>
+          </template>
+          业务角色
+        </AButton>
+
+        <AButton v-else size="small">
+          <template #icon>
+            <span class="icon-[lucide--help-circle] mr-1"></span>
+          </template>
+          未知
         </AButton>
       </template>
 
       <template #status="{ row }">
         <ASwitch
           :checked="row.status === 1"
+          :loading="row.statusLoading"
           checked-children="启用"
           un-checked-children="禁用"
-          @change="(checked: boolean | string | number) => { const isChecked = Boolean(checked); row.status = isChecked ? 1 : 0; handleStatusChange(row); }"
+          @change="
+            (checked: any) =>
+              handleStatusChange(row, checked === true || checked === 'true')
+          "
         />
       </template>
-
       <template #action="{ row }">
-        <div class="flex items-center justify-center">
-          <ATooltip title="编辑">
-            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary" @click="handleEdit(row)">
+        <div class="flex items-center justify-center gap-0.5">
+          <ATooltip title="编辑角色">
+            <AButton
+              class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+              ghost
+              shape="circle"
+              size="small"
+              type="primary"
+              @click="handleEdit(row)"
+            >
               <template #icon>
-                <div class="icon-[material-symbols--edit-square-rounded]"></div>
+                <div class="icon-[lucide--edit] text-xs"></div>
               </template>
             </AButton>
           </ATooltip>
 
-          <ADivider type="vertical" />
+          <ADivider type="vertical" class="mx-1 h-4" />
 
-          <ATooltip title="权限分配">
-            <AButton class="flex items-center justify-center" ghost shape="circle" size="small" type="primary" @click="handleAssignMenus(row)">
-              <template #icon>
-                <div class="icon-[material-symbols--shield-person]"></div>
-              </template>
-            </AButton>
-          </ATooltip>
-
-          <ADivider type="vertical" />
-
-          <APopconfirm cancel-text="取消" ok-text="确定" placement="left" title="确定删除此数据?" @confirm="handleDelete(row.id)">
-            <ATooltip title="删除">
-              <AButton class="flex items-center justify-center" danger ghost shape="circle" size="small" type="primary">
+          <APopconfirm
+            cancel-text="取消"
+            ok-text="确定"
+            placement="left"
+            :title="`确定要删除角色 '${row.name}' 吗？`"
+            @confirm="handleDelete(row.id)"
+          >
+            <ATooltip title="删除角色">
+              <AButton
+                class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+                danger
+                ghost
+                shape="circle"
+                size="small"
+                type="primary"
+                :loading="loading"
+              >
                 <template #icon>
-                  <div class="icon-[material-symbols--delete-rounded]"></div>
+                  <div class="icon-[lucide--trash-2] text-xs"></div>
                 </template>
               </AButton>
             </ATooltip>
@@ -168,7 +386,5 @@ const handleSuccess = () => {
     </Grid>
 
     <VFormDrawer @success="handleSuccess" />
-    <VAssignMenuDrawer />
   </Page>
-  
 </template>

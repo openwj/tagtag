@@ -172,4 +172,17 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         if (codes == null || codes.isEmpty()) return Collections.emptySet();
         return codes.stream().filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    /**
+     * 查询指定角色已分配的菜单ID列表（包含目录/菜单/按钮）
+     * @param roleId 角色ID
+     * @return 菜单ID列表
+     */
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "roleMenuIds", key = "#root.args[0]")
+    public List<Long> listMenuIdsByRoleId(Long roleId) {
+        if (roleId == null) return Collections.emptyList();
+        return baseMapper.selectMenuIdsByRoleId(roleId);
+    }
 }

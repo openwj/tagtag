@@ -15,6 +15,9 @@ public class Role {
     private String code;
     private String name;
     private Integer status;
+    private Integer roleType;
+    private Integer sort;
+    private String remark;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private Long createBy;

@@ -27,6 +27,7 @@ import dev.tagtag.module.auth.service.CaptchaService;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import dev.tagtag.contract.iam.api.MenuApi;
+import dev.tagtag.contract.iam.api.RoleApi;
 import dev.tagtag.contract.auth.dto.RouteRecordStringComponentDTO;
 import dev.tagtag.contract.auth.dto.RouteMetaDTO;
 
@@ -53,6 +54,7 @@ public class AuthController {
     private final PermissionResolver permissionResolver;
     private final CaptchaService captchaService;
     private final MenuApi menuApi;
+    private final RoleApi roleApi;
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
@@ -146,19 +148,66 @@ public class AuthController {
     }
 
     /**
-     * 获取当前用户可访问的路由记录（后端适配）
+     * 获取当前用户可访问的路由记录（按角色分配的目录/菜单进行过滤；按钮不生成路由）
+     * @return 路由记录列表
      */
     @GetMapping("/menu/all")
-    public Result<List<RouteRecordStringComponentDTO>> allMenus() {
-        List<MenuDTO> tree = menuApi.listMenuTree((MenuQueryDTO) null).getData();
+    public Result<List<RouteRecordStringComponentDTO>> allMenus(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
+        String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        String subject = jwtService.getSubject(token);
+        UserDTO user = userApi.getUserByUsername(subject).getData();
+        List<Long> roleIds = user == null ? Collections.emptyList() : Objects.requireNonNullElse(user.getRoleIds(), Collections.emptyList());
+
+        List<Long> assignedMenuIds = roleApi.listMenuIdsByRoleIds(roleIds).getData();
+        java.util.Set<Long> idSet = assignedMenuIds == null ? java.util.Collections.emptySet() : new java.util.LinkedHashSet<>(assignedMenuIds);
+
+        List<MenuDTO> fullTree = menuApi.listMenuTree((MenuQueryDTO) null).getData();
+        List<MenuDTO> filteredTree = filterTreeByIds(fullTree, idSet);
+
         List<RouteRecordStringComponentDTO> routes = new ArrayList<>();
-        if (tree != null) {
-            for (MenuDTO dto : tree) {
+        if (filteredTree != null) {
+            for (MenuDTO dto : filteredTree) {
                 RouteRecordStringComponentDTO r = toRoute(dto);
                 if (r != null) routes.add(r);
             }
         }
         return Result.ok(routes);
+    }
+
+    /**
+     * 依据分配的菜单ID集合过滤菜单树：保留命中节点或其包含命中子节点的祖先；丢弃未分配的分支
+     * @param tree 完整菜单树
+     * @param ids 已分配菜单ID集合（目录/菜单/按钮）
+     * @return 过滤后的树
+     */
+    private List<MenuDTO> filterTreeByIds(List<MenuDTO> tree, java.util.Set<Long> ids) {
+        if (tree == null || tree.isEmpty()) return java.util.Collections.emptyList();
+        List<MenuDTO> res = new ArrayList<>();
+        for (MenuDTO node : tree) {
+            List<MenuDTO> children = filterTreeByIds(node.getChildren(), ids);
+            boolean included = (ids != null && node.getId() != null && ids.contains(node.getId())) || (children != null && !children.isEmpty());
+            if (included) {
+                MenuDTO copy = new MenuDTO();
+                copy.setId(node.getId());
+                copy.setMenuCode(node.getMenuCode());
+                copy.setMenuName(node.getMenuName());
+                copy.setRemark(node.getRemark());
+                copy.setParentId(node.getParentId());
+                copy.setPath(node.getPath());
+                copy.setComponent(node.getComponent());
+                copy.setIcon(node.getIcon());
+                copy.setSort(node.getSort());
+                copy.setStatus(node.getStatus());
+                copy.setMenuType(node.getMenuType());
+                copy.setIsHidden(node.getIsHidden());
+                copy.setIsExternal(node.getIsExternal());
+                copy.setExternalUrl(node.getExternalUrl());
+                copy.setIsKeepalive(node.getIsKeepalive());
+                copy.setChildren(children);
+                res.add(copy);
+            }
+        }
+        return res;
     }
 
     /**

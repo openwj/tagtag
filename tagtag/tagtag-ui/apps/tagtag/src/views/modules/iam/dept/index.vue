@@ -52,20 +52,11 @@ const [Grid, gridApi] = useVbenVxeGrid({
       zoom: true,
     },
     proxyConfig: {
-      enabled: true,
-      autoLoad: true,
-      response: { result: 'list', total: 'total' },
       ajax: {
-        /**
-         * 部门树查询（不分页）
-         * @param _page 未使用的分页参数
-         * @param formValues 搜索表单值
-         */
         query: async (_page: any, formValues: any) => {
-          const tree = await getDeptTree(formValues);
-          const list = Array.isArray(tree) ? tree : [];
-          const total = list.length;
-          return { list, total };
+          const data = await getDeptTree(formValues);
+
+          return { items: data };
         },
       },
     },

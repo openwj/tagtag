@@ -36,6 +36,13 @@ public interface RoleService {
     Set<String> listMenuCodesByRoleIds(List<Long> roleIds);
 
     /**
+     * 查询指定角色已分配的菜单ID列表（包含目录/菜单/按钮）
+     * @param roleId 角色ID
+     * @return 菜单ID列表
+     */
+    List<Long> listMenuIdsByRoleId(Long roleId);
+
+    /**
      * 根据角色编码查询角色详情
      * @param code 角色编码
      * @return 角色详情

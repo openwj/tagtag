@@ -14,6 +14,9 @@ import {
   Switch as ASwitch,
   Tag as ATag,
   Tooltip as ATooltip,
+  Dropdown,
+  Menu,
+  Modal as AModal,
   message,
 } from 'ant-design-vue';
 
@@ -36,6 +39,11 @@ const formOptions: VbenFormProps = {
   showCollapseButton: true,
   // 默认折叠状态
   collapsed: true,
+  baseColProps: { span: 6 },
+  commonConfig: {
+    size: 'small',
+    labelWidth: 90,
+  },
 };
 
 const gridOptions: VxeGridProps = {
@@ -147,6 +155,9 @@ const getSelectedRows = () => {
 /**
  * 批量删除菜单
  */
+/**
+ * 批量删除菜单
+ */
 const handleBatchDelete = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
@@ -166,11 +177,15 @@ const handleBatchDelete = async () => {
   const ids = selectedRows.map((row) => row.id);
   await batchDeleteMenu(ids);
   message.success(`成功删除 ${selectedRows.length} 个菜单`);
+  gridApi.grid?.clearCheckboxRow();
   gridApi.reload();
 
   batchLoading.value = false;
 };
 
+/**
+ * 批量启用菜单
+ */
 /**
  * 批量启用菜单
  */
@@ -184,13 +199,17 @@ const handleBatchEnable = async () => {
   batchLoading.value = true;
 
   const ids = selectedRows.map((row) => row.id);
-  await batchUpdateMenuStatus(ids, false); // false表示不禁用，即启用
+  await batchUpdateMenuStatus(ids, false);
   message.success(`成功启用 ${selectedRows.length} 个菜单`);
+  gridApi.grid?.clearCheckboxRow();
   gridApi.reload();
 
   batchLoading.value = false;
 };
 
+/**
+ * 批量禁用菜单
+ */
 /**
  * 批量禁用菜单
  */
@@ -204,8 +223,9 @@ const handleBatchDisable = async () => {
   batchLoading.value = true;
 
   const ids = selectedRows.map((row) => row.id);
-  await batchUpdateMenuStatus(ids, true); // true表示禁用
+  await batchUpdateMenuStatus(ids, true);
   message.success(`成功禁用 ${selectedRows.length} 个菜单`);
+  gridApi.grid?.clearCheckboxRow();
   gridApi.reload();
 
   batchLoading.value = false;
@@ -246,55 +266,35 @@ const handleStatusChange = async (
       table-title-help="系统菜单信息"
     >
       <template #toolbar-tools>
-        <div class="flex items-center gap-3">
-          <AButton class="flex items-center" type="primary" @click="handleAdd">
+        <div class="flex items-center gap-2">
+          <AButton class="flex items-center" type="primary" size="small" @click="handleAdd">
             <template #icon>
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
             新增
           </AButton>
-
-          <APopconfirm
-            title="确定要删除选中的菜单吗？"
-            ok-text="确定"
-            cancel-text="取消"
-            @confirm="handleBatchDelete"
-          >
-            <AButton class="flex items-center" danger :loading="batchLoading">
-              <template #icon>
-                <span class="icon-[lucide--trash-2] mr-1"></span>
-              </template>
-              批量删除
-            </AButton>
-          </APopconfirm>
-
-          <APopconfirm
-            title="确定要启用选中的菜单吗？"
-            ok-text="确定"
-            cancel-text="取消"
-            @confirm="handleBatchEnable"
-          >
-            <AButton class="flex items-center" :loading="batchLoading">
-              <template #icon>
-                <span class="icon-[lucide--check-circle] mr-1"></span>
-              </template>
-              批量启用
-            </AButton>
-          </APopconfirm>
-
-          <APopconfirm
-            title="确定要禁用选中的菜单吗？"
-            ok-text="确定"
-            cancel-text="取消"
-            @confirm="handleBatchDisable"
-          >
-            <AButton class="flex items-center" :loading="batchLoading">
-              <template #icon>
-                <span class="icon-[lucide--x-circle] mr-1"></span>
-              </template>
-              批量禁用
-            </AButton>
-          </APopconfirm>
+          <Dropdown.Button size="small" :disabled="batchLoading">
+            批量操作
+            <template #icon>
+              <span class="icon-[lucide--chevrons-down]"></span>
+            </template>
+            <template #overlay>
+              <Menu>
+                <Menu.Item key="enable" @click="() => AModal.confirm({ title: '批量启用', content: '确定要启用选中的菜单吗？', okText: '确定', cancelText: '取消', onOk: handleBatchEnable })">
+                  <span class="icon-[lucide--check-circle] mr-1"></span>
+                  启用
+                </Menu.Item>
+                <Menu.Item key="disable" @click="() => AModal.confirm({ title: '批量禁用', content: '确定要禁用选中的菜单吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDisable })">
+                  <span class="icon-[lucide--x-circle] mr-1"></span>
+                  禁用
+                </Menu.Item>
+                <Menu.Item key="delete" @click="() => AModal.confirm({ title: '批量删除', content: '确定要删除选中的菜单吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDelete })">
+                  <span class="icon-[lucide--trash-2] mr-1"></span>
+                  删除
+                </Menu.Item>
+              </Menu>
+            </template>
+          </Dropdown.Button>
         </div>
       </template>
       <template #icon="{ row }">

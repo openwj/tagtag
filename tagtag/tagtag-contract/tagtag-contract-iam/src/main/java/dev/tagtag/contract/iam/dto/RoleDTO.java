@@ -22,4 +22,7 @@ public class RoleDTO {
     @Size(max = 64, message = "角色名称长度不能超过64")
     private String name;
     private Integer status;
+    private Integer roleType;
+    private Integer sort;
+    private String remark;
 }
