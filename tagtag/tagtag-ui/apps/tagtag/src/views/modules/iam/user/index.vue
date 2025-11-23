@@ -10,12 +10,26 @@ import {
   message,
 } from 'ant-design-vue';
 
+import { ref } from 'vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteUser, editUser, getUserPage } from '#/api/modules/iam/user';
+import DeptTree from '../components/DeptTree.vue';
 // 注：不再依赖分页封装，页面内直接适配后端字段
 
 import { columns, searchFormSchema } from './data';
 import FormDrawer from './FormDrawer.vue';
+
+// 选中的部门ID（undefined 表示全部）
+const selectedDeptId = ref<number | undefined>(undefined);
+/**
+ * 部门选择变化处理：更新选中部门并刷新列表
+ * @param id 选中的部门ID，undefined 表示全部
+ */
+function onDeptChange(id: number | undefined) {
+  selectedDeptId.value = id;
+  gridApi.reload();
+}
 
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
@@ -25,7 +39,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
   },
   gridOptions: {
     columns,
-    height: 'auto',
+    height: '100%',
     columnConfig: { minWidth: 120 },
     showOverflow: 'tooltip',
     pagerConfig: { enabled: true },
@@ -42,7 +56,9 @@ const [Grid, gridApi] = useVbenVxeGrid({
          * @param formValues 搜索表单值
          */
         query: async ({ page }: any, formValues: any) => {
-          const { list, total } = await getUserPage(formValues, page);
+          // 合并左侧部门筛选
+          const finalQuery = { ...formValues, deptId: selectedDeptId.value };
+          const { list, total } = await getUserPage(finalQuery, page);
           return { list, total };
         },
       },
@@ -61,6 +77,7 @@ const [VFormDrawer, VFormDrawerApi] = useVbenDrawer({
 const handleAdd = (row?: Record<string, any>) => {
   const values = { isUpdate: false };
   if (row?.deptId) (values as any).deptId = row.deptId;
+  else if (selectedDeptId.value) (values as any).deptId = selectedDeptId.value;
   VFormDrawerApi.setData({ values });
   VFormDrawerApi.open();
 };
@@ -101,11 +118,24 @@ const handleEdit = (row: Record<string, any>) => {
 const handleSuccess = () => {
   gridApi.reload();
 };
+
+//
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid table-title="用户信息" table-title-help="系统用户信息管理">
+    <div class="h-full flex gap-4">
+      <!-- 左侧部门列表 -->
+      <div class="w-72 h-full">
+        <div class="h-full rounded-md border p-4 overflow-auto">
+          <div class="mb-3 text-sm font-medium">部门列表</div>
+          <DeptTree v-model:selectedId="selectedDeptId" :status="1" @change="onDeptChange" />
+        </div>
+      </div>
+
+      <!-- 右侧用户表格 -->
+      <div class="flex-1 h-full">
+        <Grid class="h-full" table-title="用户信息" table-title-help="系统用户信息管理">
       <template #toolbar-tools>
         <AButton class="flex items-center" type="primary" @click="handleAdd()">
           <template #icon>
@@ -173,7 +203,9 @@ const handleSuccess = () => {
           </APopconfirm>
         </div>
       </template>
-    </Grid>
+        </Grid>
+      </div>
+    </div>
 
     <VFormDrawer @success="handleSuccess" />
   </Page>
