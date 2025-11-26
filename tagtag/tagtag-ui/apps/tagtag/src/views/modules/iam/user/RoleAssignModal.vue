@@ -6,12 +6,8 @@ import { useVbenModal } from '@vben/common-ui';
 
 import {
   Alert as AAlert,
-  Button as AButton,
-  Checkbox as ACheckbox,
-  CheckboxGroup as ACheckboxGroup,
-  Input as AInput,
   Spin as ASpin,
-  Tag as ATag,
+  Transfer as ATransfer,
 } from 'ant-design-vue';
 
 interface Props {
@@ -44,7 +40,7 @@ const [Modal, modalApi] = useVbenModal({
 
 // 响应式数据
 const searchKeyword = ref('');
-const selectedRoleIds = ref<(number | string)[]>([]);
+const selectedRoleIds = ref<string[]>([]);
 // 简化：直接使用原始关键词进行筛选
 
 // 计算属性
@@ -78,6 +74,15 @@ const filteredRoles = computed(() => {
   });
 });
 
+const transferData = computed(() => {
+  return (rolesWithAssignedStatus.value || []).map((role: any) => ({
+    key: String(role.id),
+    title: role.name,
+    description: role.description || '',
+    isAssigned: role.isAssigned,
+  }));
+});
+
 // 简化：总是允许提交，由服务端覆盖式分配处理差异
 
 /**
@@ -95,7 +100,7 @@ watch(
     if (!modalState?.value?.isOpen) return;
     const ids = (props.assignedRoleIds || []).map(String);
     const valid = new Set((props.roles || []).map((r: any) => String(r.id)));
-    selectedRoleIds.value = ids.filter((id) => valid.has(id));
+    selectedRoleIds.value = ids.filter((id) => valid.has(id)).map(String);
   },
   { immediate: true },
 );
@@ -125,31 +130,7 @@ const closeModal = () => {
 /**
  * 全选当前筛选的角色
  */
-/** 全选当前筛选的角色 */
-const selectAll = () => {
-  selectedRoleIds.value = filteredRoles.value.map((role: any) =>
-    String(role.id),
-  );
-};
-
-/**
- * 清空所有角色选择
- */
-/** 清空角色选择 */
-const clearAll = () => {
-  selectedRoleIds.value = [];
-};
-
-/** 反选当前筛选的角色 */
-const invertSelection = () => {
-  const current = new Set((selectedRoleIds.value || []).map(String));
-  const next: string[] = [];
-  for (const role of filteredRoles.value) {
-    const idStr = String((role as any).id);
-    if (!current.has(idStr)) next.push(idStr);
-  }
-  selectedRoleIds.value = next;
-};
+// 采用内置 Transfer 搜索与选择，不再保留自定义全选/清空/反选逻辑
 
 /**
  * 确认分配角色
@@ -220,24 +201,9 @@ defineExpose({
       </div>
     </div>
 
-    <!-- 角色搜索 -->
-    <div class="mb-4">
-      <AInput
-        v-model:value="searchKeyword"
-        placeholder="搜索角色名称"
-        allow-clear
-      />
-    </div>
+    <!-- 内置搜索由 Transfer 提供 -->
 
-    <!-- 角色选择操作 -->
-    <div class="mb-3 flex items-center justify-between">
-      <div class="text-sm font-medium">选择角色：</div>
-      <div class="space-x-2">
-        <AButton size="small" @click="selectAll">全选</AButton>
-        <AButton size="small" @click="clearAll">清空</AButton>
-        <AButton size="small" @click="invertSelection">反选</AButton>
-      </div>
-    </div>
+    <!-- 双列选择 -->
 
     <!-- 角色列表 -->
     <div class="max-h-96 overflow-y-auto rounded border border-gray-200 p-2">
@@ -265,37 +231,16 @@ defineExpose({
           </div>
         </div>
 
-        <!-- 角色选择列表 -->
-        <ACheckboxGroup v-else v-model:value="selectedRoleIds" class="w-full">
-          <div
-            v-for="role in filteredRoles"
-            :key="(role as any).id"
-            class="mb-2"
-          >
-            <ACheckbox :value="(role as any).id" class="w-full">
-              <div class="flex w-full items-center justify-between">
-                <div class="min-w-0">
-                  <div class="font-medium">
-                    {{ (role as any).name }}
-                    <ATag
-                      v-if="(role as any).isAssigned"
-                      color="blue"
-                      class="ml-2"
-                    >
-                      已分配
-                    </ATag>
-                  </div>
-                  <div class="truncate text-xs text-gray-500">
-                    <span v-if="(role as any).code"
-                      >{{ (role as any).code }} ·
-                    </span>
-                    <span>{{ (role as any).description }}</span>
-                  </div>
-                </div>
-              </div>
-            </ACheckbox>
-          </div>
-        </ACheckboxGroup>
+        <!-- 角色选择双列 -->
+        <ATransfer
+          v-else
+          :data-source="transferData"
+          v-model:target-keys="selectedRoleIds"
+          :show-search="true"
+          :list-style="{ width: '45%', height: '320px' }"
+          :titles="['可选角色', '已选角色']"
+          :render="(item: any) => item.title"
+        />
       </div>
     </div>
 

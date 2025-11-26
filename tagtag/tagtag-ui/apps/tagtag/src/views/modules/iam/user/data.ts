@@ -12,22 +12,32 @@ export const columns: VxeGridProps['columns'] = [
   { align: 'left', type: 'checkbox', width: 50 },
   { title: '序号', type: 'seq', width: 50 },
   { field: 'id', title: 'ID', visible: false },
-  { field: 'username', title: '用户名', width: 120 },
-  { field: 'nickname', title: '昵称', width: 100 },
-  { field: 'email', title: '邮箱', width: 180 },
-  { field: 'phone', title: '手机号', width: 120 },
+  {
+    field: 'username',
+    title: '用户',
+    width: 220,
+    slots: { default: 'userCell' },
+  },
+  { field: 'nickname', title: '昵称', visible: false },
+  { field: 'email', title: '邮箱', width: 200, showOverflow: true },
+  { field: 'phone', title: '手机号', width: 140, showOverflow: true },
   { field: 'gender', title: '性别', width: 80 },
-  { field: 'deptName', title: '部门', width: 120 },
-  { field: 'position', title: '职位', width: 100 },
-  { field: 'status', title: '状态', width: 80, slots: { default: 'status' } },
-  { field: 'lastLoginTime', title: '最后登录时间', width: 160 },
-  { field: 'createTime', title: '创建时间', width: 160 },
+  { field: 'deptName', title: '部门', width: 140 },
+  { field: 'position', title: '职位', width: 120, showOverflow: true },
+  { field: 'status', title: '状态', width: 120, slots: { default: 'status' } },
+  {
+    field: 'lastLoginTime',
+    title: '最后登录时间',
+    width: 180,
+    showOverflow: true,
+  },
+  { field: 'createTime', title: '创建时间', width: 180, showOverflow: true },
   {
     field: 'action',
     fixed: 'right',
     slots: { default: 'action' },
     title: '操作',
-    width: 150,
+    width: 140,
   },
 ];
 
@@ -38,14 +48,6 @@ export const searchFormSchema: VbenFormProps['schema'] = [
     label: '用户名',
     componentProps: {
       placeholder: '请输入用户名',
-    },
-  },
-  {
-    component: 'Input',
-    fieldName: 'nickname',
-    label: '昵称',
-    componentProps: {
-      placeholder: '请输入昵称',
     },
   },
   {
@@ -162,15 +164,6 @@ export const formSchema: VbenFormProps['schema'] = [
     rules: 'required',
   },
   {
-    component: 'Input',
-    componentProps: {
-      placeholder: '请输入昵称（最多50字符）',
-    },
-    fieldName: 'nickname',
-    label: '昵称',
-    rules: null,
-  },
-  {
     component: 'TreeSelect',
     componentProps: {
       placeholder: '请选择',
@@ -268,7 +261,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'position',
     label: '职位',
-    rules: null,
   },
   {
     component: 'Switch',
@@ -302,6 +294,5 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'remark',
     label: '备注',
-    rules: null,
   },
 ];

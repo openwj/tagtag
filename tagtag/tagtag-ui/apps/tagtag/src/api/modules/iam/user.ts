@@ -13,7 +13,7 @@ export namespace UserApiParams {
     gender?: number;
     roleId?: number;
     email?: string;
-    mobile?: string;
+    phone?: string;
     deptId?: number;
     employeeNo?: string;
     createTimeRange?: { end?: string; start?: string };
@@ -25,7 +25,7 @@ export namespace UserApiParams {
     password?: string;
     nickname?: string;
     email?: string;
-    mobile?: string;
+    phone?: string;
     gender?: number;
     deptId?: number;
     status?: number;
@@ -33,7 +33,7 @@ export namespace UserApiParams {
     avatar?: string;
     remark?: string;
     employeeNo?: string;
-    jobTitle?: string;
+    position?: string;
     birthday?: string;
     entryDate?: string;
   }

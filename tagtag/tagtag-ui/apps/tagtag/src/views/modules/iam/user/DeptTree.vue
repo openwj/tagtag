@@ -8,6 +8,8 @@ import {
   Empty as AEmpty,
   Input as AInput,
   Tree as ATree,
+  Spin as ASpin,
+  Tag as ATag,
 } from 'ant-design-vue';
 
 import { getDeptTree } from '#/api/modules/iam/dept';
@@ -38,6 +40,8 @@ const treeData = ref<DataNode[]>([]);
 const searchValue = ref('');
 const expandedKeys = ref<string[]>([]);
 const autoExpandParent = ref(true);
+const selectedKeys = ref<string[]>([]);
+const loading = ref(false);
 
 /**
  * 获取所有节点的key
@@ -73,7 +77,10 @@ function getMatchedKeys(data: DeptItem[], searchKey: string): string[] {
   function traverse(nodes: DeptItem[]) {
     if (!nodes) return;
     nodes.forEach((node) => {
-      if (node.name && node.name.toLowerCase().includes(searchKey.toLowerCase())) {
+      if (
+        node.name &&
+        node.name.toLowerCase().includes(searchKey.toLowerCase())
+      ) {
         keys.push(node.id);
       }
       if (node.children) {
@@ -162,10 +169,13 @@ function transformData(data: DeptItem[]): DataNode[] {
   });
 }
 
+const totalCount = computed(() => getAllKeys(treeData.value).length);
+
 /**
  * 获取部门树数据
  */
 async function fetch() {
+  loading.value = true;
   const response = await getDeptTree({});
 
   // API直接返回DeptItem[]数组
@@ -180,6 +190,7 @@ async function fetch() {
 
   // 默认展开所有节点
   expandedKeys.value = getAllKeys(transformedData);
+  loading.value = false;
 }
 
 /**
@@ -188,6 +199,7 @@ async function fetch() {
  */
 function handleSelect(keys: any[]) {
   const stringKeys = keys.map(key => String(key));
+  selectedKeys.value = stringKeys;
   emit('select', stringKeys[0]);
 }
 
@@ -196,8 +208,17 @@ function handleSelect(keys: any[]) {
  * @param keys 展开的节点key数组
  */
 function handleExpand(keys: any[]) {
-  expandedKeys.value = keys.map(key => String(key));
+  expandedKeys.value = keys.map(String);
   autoExpandParent.value = false;
+}
+
+/**
+ * 懒加载子节点（示意实现）
+ * 说明：当节点首次展开时，可在此处按需请求其子节点数据并追加到 treeData。
+ * 当前接口已返回完整树，此方法直接返回。
+ */
+function loadDataNode() {
+  return Promise.resolve();
 }
 
 /**
@@ -224,12 +245,45 @@ function clearSearch() {
 onMounted(() => {
   fetch();
 });
+
+const clearSelection = () => {
+  selectedKeys.value = [];
+};
+
+defineExpose({ clearSelection });
 </script>
 
 <template>
-  <div class="bg-card flex h-full flex-col rounded-md p-3">
-    <!-- 标题 -->
-    <div class="mb-3 pl-1 text-[1rem] font-medium">部门列表</div>
+  <div class="bg-card flex h-full flex-col rounded-lg border p-3 shadow-sm">
+    <div class="mb-2 flex items-center justify-between gap-2 whitespace-nowrap">
+      <div class="flex items-center gap-1 min-w-0 pl-1 text-[0.95rem] font-medium">
+        <span class="icon-[material-symbols--apartment] text-blue-500"></span>
+        <span class="truncate">部门</span>
+        <ATag color="processing" class="ml-1">{{ totalCount }}</ATag>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <ATooltip title="展开全部">
+          <AButton
+            size="small"
+            type="text"
+            class="flex h-7 w-7 items-center justify-center p-0"
+            @click="expandAll"
+          >
+            <span class="icon-[material-symbols--unfold-more]"></span>
+          </AButton>
+        </ATooltip>
+        <ATooltip title="收起全部">
+          <AButton
+            size="small"
+            type="text"
+            class="hidden sm:flex h-7 w-7 items-center justify-center p-0"
+            @click="collapseAll"
+          >
+            <span class="icon-[material-symbols--unfold-less]"></span>
+          </AButton>
+        </ATooltip>
+      </div>
+    </div>
 
     <!-- 搜索框 -->
     <div class="mb-3">
@@ -246,42 +300,25 @@ onMounted(() => {
       </AInput>
     </div>
 
-    <!-- 操作按钮 -->
-    <div class="mb-3 flex gap-2">
-      <AButton
-        size="small"
-        type="text"
-        @click="expandAll"
-        class="flex items-center gap-1 px-2"
-      >
-        <span class="icon-[material-symbols--expand-more]"></span>
-        全部展开
-      </AButton>
-      <AButton
-        size="small"
-        type="text"
-        @click="collapseAll"
-        class="flex items-center gap-1 px-2"
-      >
-        <span class="icon-[material-symbols--expand-less]"></span>
-        全部收起
-      </AButton>
-    </div>
-
     <hr class="mb-3" />
 
     <!-- 部门树 -->
     <div class="flex-1 overflow-auto">
-      <ATree
-        v-if="treeData && treeData.length > 0"
-        :tree-data="treeData"
-        :expanded-keys="computedExpandedKeys"
-        :auto-expand-parent="autoExpandParent"
-        show-line
-        class="py-2"
-        @select="handleSelect"
-        @expand="handleExpand"
-      >
+      <ASpin :spinning="loading">
+        <ATree
+          v-if="treeData && treeData.length > 0"
+          v-model:selectedKeys="selectedKeys"
+          :tree-data="treeData"
+          :expanded-keys="computedExpandedKeys"
+          :auto-expand-parent="autoExpandParent"
+          :load-data="loadDataNode"
+          block-node
+          virtual
+          show-line
+          class="py-2"
+          @select="handleSelect"
+          @expand="handleExpand"
+        >
         <!-- 自定义节点标题，支持搜索高亮 -->
         <template #title="nodeData">
           <!-- 从节点数据中获取部门名称 -->
@@ -289,9 +326,7 @@ onMounted(() => {
             v-if="
               searchValue &&
               nodeData.title &&
-              nodeData.title
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
+              nodeData.title.toLowerCase().includes(searchValue.toLowerCase())
             "
           >
             <template
@@ -311,7 +346,8 @@ onMounted(() => {
           </span>
           <span v-else>{{ nodeData.title || '未知部门' }}</span>
         </template>
-      </ATree>
+        </ATree>
+      </ASpin>
 
       <!-- 空状态 -->
       <AEmpty

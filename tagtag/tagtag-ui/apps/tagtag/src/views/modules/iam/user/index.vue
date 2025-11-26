@@ -7,10 +7,13 @@ import { onMounted, ref } from 'vue';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
+  Avatar as AAvatar,
   Button as AButton,
-  ButtonGroup as AButtonGroup,
+  Dropdown as ADropdown,
+  Menu as AMenu,
   Popconfirm as APopconfirm,
   Switch as ASwitch,
+  Tag as ATag,
   Tooltip as ATooltip,
   message,
   Modal,
@@ -42,8 +45,6 @@ const selectedDeptId = ref<string>('');
 const deptLoading = ref<boolean>(false);
 // 批量操作加载状态
 const batchLoading = ref<boolean>(false);
-// 选中的行键
-const selectedRowKeys = ref<string[]>([]);
 
 // 角色分配对话框状态
 const roleAssignLoading = ref(false);
@@ -53,6 +54,9 @@ const allRoles = ref<any[]>([]);
 const selectedRoleIds = ref<(number | string)[]>([]);
 // 角色分配模态框引用
 const roleAssignModalRef = ref();
+const deptTreeRef = ref();
+
+// 取消筛选条件的前端缓存
 
 /**
  * 表格查询（按角色页风格简化）：返回 { list, total }
@@ -69,7 +73,7 @@ const queryUserData = async (page: any, formValues: any) => {
 
 const formOptions: VbenFormProps = {
   schema: searchFormSchema,
-  collapsed: true, // 默认折叠搜索表单
+  collapsed: true,
 };
 
 const gridOptions: VxeGridProps = {
@@ -81,6 +85,8 @@ const gridOptions: VxeGridProps = {
   columns,
   height: 'auto',
   keepSource: true,
+  emptyText: '暂无用户数据，点击“新增”创建首个用户',
+  scrollY: { enabled: true, gt: 100 },
   pagerConfig: {
     enabled: true,
     pageSize: 10,
@@ -119,6 +125,8 @@ const gridOptions: VxeGridProps = {
 };
 
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
+
+// 已移除“已选中”计数回显
 
 /**
  * 加载数据
@@ -221,9 +229,13 @@ const handleBatchDelete = async () => {
 const handleStatusToggle = async (row: Record<string, any>) => {
   const newStatus = row.status === 1 ? 0 : 1;
   const statusText = newStatus === 1 ? '启用' : '禁用';
-  await updateUserStatus(row.id, newStatus);
-  message.success(`用户${statusText}成功`);
-  gridApi.reload();
+  try {
+    await updateUserStatus(row.id, newStatus);
+    message.success(`用户${statusText}成功`);
+    gridApi.reload();
+  } catch {
+    message.error(`用户${statusText}失败`);
+  }
 };
 
 /**
@@ -370,7 +382,6 @@ const handleConfirmAssignRoles = async (roleIds: (number | string)[]) => {
         `成功为 ${selectedUsersForBatchRole.value.length} 个用户分配角色`,
       );
 
-      selectedRowKeys.value = [];
       gridApi.grid.clearCheckboxRow();
     }
 
@@ -411,6 +422,11 @@ const handleSuccess = () => {
 };
 
 /**
+ * 重置筛选：清空本地保存的筛选项并重载
+ */
+// 去掉“重置筛选”方法
+
+/**
  * 处理部门选择事件
  * 根据选中的部门过滤用户列表
  * @param deptId 部门ID，默认为空字符串表示显示所有部门用户
@@ -421,18 +437,31 @@ function handleSelect(deptId = '') {
   // 重新加载表格数据
   gridApi.reload();
 }
+
+function handleClearDept() {
+  // 清空部门树选中并重置筛选
+  // 使用可选链避免空引用
+  deptTreeRef.value?.clearSelection?.();
+  handleSelect('');
+}
 </script>
 
 <template>
   <div>
     <Page auto-content-height content-class="flex gap-3">
       <div class="w-1/6">
-        <DeptTree @select="handleSelect" />
+        <DeptTree ref="deptTreeRef" @select="handleSelect" />
       </div>
       <div class="w-5/6">
         <Grid table-title="用户信息" table-title-help="系统用户信息">
           <template #toolbar-tools>
             <div class="flex items-center gap-4">
+              <div v-if="selectedDeptId" class="flex items-center gap-2">
+                <ATag color="blue">已按部门筛选</ATag>
+                <ATooltip title="清除部门筛选">
+                  <AButton size="small" type="link" @click="handleClearDept">清除</AButton>
+                </ATooltip>
+              </div>
               <!-- 新增按钮单独放置 -->
               <AButton
                 class="flex items-center px-4"
@@ -445,77 +474,68 @@ function handleSelect(deptId = '') {
                 新增
               </AButton>
 
-              <!-- 批量操作按钮组 -->
-              <AButtonGroup>
-                <AButton
-                  class="flex items-center px-4 text-red-500 hover:text-red-600"
-                  :loading="batchLoading"
-                  :disabled="batchLoading"
-                  @click="handleBatchDelete"
-                >
-                  <template #icon>
-                    <span
-                      class="icon-[material-symbols--delete-rounded] mr-1"
-                    ></span>
-                  </template>
-                  批量删除
-                </AButton>
-
-                <AButton
-                  class="flex items-center px-4"
-                  :loading="batchLoading"
-                  :disabled="batchLoading"
-                  @click="handleBatchStatusUpdate(1)"
-                >
-                  <template #icon>
-                    <span
-                      class="icon-[material-symbols--check-circle] mr-1"
-                    ></span>
-                  </template>
-                  批量启用
-                </AButton>
-
-                <AButton
-                  class="flex items-center px-4"
-                  :loading="batchLoading"
-                  :disabled="batchLoading"
-                  @click="handleBatchStatusUpdate(0)"
-                >
-                  <template #icon>
-                    <span class="icon-[material-symbols--cancel] mr-1"></span>
-                  </template>
-                  批量禁用
-                </AButton>
-
-                <AButton
-                  class="flex items-center px-4"
-                  :loading="batchLoading"
-                  :disabled="batchLoading"
-                  @click="handleBatchAssignRoles"
-                >
-                  <template #icon>
-                    <span
-                      class="icon-[material-symbols--group-add] mr-1"
-                    ></span>
-                  </template>
-                  批量分配角色
-                </AButton>
-              </AButtonGroup>
+              <!-- 批量操作下拉（参考菜单管理的分割样式） -->
+              <ADropdown.Button :disabled="batchLoading">
+                批量操作
+                <template #overlay>
+                  <AMenu>
+                    <AMenu.Item key="delete" @click="handleBatchDelete">
+                      <span
+                        class="icon-[material-symbols--delete-rounded] mr-2"
+                      ></span>批量删除
+                    </AMenu.Item>
+                    <AMenu.Item
+                      key="enable"
+                      @click="handleBatchStatusUpdate(1)"
+                    >
+                      <span
+                        class="icon-[material-symbols--check-circle] mr-2"
+                      ></span>批量启用
+                    </AMenu.Item>
+                    <AMenu.Item
+                      key="disable"
+                      @click="handleBatchStatusUpdate(0)"
+                    >
+                      <span class="icon-[material-symbols--cancel] mr-2"></span>批量禁用
+                    </AMenu.Item>
+                    <AMenu.Item key="roles" @click="handleBatchAssignRoles">
+                      <span
+                        class="icon-[material-symbols--group-add] mr-2"
+                      ></span>批量分配角色
+                    </AMenu.Item>
+                  </AMenu>
+                </template>
+              </ADropdown.Button>
             </div>
           </template>
           <template #status="{ row }">
-            <ASwitch
-              :checked="row.status === 1"
-              checked-children="启用"
-              un-checked-children="禁用"
-              @change="handleStatusToggle(row)"
-            />
+            <div class="flex items-center gap-2">
+              <ASwitch
+                :checked="row.status === 1"
+                checked-children="启用"
+                un-checked-children="禁用"
+                @change="handleStatusToggle(row)"
+              />
+            </div>
+          </template>
+          <template #userCell="{ row }">
+            <div class="flex items-center gap-2">
+              <AAvatar size="small">
+                {{ (row.username || '?').slice(0, 1).toUpperCase() }}
+              </AAvatar>
+              <div class="flex flex-col leading-tight">
+                <span class="text-sm font-medium">{{ row.username }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{
+                  row.nickname
+                }}</span>
+              </div>
+            </div>
           </template>
           <template #action="{ row }">
-            <div class="flex items-center justify-center gap-1">
+            <div class="flex items-center justify-center gap-1.5">
               <ATooltip title="编辑">
                 <AButton
-                  class="flex items-center justify-center"
+                  class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                   ghost
                   shape="circle"
                   size="small"
@@ -523,37 +543,35 @@ function handleSelect(deptId = '') {
                   @click="handleEdit(row)"
                 >
                   <template #icon>
-                    <div
-                      class="icon-[material-symbols--edit-square-rounded]"
-                    ></div>
+                    <div class="icon-[material-symbols--edit-square-rounded] text-blue-500"></div>
                   </template>
                 </AButton>
               </ATooltip>
 
               <ATooltip title="重置密码">
                 <AButton
-                  class="flex items-center justify-center"
+                  class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                   shape="circle"
                   size="small"
                   type="default"
                   @click="handleResetPassword(row)"
                 >
                   <template #icon>
-                    <div class="icon-[material-symbols--lock-reset]"></div>
+                    <div class="icon-[material-symbols--lock-reset] text-orange-500"></div>
                   </template>
                 </AButton>
               </ATooltip>
 
               <ATooltip title="分配角色">
                 <AButton
-                  class="flex items-center justify-center"
+                  class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                   shape="circle"
                   size="small"
                   type="default"
                   @click="handleAssignRoles(row)"
                 >
                   <template #icon>
-                    <div class="icon-[material-symbols--person-add]"></div>
+                    <div class="icon-[material-symbols--person-add] text-purple-500"></div>
                   </template>
                 </AButton>
               </ATooltip>
@@ -567,7 +585,7 @@ function handleSelect(deptId = '') {
               >
                 <ATooltip title="删除">
                   <AButton
-                    class="flex items-center justify-center"
+                    class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                     danger
                     ghost
                     shape="circle"
@@ -575,9 +593,7 @@ function handleSelect(deptId = '') {
                     type="primary"
                   >
                     <template #icon>
-                      <div
-                        class="icon-[material-symbols--delete-rounded]"
-                      ></div>
+                      <div class="icon-[material-symbols--delete-rounded] text-red-500"></div>
                     </template>
                   </AButton>
                 </ATooltip>

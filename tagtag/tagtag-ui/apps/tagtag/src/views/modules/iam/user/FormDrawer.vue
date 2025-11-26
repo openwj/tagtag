@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 import { useVbenDrawer } from '@vben/common-ui';
 
+import { message } from 'ant-design-vue';
+
 import { useVbenForm } from '#/adapter/form';
 import { addUser, editUser } from '#/api/modules/iam/user';
 
@@ -20,7 +22,7 @@ const [Form, formApi] = useVbenForm({
   schema: formSchema,
   showDefaultActions: false,
   commonConfig: {
-    labelWidth: 80,
+    labelWidth: 100,
   },
 });
 const [Drawer, drawerApi] = useVbenDrawer({
@@ -32,6 +34,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
     if (valid) {
       const data = await formApi.getValues();
       await (isUpdate.value ? editUser(data) : addUser(data));
+      message.success(isUpdate.value ? '保存成功' : '新增成功');
       drawerApi.close();
       emit('success');
     }
