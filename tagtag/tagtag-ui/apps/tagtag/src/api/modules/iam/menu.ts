@@ -41,13 +41,7 @@ export async function getMenuById(id: number | string) {
   return requestClient.get(`${Api.BaseApi}/${id}`);
 }
 
-/**
- * 获取菜单详情（别名）
- * @param id 菜单ID
- */
-export async function getMenu(id: number | string) {
-  return requestClient.get(`${Api.BaseApi}/${id}`);
-}
+// 删除重复别名方法：保持单一 getMenuById
 
 /**
  * 根据菜单编码查询单条
@@ -89,13 +83,7 @@ export function editMenu(data: Record<string, any>) {
   return requestClient.put(`${Api.BaseApi}`, data);
 }
 
-/**
- * 更新菜单（别名）
- * @param data 菜单表单数据（包含 id）
- */
-export function updateMenu(data: Record<string, any>) {
-  return requestClient.put(`${Api.BaseApi}`, data);
-}
+// 删除重复别名方法：保持单一 editMenu
 
 /**
  * 删除菜单

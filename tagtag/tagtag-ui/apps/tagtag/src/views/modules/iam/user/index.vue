@@ -126,8 +126,6 @@ const gridOptions: VxeGridProps = {
 
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
 
-// 已移除“已选中”计数回显
-
 /**
  * 加载数据
  */
@@ -459,7 +457,9 @@ function handleClearDept() {
               <div v-if="selectedDeptId" class="flex items-center gap-2">
                 <ATag color="blue">已按部门筛选</ATag>
                 <ATooltip title="清除部门筛选">
-                  <AButton size="small" type="link" @click="handleClearDept">清除</AButton>
+                  <AButton size="small" type="link" @click="handleClearDept">
+                    清除
+                  </AButton>
                 </ATooltip>
               </div>
               <!-- 新增按钮单独放置 -->
@@ -482,7 +482,8 @@ function handleClearDept() {
                     <AMenu.Item key="delete" @click="handleBatchDelete">
                       <span
                         class="icon-[material-symbols--delete-rounded] mr-2"
-                      ></span>批量删除
+                      ></span
+                      >批量删除
                     </AMenu.Item>
                     <AMenu.Item
                       key="enable"
@@ -490,18 +491,21 @@ function handleClearDept() {
                     >
                       <span
                         class="icon-[material-symbols--check-circle] mr-2"
-                      ></span>批量启用
+                      ></span
+                      >批量启用
                     </AMenu.Item>
                     <AMenu.Item
                       key="disable"
                       @click="handleBatchStatusUpdate(0)"
                     >
-                      <span class="icon-[material-symbols--cancel] mr-2"></span>批量禁用
+                      <span class="icon-[material-symbols--cancel] mr-2"></span
+                      >批量禁用
                     </AMenu.Item>
                     <AMenu.Item key="roles" @click="handleBatchAssignRoles">
                       <span
                         class="icon-[material-symbols--group-add] mr-2"
-                      ></span>批量分配角色
+                      ></span
+                      >批量分配角色
                     </AMenu.Item>
                   </AMenu>
                 </template>
@@ -543,7 +547,9 @@ function handleClearDept() {
                   @click="handleEdit(row)"
                 >
                   <template #icon>
-                    <div class="icon-[material-symbols--edit-square-rounded] text-blue-500"></div>
+                    <div
+                      class="icon-[material-symbols--edit-square-rounded] text-blue-500"
+                    ></div>
                   </template>
                 </AButton>
               </ATooltip>
@@ -557,7 +563,9 @@ function handleClearDept() {
                   @click="handleResetPassword(row)"
                 >
                   <template #icon>
-                    <div class="icon-[material-symbols--lock-reset] text-orange-500"></div>
+                    <div
+                      class="icon-[material-symbols--lock-reset] text-orange-500"
+                    ></div>
                   </template>
                 </AButton>
               </ATooltip>
@@ -571,7 +579,9 @@ function handleClearDept() {
                   @click="handleAssignRoles(row)"
                 >
                   <template #icon>
-                    <div class="icon-[material-symbols--person-add] text-purple-500"></div>
+                    <div
+                      class="icon-[material-symbols--person-add] text-purple-500"
+                    ></div>
                   </template>
                 </AButton>
               </ATooltip>
@@ -593,7 +603,9 @@ function handleClearDept() {
                     type="primary"
                   >
                     <template #icon>
-                      <div class="icon-[material-symbols--delete-rounded] text-red-500"></div>
+                      <div
+                        class="icon-[material-symbols--delete-rounded] text-red-500"
+                      ></div>
                     </template>
                   </AButton>
                 </ATooltip>

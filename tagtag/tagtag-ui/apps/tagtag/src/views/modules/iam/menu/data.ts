@@ -144,7 +144,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'parentId',
     label: '上级菜单',
-    rules: undefined,
     formItemClass: 'col-span-2',
   },
 
@@ -194,7 +193,6 @@ export const formSchema: VbenFormProps['schema'] = [
     component: 'IconPicker',
     fieldName: 'icon',
     label: '菜单图标',
-    rules: undefined,
     dependencies: {
       show(values) {
         return values.menuType !== 2;
@@ -266,7 +264,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'isHidden',
     label: '是否隐藏',
-    rules: undefined,
     dependencies: {
       show(values) {
         return values.menuType !== 2;
@@ -285,7 +282,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'isKeepalive',
     label: '是否缓存',
-    rules: undefined,
     dependencies: {
       show(values) {
         return values.menuType === 1;
@@ -304,7 +300,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'isExternal',
     label: '是否外链',
-    rules: undefined,
     dependencies: {
       show(values) {
         return values.menuType !== 2;
@@ -359,7 +354,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'status',
     label: '状态',
-    rules: undefined,
     defaultValue: 1,
   },
 ];

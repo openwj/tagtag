@@ -30,8 +30,9 @@ export async function getDeptById(id: number | string) {
 /**
  * 分页查询部门列表
  */
+// 统一分页为 POST 请求，携带查询条件与分页参数
 export async function getDeptPage(params: ApiParams.PageFetchParams) {
-  return requestClient.get(`${Api.BaseApi}/page`, { params });
+  return requestClient.post(`${Api.BaseApi}/page`, params);
 }
 
 /**
@@ -58,16 +59,12 @@ export async function getDeptLevel(deptId: number | string) {
 /**
  * 统计部门下的用户数量
  */
-export async function countDeptUsers(deptId: number | string) {
-  return Promise.reject(new Error('countDeptUsers 未实现：后端暂不支持'));
-}
+// 删除未实现且未使用的方法：保持最小接口集合
 
 /**
  * 查询子部门列表
  */
-export async function getDeptChildren(deptId: number | string) {
-  return Promise.reject(new Error('getDeptChildren 未实现：后端暂不支持'));
-}
+// 删除未实现且未使用的方法：保持最小接口集合
 
 /**
  * 获取部门的所有子部门ID
@@ -114,22 +111,12 @@ export function updateDeptStatus(data: {
 /**
  * 批量更新部门状态
  */
-export function batchUpdateDeptStatus(data: {
-  ids: (number | string)[];
-  status: number;
-}) {
-  return Promise.reject(new Error('batchUpdateDeptStatus 未实现：后端暂不支持'));
-}
+// 删除未实现且未使用的方法：保持最小接口集合
 
 /**
  * 移动部门
  */
-export function moveDept(data: {
-  id: number | string;
-  targetParentId: number | string;
-}) {
-  return Promise.reject(new Error('moveDept 未实现：后端暂不支持'));
-}
+// 删除未实现且未使用的方法：保持最小接口集合
 
 /**
  * 检查部门编码是否存在
@@ -144,13 +131,9 @@ export function checkDeptCode(params: {
 /**
  * 检查部门是否有用户
  */
-export function checkDeptHasUsers(deptId: number | string) {
-  return Promise.reject(new Error('checkDeptHasUsers 未实现：后端暂不支持'));
-}
+// 删除未实现且未使用的方法：保持最小接口集合
 
 /**
  * 检查部门是否有子部门
  */
-export function checkDeptHasChildren(deptId: number | string) {
-  return Promise.reject(new Error('checkDeptHasChildren 未实现：后端暂不支持'));
-}
+// 删除未实现且未使用的方法：保持最小接口集合

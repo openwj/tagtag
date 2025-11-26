@@ -8,6 +8,7 @@ import {
   Empty as AEmpty,
   Input as AInput,
   Tree as ATree,
+  Tooltip as ATooltip,
   Spin as ASpin,
   Tag as ATag,
 } from 'ant-design-vue';

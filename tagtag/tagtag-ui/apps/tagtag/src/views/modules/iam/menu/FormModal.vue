@@ -6,9 +6,9 @@ import { useVbenModal } from '@vben/common-ui';
 import { useVbenForm } from '#/adapter/form';
 import {
   addMenu,
-  getMenu,
+  getMenuById,
   getMenuTree,
-  updateMenu,
+  editMenu,
 } from '#/api/modules/iam/menu';
 
 import { formSchema } from './data';
@@ -97,7 +97,7 @@ const [Modal, modalApi] = useVbenModal({
         parentId: Number(formData.parentId) || 0,
       };
 
-      await (isUpdate.value ? updateMenu(data) : addMenu(data));
+      await (isUpdate.value ? editMenu(data) : addMenu(data));
       modalApi.close();
       emit('success');
     }
@@ -134,7 +134,7 @@ const [Modal, modalApi] = useVbenModal({
 
         if (values.isUpdate && values.id) {
           // 编辑模式：获取菜单数据并设置表单值
-          const menu = await getMenu(values.id);
+          const menu = await getMenuById(values.id);
           if (menu) {
             // 使用展开运算符和辅助函数简化赋值
             const formValues = {

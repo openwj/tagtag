@@ -273,7 +273,7 @@ watch(
           :tree-data="treeData"
           :selectable="false"
           check-on-click-node
-          @check="handleCheck"
+          @check.passive="handleCheck"
         >
           <template #title="{ title, menuType, menuCode }">
             <div class="flex items-center gap-2">
