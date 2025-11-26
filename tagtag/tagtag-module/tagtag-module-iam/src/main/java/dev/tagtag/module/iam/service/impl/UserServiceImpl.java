@@ -11,6 +11,7 @@ import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.module.iam.convert.UserMapperConvert;
 import dev.tagtag.module.iam.entity.User;
 import dev.tagtag.module.iam.mapper.UserMapper;
+import dev.tagtag.module.iam.mapper.RoleMapper;
 import dev.tagtag.module.iam.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import dev.tagtag.framework.config.PageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private final PageProperties pageProperties;
     private final UserMapperConvert userMapperConvert;
+    private final RoleMapper roleMapper;
+    private final dev.tagtag.module.iam.convert.RoleMapperConvert roleMapperConvert;
 
     
 
@@ -41,7 +45,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
         IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
                 (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<UserDTO> dtoPage = page.convert(userMapperConvert::toDTO);
+        IPage<UserDTO> dtoPage = page.convert(e -> {
+            if (e instanceof dev.tagtag.module.iam.entity.vo.UserVO vo) {
+                return userMapperConvert.toDTO(vo);
+            }
+            return userMapperConvert.toDTO(e);
+        });
         return PageResults.of(dtoPage);
     }
 
@@ -140,5 +149,71 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             dto.setRoleIds(roleIds);
         }
         return dto;
+    }
+
+    /** 更新单个用户状态 */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
+    public void updateStatus(Long id, Integer status) {
+        if (id == null || status == null) return;
+        this.lambdaUpdate().eq(User::getId, id).set(User::getStatus, status).update();
+    }
+
+    /** 批量更新用户状态 */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
+    public void batchUpdateStatus(List<Long> ids, Integer status) {
+        if (ids == null || ids.isEmpty() || status == null) return;
+        this.lambdaUpdate().in(User::getId, ids).set(User::getStatus, status).update();
+    }
+
+    /** 批量删除用户 */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
+    public void batchDelete(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return;
+        this.removeBatchByIds(ids);
+    }
+
+    /** 重置用户密码（BCrypt 加密并记录更新时间） */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
+    public void resetPassword(Long id, String password) {
+        if (id == null || password == null || password.isBlank()) return;
+        String encoded = new BCryptPasswordEncoder().encode(password);
+        this.lambdaUpdate().eq(User::getId, id)
+            .set(User::getPassword, encoded)
+            .set(User::getPasswordUpdatedAt, java.time.LocalDateTime.now())
+            .update();
+    }
+
+    /** 查询用户已分配角色列表（DTO） */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<dev.tagtag.contract.iam.dto.RoleDTO> listRolesByUserId(Long userId) {
+        if (userId == null) return java.util.Collections.emptyList();
+        java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(userId);
+        if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptyList();
+        java.util.List<dev.tagtag.module.iam.entity.Role> roles = roleMapper.selectBatchIds(roleIds);
+        return roleMapperConvert.toDTOList(roles);
+    }
+
+    /** 批量为用户分配角色（覆盖式：每个用户先删后插） */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
+    public void assignRolesBatch(java.util.List<Long> userIds, java.util.List<Long> roleIds) {
+        if (userIds == null || userIds.isEmpty()) return;
+        for (Long uid : userIds) {
+            if (uid == null) continue;
+            baseMapper.deleteUserRoles(uid);
+            if (roleIds != null && !roleIds.isEmpty()) {
+                baseMapper.insertUserRoles(uid, roleIds);
+            }
+        }
     }
 }

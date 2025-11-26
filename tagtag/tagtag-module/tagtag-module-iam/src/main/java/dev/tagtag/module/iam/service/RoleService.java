@@ -69,4 +69,7 @@ public interface RoleService {
      * @return 是否存在
      */
     boolean existsByName(String name);
+
+    /** 查询所有角色（简单列表） */
+    java.util.List<RoleDTO> listAll();
 }

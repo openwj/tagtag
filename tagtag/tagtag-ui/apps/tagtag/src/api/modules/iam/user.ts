@@ -95,3 +95,62 @@ export function deleteUser(id: number | string) {
 export function assignUserRoles(id: number | string, roleIds: Array<number>) {
   return requestClient.post(`${Api.BaseApi}/${id}/roles`, roleIds);
 }
+
+/**
+ * 批量为用户分配角色（覆盖式）
+ * @param userIds 用户ID列表
+ * @param roleIds 角色ID列表
+ */
+export function batchAssignRoles(
+  userIds: Array<number | string>,
+  roleIds: Array<number>,
+) {
+  return requestClient.post(`${Api.BaseApi}/roles/batch`, { userIds, roleIds });
+}
+
+/**
+ * 更新单个用户状态
+ * @param id 用户ID
+ * @param status 用户状态（0=禁用，1=启用）
+ */
+export function updateUserStatus(id: number | string, status: number) {
+  return requestClient.put(`${Api.BaseApi}/${id}/status`, { status });
+}
+
+/**
+ * 批量更新用户状态
+ * @param ids 用户ID列表
+ * @param status 用户状态（0=禁用，1=启用）
+ */
+export function batchUpdateUserStatus(
+  ids: Array<number | string>,
+  status: number,
+) {
+  return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, status });
+}
+
+/**
+ * 批量删除用户
+ * @param ids 用户ID列表
+ */
+export function batchDeleteUsers(ids: Array<number | string>) {
+  return requestClient.delete(`${Api.BaseApi}/batch`, { data: { ids } });
+}
+
+/**
+ * 重置用户密码
+ * @param id 用户ID
+ * @param password 新密码
+ */
+export function resetUserPassword(id: number | string, password: string) {
+  return requestClient.put(`${Api.BaseApi}/${id}/password`, { password });
+}
+
+/**
+ * 查询用户已分配的角色
+ * @param id 用户ID
+ * @returns 角色列表
+ */
+export function getUserRoles(id: number | string) {
+  return requestClient.get(`${Api.BaseApi}/${id}/roles`);
+}

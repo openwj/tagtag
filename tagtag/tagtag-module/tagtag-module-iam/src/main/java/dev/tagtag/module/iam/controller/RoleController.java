@@ -87,6 +87,13 @@ public class RoleController {
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
+    /** 查询所有角色（简单列表） */
+    @GetMapping
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    public Result<java.util.List<RoleDTO>> listAll() {
+        return Result.ok(roleService.listAll());
+    }
+
     /** 查询角色的菜单列表（含按钮） */
     @GetMapping("/{id}/menus")
     @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")

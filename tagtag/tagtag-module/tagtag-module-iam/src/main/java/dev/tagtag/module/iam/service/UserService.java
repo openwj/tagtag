@@ -32,4 +32,22 @@ public interface UserService {
      * @return 用户数据
      */
     UserDTO getByUsername(String username);
+
+    /** 更新单个用户状态 */
+    void updateStatus(Long id, Integer status);
+
+    /** 批量更新用户状态 */
+    void batchUpdateStatus(List<Long> ids, Integer status);
+
+    /** 批量删除用户 */
+    void batchDelete(List<Long> ids);
+
+    /** 重置用户密码 */
+    void resetPassword(Long id, String password);
+
+    /** 查询用户已分配角色列表（DTO） */
+    List<dev.tagtag.contract.iam.dto.RoleDTO> listRolesByUserId(Long userId);
+
+    /** 批量为用户分配角色（覆盖式） */
+    void assignRolesBatch(java.util.List<Long> userIds, java.util.List<Long> roleIds);
 }

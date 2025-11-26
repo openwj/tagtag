@@ -185,4 +185,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         if (roleId == null) return Collections.emptyList();
         return baseMapper.selectMenuIdsByRoleId(roleId);
     }
+
+    /** 查询所有角色（简单列表） */
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<RoleDTO> listAll() {
+        java.util.List<Role> entities = this.list();
+        return roleMapperConvert.toDTOList(entities);
+    }
 }

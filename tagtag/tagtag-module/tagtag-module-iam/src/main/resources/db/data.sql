@@ -1,6 +1,6 @@
 -- 管理员用户
-INSERT INTO iam_user (username, password, nickname, status)
-SELECT 'admin', '{bcrypt}$2a$10$QwZFYsCblPhgBHXBgmTdPeJ9IWAb25jOuscU6pvt6dFSmX2rTtO/O', '管理员', 1
+INSERT INTO iam_user (username, password, nickname, status, is_admin)
+SELECT 'admin', '{bcrypt}$2a$10$QwZFYsCblPhgBHXBgmTdPeJ9IWAb25jOuscU6pvt6dFSmX2rTtO/O', '管理员', 1, 1
 WHERE NOT EXISTS (SELECT 1 FROM iam_user WHERE username='admin');
 
 -- 管理员角色（显式包含统一字段：role_type/sort/remark）

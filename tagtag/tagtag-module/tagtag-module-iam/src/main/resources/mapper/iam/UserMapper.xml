@@ -7,67 +7,70 @@
       - q: UserQueryDTO 查询条件
       - orderList: List<SortField> 排序字段（字段名将按白名单映射到列）
     -->
-    <select id="selectPage" resultType="dev.tagtag.module.iam.entity.User">
+    <select id="selectPage" resultType="dev.tagtag.module.iam.entity.vo.UserVO">
         SELECT
-            id,
-            username,
-            nickname,
-            email,
-            mobile,
-            gender,
-            dept_id AS deptId,
-            status,
-            avatar,
-            remark,
-            employee_no AS employeeNo,
-            job_title AS jobTitle,
-            birthday,
-            entry_date AS entryDate,
-            last_login_time AS lastLoginTime,
-            last_login_ip AS lastLoginIp,
-            password_updated_at AS passwordUpdatedAt,
-            create_time AS createTime,
-            update_time AS updateTime,
-            create_by AS createBy,
-            update_by AS updateBy
-        FROM iam_user
+            u.id,
+            u.username,
+            u.nickname,
+            u.email,
+            u.phone,
+            u.gender,
+            u.dept_id AS deptId,
+            u.status,
+            u.is_admin AS isAdmin,
+            u.avatar,
+            u.remark,
+            u.employee_no AS employeeNo,
+            u.position AS position,
+            u.birthday,
+            u.entry_date AS entryDate,
+            u.last_login_time AS lastLoginTime,
+            u.last_login_ip AS lastLoginIp,
+            u.password_updated_at AS passwordUpdatedAt,
+            u.create_time AS createTime,
+            u.update_time AS updateTime,
+            u.create_by AS createBy,
+            u.update_by AS updateBy,
+            d.name AS deptName
+        FROM iam_user u
+        LEFT JOIN iam_dept d ON d.id = u.dept_id
         <where>
             <if test="q != null">
                 <if test="q.username != null and q.username != ''">
-                    AND username LIKE CONCAT('%', #{q.username}, '%')
+                    AND u.username LIKE CONCAT('%', #{q.username}, '%')
                 </if>
                 <if test="q.nickname != null and q.nickname != ''">
-                    AND nickname LIKE CONCAT('%', #{q.nickname}, '%')
+                    AND u.nickname LIKE CONCAT('%', #{q.nickname}, '%')
                 </if>
                 <if test="q.status != null">
-                    AND status = #{q.status.code}
+                    AND u.status = #{q.status.code}
                 </if>
                 <if test="q.gender != null">
-                    AND gender = #{q.gender.code}
+                    AND u.gender = #{q.gender.code}
                 </if>
                 <if test="q.email != null and q.email != ''">
-                    AND email LIKE CONCAT('%', #{q.email}, '%')
+                    AND u.email LIKE CONCAT('%', #{q.email}, '%')
                 </if>
-                <if test="q.mobile != null and q.mobile != ''">
-                    AND mobile LIKE CONCAT('%', #{q.mobile}, '%')
+                <if test="q.phone != null and q.phone != ''">
+                    AND u.phone LIKE CONCAT('%', #{q.phone}, '%')
                 </if>
                 <if test="q.deptId != null">
-                    AND dept_id = #{q.deptId}
+                    AND u.dept_id = #{q.deptId}
                 </if>
                 <if test="q.employeeNo != null and q.employeeNo != ''">
-                    AND employee_no LIKE CONCAT('%', #{q.employeeNo}, '%')
+                    AND u.employee_no LIKE CONCAT('%', #{q.employeeNo}, '%')
                 </if>
                 <if test="q.entryDateRange != null and q.entryDateRange.start != null">
-                    AND entry_date &gt;= #{q.entryDateRange.start}
+                    AND u.entry_date &gt;= #{q.entryDateRange.start}
                 </if>
                 <if test="q.entryDateRange != null and q.entryDateRange.end != null">
-                    AND entry_date &lt;= #{q.entryDateRange.end}
+                    AND u.entry_date &lt;= #{q.entryDateRange.end}
                 </if>
                 <if test="q.createTimeRange != null and q.createTimeRange.start != null">
-                    AND create_time &gt;= #{q.createTimeRange.start}
+                    AND u.create_time &gt;= #{q.createTimeRange.start}
                 </if>
                 <if test="q.createTimeRange != null and q.createTimeRange.end != null">
-                    AND create_time &lt;= #{q.createTimeRange.end}
+                    AND u.create_time &lt;= #{q.createTimeRange.end}
                 </if>
             </if>
         </where>
@@ -76,7 +79,7 @@
             ${orderBySql}
         </if>
         <if test="orderBySql == null or orderBySql == ''">
-            ORDER BY id ASC
+            ORDER BY u.id ASC
         </if>
     </select>
 

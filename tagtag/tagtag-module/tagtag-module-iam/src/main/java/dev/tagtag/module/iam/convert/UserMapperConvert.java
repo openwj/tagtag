@@ -8,6 +8,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import dev.tagtag.framework.mapstruct.MapStructConfig;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.module.iam.entity.User;
+import dev.tagtag.module.iam.entity.vo.UserVO;
 import java.util.List;
 
 /**
@@ -19,6 +20,10 @@ public interface UserMapperConvert {
     /** 将实体转换为DTO（忽略 roleIds，服务层补充） */
     @Mapping(target = "roleIds", ignore = true)
     UserDTO toDTO(User entity);
+
+    /** 将视图对象转换为DTO（包含 deptName） */
+    @Mapping(target = "roleIds", ignore = true)
+    UserDTO toDTO(UserVO entity);
 
     /** 将DTO转换为实体 */
     User toEntity(UserDTO dto);

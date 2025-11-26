@@ -145,6 +145,14 @@ export function batchUpdateRoleStatus(
 }
 
 /**
+ * 查询所有角色（简单列表）
+ * @returns 角色列表
+ */
+export function getAllRoles() {
+  return requestClient.get(`${Api.BaseApi}`);
+}
+
+/**
  * 判断角色编码是否存在
  * @param code 角色编码
  */

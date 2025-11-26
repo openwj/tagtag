@@ -20,7 +20,7 @@ public class UserQueryDTO {
     private GenderEnum gender;
     private Long roleId;
     private String email;
-    private String mobile;
+    private String phone;
     private TimeRangeDTO createTimeRange;
     private Long deptId;
     private String employeeNo;

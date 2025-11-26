@@ -9,12 +9,13 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import {
   Button as AButton,
   Divider as ADivider,
+  Modal as AModal,
   Popconfirm as APopconfirm,
   Switch as ASwitch,
   Tooltip as ATooltip,
-  Modal as AModal,
   Dropdown,
   Menu,
+  message,
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -33,9 +34,7 @@ const formOptions: VbenFormProps = {
   collapsed: true,
   schema: searchFormSchema,
   showCollapseButton: true,
-  baseColProps: { span: 6 },
   commonConfig: {
-    size: 'small',
     labelWidth: 90,
   },
 };
@@ -73,25 +72,8 @@ const gridOptions: VxeGridProps = {
     },
     ajax: {
       query: async ({ page }, formValues) => {
-        const pageNo = page?.currentPage || 1;
-        const pageSize = page?.pageSize || 10;
-
-        const query: Record<string, any> = {};
-        if (formValues && typeof formValues === 'object') {
-          Object.keys(formValues).forEach((key) => {
-            const value = (formValues as Record<string, any>)[key];
-            if (value !== null && value !== undefined && value !== '') {
-              query[key] = value;
-            }
-          });
-        }
-
-        const res = await getRolePage(query, { pageNo, pageSize });
-
-        return {
-          list: Array.isArray(res?.list) ? res.list : [],
-          total: Number(res?.total ?? 0),
-        };
+        const { list, total } = await getRolePage(formValues, page);
+        return { list, total };
       },
     },
   },
@@ -143,7 +125,7 @@ const handleStatusChange = async (row: any, checked: boolean) => {
     // checked为true表示启用，所以disabled应该为!checked
     await updateRoleStatus(row.id, !checked);
     message.success('状态更新成功');
-  } catch (e) {
+  } catch {
     // 失败回滚到原状态
     row.status = prevStatus;
   } finally {
@@ -267,7 +249,12 @@ const handleSuccess = () => {
     <Grid table-title="角色信息" table-title-help="系统角色信息">
       <template #toolbar-tools>
         <div class="flex items-center gap-2">
-          <AButton class="flex items-center" type="primary" size="small" @click="handleAdd">
+          <AButton
+            class="flex items-center"
+            type="primary"
+            size="small"
+            @click="handleAdd"
+          >
             <template #icon>
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
@@ -280,15 +267,51 @@ const handleSuccess = () => {
             </template>
             <template #overlay>
               <Menu>
-                <Menu.Item key="enable" @click="() => AModal.confirm({ title: '批量启用', content: '确定要启用选中的角色吗？', okText: '确定', cancelText: '取消', onOk: handleBatchEnable })">
+                <Menu.Item
+                  key="enable"
+                  @click="
+                    () =>
+                      AModal.confirm({
+                        title: '批量启用',
+                        content: '确定要启用选中的角色吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        onOk: handleBatchEnable,
+                      })
+                  "
+                >
                   <span class="icon-[lucide--check-circle] mr-1"></span>
                   启用
                 </Menu.Item>
-                <Menu.Item key="disable" @click="() => AModal.confirm({ title: '批量禁用', content: '确定要禁用选中的角色吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDisable })">
+                <Menu.Item
+                  key="disable"
+                  @click="
+                    () =>
+                      AModal.confirm({
+                        title: '批量禁用',
+                        content: '确定要禁用选中的角色吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        onOk: handleBatchDisable,
+                      })
+                  "
+                >
                   <span class="icon-[lucide--x-circle] mr-1"></span>
                   禁用
                 </Menu.Item>
-                <Menu.Item key="delete" @click="() => AModal.confirm({ title: '批量删除', content: '确定要删除选中的角色吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDelete })">
+                <Menu.Item
+                  key="delete"
+                  @click="
+                    () =>
+                      AModal.confirm({
+                        title: '批量删除',
+                        content: '确定要删除选中的角色吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        onOk: handleBatchDelete,
+                      })
+                  "
+                >
                   <span class="icon-[lucide--trash-2] mr-1"></span>
                   删除
                 </Menu.Item>

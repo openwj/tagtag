@@ -10,13 +10,13 @@ import { Icon } from '@iconify/vue';
 import {
   Button as AButton,
   Divider as ADivider,
+  Modal as AModal,
   Popconfirm as APopconfirm,
   Switch as ASwitch,
   Tag as ATag,
   Tooltip as ATooltip,
   Dropdown,
   Menu,
-  Modal as AModal,
   message,
 } from 'ant-design-vue';
 
@@ -39,9 +39,8 @@ const formOptions: VbenFormProps = {
   showCollapseButton: true,
   // 默认折叠状态
   collapsed: true,
-  baseColProps: { span: 6 },
+
   commonConfig: {
-    size: 'small',
     labelWidth: 90,
   },
 };
@@ -267,28 +266,64 @@ const handleStatusChange = async (
     >
       <template #toolbar-tools>
         <div class="flex items-center gap-2">
-          <AButton class="flex items-center" type="primary" size="small" @click="handleAdd">
+          <AButton class="flex items-center" type="primary" @click="handleAdd">
             <template #icon>
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
             新增
           </AButton>
-          <Dropdown.Button size="small" :disabled="batchLoading">
+          <Dropdown.Button :disabled="batchLoading">
             批量操作
             <template #icon>
               <span class="icon-[lucide--chevrons-down]"></span>
             </template>
             <template #overlay>
               <Menu>
-                <Menu.Item key="enable" @click="() => AModal.confirm({ title: '批量启用', content: '确定要启用选中的菜单吗？', okText: '确定', cancelText: '取消', onOk: handleBatchEnable })">
+                <Menu.Item
+                  key="enable"
+                  @click="
+                    () =>
+                      AModal.confirm({
+                        title: '批量启用',
+                        content: '确定要启用选中的菜单吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        onOk: handleBatchEnable,
+                      })
+                  "
+                >
                   <span class="icon-[lucide--check-circle] mr-1"></span>
                   启用
                 </Menu.Item>
-                <Menu.Item key="disable" @click="() => AModal.confirm({ title: '批量禁用', content: '确定要禁用选中的菜单吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDisable })">
+                <Menu.Item
+                  key="disable"
+                  @click="
+                    () =>
+                      AModal.confirm({
+                        title: '批量禁用',
+                        content: '确定要禁用选中的菜单吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        onOk: handleBatchDisable,
+                      })
+                  "
+                >
                   <span class="icon-[lucide--x-circle] mr-1"></span>
                   禁用
                 </Menu.Item>
-                <Menu.Item key="delete" @click="() => AModal.confirm({ title: '批量删除', content: '确定要删除选中的菜单吗？', okText: '确定', cancelText: '取消', onOk: handleBatchDelete })">
+                <Menu.Item
+                  key="delete"
+                  @click="
+                    () =>
+                      AModal.confirm({
+                        title: '批量删除',
+                        content: '确定要删除选中的菜单吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        onOk: handleBatchDelete,
+                      })
+                  "
+                >
                   <span class="icon-[lucide--trash-2] mr-1"></span>
                   删除
                 </Menu.Item>

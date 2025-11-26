@@ -20,20 +20,21 @@ public class UserDTO {
     private String password;
     private String nickname;
     private String email;
-    private String mobile;
+    private String phone;
     private Integer gender;
     private Long deptId;
     private Integer status;
+    private Integer isAdmin;
     private List<Long> roleIds;
     private LocalDateTime createTime;
     private String avatar;
     private String remark;
     private String employeeNo;
-    private String jobTitle;
+    private String position;
     private LocalDate birthday;
     private LocalDate entryDate;
     private LocalDateTime lastLoginTime;
     private String lastLoginIp;
     private LocalDateTime passwordUpdatedAt;
+    private String deptName;
 }
-
