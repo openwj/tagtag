@@ -7,9 +7,11 @@ import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.UserDTO;
+import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.module.iam.convert.UserMapperConvert;
 import dev.tagtag.module.iam.entity.User;
+import dev.tagtag.module.iam.entity.Role;
 import dev.tagtag.module.iam.mapper.UserMapper;
 import dev.tagtag.module.iam.mapper.RoleMapper;
 import dev.tagtag.module.iam.service.UserService;
@@ -43,8 +45,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(readOnly = true)
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
+        // 先规范化字符串条件，减少 XML 中的冗余空串判断
+        UserQueryDTO q = normalizeQuery(query);
         IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
-                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
+                (p, orderBy) -> baseMapper.selectPage(p, q, orderBy));
         IPage<UserDTO> dtoPage = page.convert(e -> {
             if (e instanceof dev.tagtag.module.iam.entity.vo.UserVO vo) {
                 return userMapperConvert.toDTO(vo);
@@ -194,11 +198,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /** 查询用户已分配角色列表（DTO） */
     @Override
     @Transactional(readOnly = true)
-    public java.util.List<dev.tagtag.contract.iam.dto.RoleDTO> listRolesByUserId(Long userId) {
+    public List<RoleDTO> listRolesByUserId(Long userId) {
         if (userId == null) return java.util.Collections.emptyList();
-        java.util.List<Long> roleIds = baseMapper.selectRoleIdsByUserId(userId);
+        List<Long> roleIds = baseMapper.selectRoleIdsByUserId(userId);
         if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptyList();
-        java.util.List<dev.tagtag.module.iam.entity.Role> roles = roleMapper.selectBatchIds(roleIds);
+        List<Role> roles = roleMapper.selectBatchIds(roleIds);
         return roleMapperConvert.toDTOList(roles);
     }
 
@@ -206,7 +210,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
-    public void assignRolesBatch(java.util.List<Long> userIds, java.util.List<Long> roleIds) {
+    public void assignRolesBatch(List<Long> userIds, List<Long> roleIds) {
         if (userIds == null || userIds.isEmpty()) return;
         for (Long uid : userIds) {
             if (uid == null) continue;
@@ -215,5 +219,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 baseMapper.insertUserRoles(uid, roleIds);
             }
         }
+    }
+
+    /**
+     * 规范化查询条件中的字符串字段（空白转 null）
+     */
+    private UserQueryDTO normalizeQuery(UserQueryDTO q) {
+        if (q == null) return null;
+        q.setUsername(dev.tagtag.common.util.Strings.normalizeToNull(q.getUsername()));
+        q.setNickname(dev.tagtag.common.util.Strings.normalizeToNull(q.getNickname()));
+        q.setEmail(dev.tagtag.common.util.Strings.normalizeToNull(q.getEmail()));
+        q.setPhone(dev.tagtag.common.util.Strings.normalizeToNull(q.getPhone()));
+        q.setEmployeeNo(dev.tagtag.common.util.Strings.normalizeToNull(q.getEmployeeNo()));
+        return q;
     }
 }

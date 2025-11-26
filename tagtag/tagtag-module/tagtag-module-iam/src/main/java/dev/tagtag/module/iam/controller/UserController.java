@@ -1,11 +1,9 @@
 package dev.tagtag.module.iam.controller;
 
-import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
-import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.module.iam.service.UserService;
 import dev.tagtag.common.constant.GlobalConstants;
 import lombok.AllArgsConstructor;
