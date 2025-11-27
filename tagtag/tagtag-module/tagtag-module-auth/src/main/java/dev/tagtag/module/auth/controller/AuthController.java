@@ -86,8 +86,15 @@ public class AuthController {
     @RateLimit(key = "auth:refresh", periodSeconds = 60, permits = 30, message = "刷新频率过快，请稍后再试")
     @PostMapping("/refresh")
     public Result<TokenDTO> refresh(@Valid @RequestBody RefreshRequest req) {
-        TokenDTO dto = authService.refresh(req.getRefreshToken());
-        return Result.ok(dto);
+        try {
+            TokenDTO dto = authService.refresh(req.getRefreshToken());
+            return Result.ok(dto);
+        } catch (BusinessException ex) {
+            if (ex.getErrorCode() == ErrorCode.UNAUTHORIZED) {
+                return Result.fail(ErrorCode.UNAUTHORIZED, ex.getMessage());
+            }
+            throw ex;
+        }
     }
 
     /**
