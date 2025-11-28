@@ -255,6 +255,30 @@ const handleStatusChange = async (
     row.statusLoading = false;
   }
 };
+
+/**
+ * 展开树形菜单（全量）
+ */
+const handleExpandAllMenus = async () => {
+  try {
+    gridApi.grid?.setAllTreeExpand(true);
+  } catch {
+    gridApi.reload();
+  }
+};
+
+/**
+ * 收起树形菜单（全量）
+ */
+const handleCollapseAllMenus = async () => {
+  try {
+    gridApi.grid?.setAllTreeExpand(false);
+  } catch {
+    gridApi.grid?.clearTreeExpand();
+    gridApi.reload();
+  }
+};
+
 </script>
 
 <template>
@@ -265,8 +289,8 @@ const handleStatusChange = async (
       table-title-help="系统菜单信息"
     >
       <template #toolbar-tools>
-        <div class="flex items-center gap-2">
-          <AButton class="flex items-center" type="primary" @click="handleAdd">
+        <div class="flex items-center gap-3">
+          <AButton class="flex items-center px-2" type="primary" @click="handleAdd">
             <template #icon>
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
@@ -292,7 +316,7 @@ const handleStatusChange = async (
                       })
                   "
                 >
-                  <span class="icon-[lucide--check-circle] mr-1"></span>
+                  <span class="icon-[lucide--check-circle] mr-2"></span>
                   启用
                 </Menu.Item>
                 <Menu.Item
@@ -308,7 +332,7 @@ const handleStatusChange = async (
                       })
                   "
                 >
-                  <span class="icon-[lucide--x-circle] mr-1"></span>
+                  <span class="icon-[lucide--x-circle] mr-2"></span>
                   禁用
                 </Menu.Item>
                 <Menu.Item
@@ -324,37 +348,51 @@ const handleStatusChange = async (
                       })
                   "
                 >
-                  <span class="icon-[lucide--trash-2] mr-1"></span>
+                  <span class="icon-[lucide--trash-2] mr-2"></span>
                   删除
                 </Menu.Item>
               </Menu>
             </template>
           </Dropdown.Button>
+          <ATooltip title="展开全部">
+            <AButton
+              size="small"
+              shape="circle"
+              type="default"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+              @click="handleExpandAllMenus"
+            >
+              <span class="icon-[material-symbols--unfold-more]"></span>
+            </AButton>
+          </ATooltip>
+          <ATooltip title="收起全部">
+            <AButton
+              size="small"
+              shape="circle"
+              type="default"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+              @click="handleCollapseAllMenus"
+            >
+              <span class="icon-[material-symbols--unfold-less]"></span>
+            </AButton>
+          </ATooltip>
         </div>
       </template>
       <template #icon="{ row }">
-        <div class="group flex cursor-help items-center justify-center">
-          <div v-if="row.icon">
-            <!-- 主图标 -->
-            <!-- <Icon :icon="row.icon" /> -->
-            <Icon :icon="row.icon" color="orange" v-if="row.menuType === 0" />
-            <Icon :icon="row.icon" color="blue" v-if="row.menuType === 1" />
-            <Icon :icon="row.icon" color="green" v-if="row.menuType === 2" />
+        <ATooltip :title="row.icon || (row.menuType === 0 ? 'lucide:folder' : row.menuType === 1 ? 'lucide:file-text' : 'lucide:zap')">
+          <div class="group flex cursor-help items-center justify-center">
+            <div v-if="row.icon">
+              <Icon :icon="row.icon" color="orange" v-if="row.menuType === 0" />
+              <Icon :icon="row.icon" color="blue" v-if="row.menuType === 1" />
+              <Icon :icon="row.icon" color="green" v-if="row.menuType === 2" />
+            </div>
+            <div v-else>
+              <Icon icon="lucide:folder" color="orange" v-if="row.menuType === 0" />
+              <Icon icon="lucide:file-text" color="blue" v-if="row.menuType === 1" />
+              <Icon icon="lucide:zap" color="green" v-if="row.menuType === 2" />
+            </div>
           </div>
-          <div v-else>
-            <Icon
-              icon="lucide:folder"
-              color="orange"
-              v-if="row.menuType === 0"
-            />
-            <Icon
-              icon="lucide:file-text"
-              color="blue"
-              v-if="row.menuType === 1"
-            />
-            <Icon icon="lucide:zap" color="green" v-if="row.menuType === 2" />
-          </div>
-        </div>
+        </ATooltip>
       </template>
       <template #status="{ row }">
         <ASwitch
@@ -398,10 +436,11 @@ const handleStatusChange = async (
         <div class="flex items-center justify-center gap-0.5">
           <ATooltip title="新增子菜单">
             <AButton
-              class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               shape="circle"
               size="small"
               type="primary"
+              aria-label="新增子菜单"
               @click="handleAdd(row)"
             >
               <template #icon>
@@ -414,11 +453,12 @@ const handleStatusChange = async (
 
           <ATooltip title="编辑菜单">
             <AButton
-              class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
               size="small"
               type="primary"
+              aria-label="编辑菜单"
               @click="handleEdit(row)"
             >
               <template #icon>
@@ -438,13 +478,14 @@ const handleStatusChange = async (
           >
             <ATooltip title="删除菜单">
               <AButton
-                class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+                class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                 danger
                 ghost
                 shape="circle"
                 size="small"
                 type="primary"
                 :loading="loading"
+                aria-label="删除菜单"
               >
                 <template #icon>
                   <div class="icon-[lucide--trash-2] text-xs"></div>

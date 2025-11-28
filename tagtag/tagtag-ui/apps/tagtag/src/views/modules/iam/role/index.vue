@@ -250,9 +250,8 @@ const handleSuccess = () => {
       <template #toolbar-tools>
         <div class="flex items-center gap-2">
           <AButton
-            class="flex items-center"
+            class="flex items-center px-2"
             type="primary"
-            size="small"
             @click="handleAdd"
           >
             <template #icon>
@@ -260,7 +259,7 @@ const handleSuccess = () => {
             </template>
             新增
           </AButton>
-          <Dropdown.Button size="small" :disabled="batchLoading">
+          <Dropdown.Button class="px-2" :disabled="batchLoading">
             批量操作
             <template #icon>
               <span class="icon-[lucide--chevrons-down]"></span>
@@ -366,7 +365,7 @@ const handleSuccess = () => {
         <div class="flex items-center justify-center gap-0.5">
           <ATooltip title="编辑角色">
             <AButton
-              class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
               size="small"
@@ -390,7 +389,7 @@ const handleSuccess = () => {
           >
             <ATooltip title="删除角色">
               <AButton
-                class="flex h-6 w-6 items-center justify-center p-0 transition-transform hover:scale-105"
+                class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                 danger
                 ghost
                 shape="circle"

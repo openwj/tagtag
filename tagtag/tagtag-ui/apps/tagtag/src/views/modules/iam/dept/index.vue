@@ -127,7 +127,7 @@ const handleSuccess = () => {
       table-title-help="公司组织架构信息"
     >
       <template #toolbar-tools>
-        <AButton class="flex items-center" type="primary" @click="handleAdd">
+        <AButton class="flex items-center px-2" type="primary" @click="handleAdd">
           <template #icon>
             <span class="icon-[material-symbols--add-circle] mr-1"></span>
           </template>
@@ -153,7 +153,7 @@ const handleSuccess = () => {
         <div class="flex items-center justify-center">
           <ATooltip title="新增">
             <AButton
-              class="flex items-center justify-center"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
               size="small"
@@ -169,7 +169,7 @@ const handleSuccess = () => {
           <ADivider type="vertical" />
           <ATooltip title="编辑">
             <AButton
-              class="flex items-center justify-center"
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
               size="small"
@@ -193,7 +193,7 @@ const handleSuccess = () => {
           >
             <ATooltip title="删除">
               <AButton
-                class="flex items-center justify-center"
+                class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                 danger
                 ghost
                 shape="circle"

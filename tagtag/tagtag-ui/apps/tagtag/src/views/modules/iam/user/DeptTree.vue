@@ -266,8 +266,9 @@ defineExpose({ clearSelection });
         <ATooltip title="展开全部">
           <AButton
             size="small"
-            type="text"
-            class="flex h-7 w-7 items-center justify-center p-0"
+            shape="circle"
+            type="default"
+            class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
             @click="expandAll"
           >
             <span class="icon-[material-symbols--unfold-more]"></span>
@@ -276,8 +277,9 @@ defineExpose({ clearSelection });
         <ATooltip title="收起全部">
           <AButton
             size="small"
-            type="text"
-            class="hidden sm:flex h-7 w-7 items-center justify-center p-0"
+            shape="circle"
+            type="default"
+            class="hidden sm:flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
             @click="collapseAll"
           >
             <span class="icon-[material-symbols--unfold-less]"></span>
