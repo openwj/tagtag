@@ -86,15 +86,8 @@ public class AuthController {
     @RateLimit(key = "auth:refresh", periodSeconds = 60, permits = 30, message = "刷新频率过快，请稍后再试")
     @PostMapping("/refresh")
     public Result<TokenDTO> refresh(@Valid @RequestBody RefreshRequest req) {
-        try {
-            TokenDTO dto = authService.refresh(req.getRefreshToken());
-            return Result.ok(dto);
-        } catch (BusinessException ex) {
-            if (ex.getErrorCode() == ErrorCode.UNAUTHORIZED) {
-                return Result.fail(ErrorCode.UNAUTHORIZED, ex.getMessage());
-            }
-            throw ex;
-        }
+        TokenDTO dto = authService.refresh(req.getRefreshToken());
+        return Result.ok(dto);
     }
 
     /**
@@ -131,6 +124,9 @@ public class AuthController {
     @GetMapping("/me")
     public Result<UserDTO> me(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
         String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        if (!valid) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
+        }
         String subject = jwtService.getSubject(token);
         UserDTO user = userApi.getUserByUsername(subject).getData();
         if (user != null) {

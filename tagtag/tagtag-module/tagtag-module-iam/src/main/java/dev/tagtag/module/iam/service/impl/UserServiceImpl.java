@@ -137,7 +137,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "userByUsername", key = "#root.args[0]", unless = "#result == null")
+    @Cacheable(cacheNames = "userByUsername", key = "#root.args[0]", condition = "#root.args[0] != null && #root.args[0].length() > 0", unless = "#result == null")
     public UserDTO getByUsername(String username) {
         if (username == null || username.isEmpty()) {
             return null;

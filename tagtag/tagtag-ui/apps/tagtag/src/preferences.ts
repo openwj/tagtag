@@ -11,7 +11,7 @@ export const overridesPreferences = defineOverridesPreferences({
     name: import.meta.env.VITE_APP_TITLE,
     layout: 'sidebar-mixed-nav',
     enableRefreshToken: true,
-    loginExpiredMode: 'modal',
+    loginExpiredMode: 'page',
     accessMode: 'mixed', // backend
   },
   sidebar: {

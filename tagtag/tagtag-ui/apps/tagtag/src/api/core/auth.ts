@@ -41,12 +41,14 @@ export async function loginApi(data: AuthApi.LoginParams) {
  * @param data 刷新参数，包含 `refreshToken`
  * @returns 新的令牌信息，含 `accessToken` 与可选 `refreshToken`
  */
+/**
+ * 刷新 accessToken（统一 client 与拦截器）
+ * Refresh access token using persisted refresh token
+ * @param data 刷新参数，包含 `refreshToken`
+ * @returns 新的令牌信息，含 `accessToken` 与可选 `refreshToken`
+ */
 export async function refreshTokenApi(data: AuthApi.RefreshTokenParams) {
-  return baseRequestClient.post<AuthApi.LoginResult>(
-    '/auth/refresh',
-    data,
-    { responseReturn: 'data' },
-  );
+  return requestClient.post<AuthApi.LoginResult>('/auth/refresh', data);
 }
 
 /**
