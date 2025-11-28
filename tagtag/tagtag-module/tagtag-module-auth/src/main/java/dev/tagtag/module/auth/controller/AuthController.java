@@ -115,6 +115,7 @@ public class AuthController {
      * @param req 注册请求
      * @return 操作结果
      */
+    @RateLimit(key = "auth:register", periodSeconds = 60, permits = 10, message = "注册请求过多，请稍后再试")
     @PostMapping("/register")
     public Result<Void> register(@Valid @RequestBody RegisterRequest req) {
         authService.register(req.getUsername(), req.getPassword());

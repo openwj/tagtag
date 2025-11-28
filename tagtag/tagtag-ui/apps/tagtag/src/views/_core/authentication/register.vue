@@ -2,12 +2,14 @@
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
-import { computed, h, ref } from 'vue';
+import { computed, h, ref, markRaw } from 'vue';
 
-import { AuthenticationRegister, z } from '@vben/common-ui';
-import { registerApi, loginApi } from '#/api/core/auth';
+import { AuthenticationRegister, ImageCaptchaInput, z } from '@vben/common-ui';
+import { registerApi } from '#/api/core/auth';
+import { fetchImageCaptchaApi } from '#/api/core/captcha';
 import { useAuthStore } from '#/store';
 import { $t } from '@vben/locales';
+import { notification } from 'ant-design-vue';
 
 defineOptions({ name: 'Register' });
 
@@ -81,18 +83,39 @@ const formSchema = computed((): VbenFormSchema[] => {
         message: $t('authentication.agreeTip'),
       }),
     },
+    {
+      component: markRaw(ImageCaptchaInput),
+      componentProps: {
+        placeholder: $t('authentication.code'),
+        fetchImage: async () => {
+          const { src, captchaId } = await fetchImageCaptchaApi();
+          return { src, captchaId };
+        },
+      },
+      fieldName: 'captcha',
+      label: $t('authentication.code'),
+      rules: z.object({
+        code: z.string().min(5, { message: $t('authentication.codeTip', [5]) }),
+        captchaId: z.string().min(1, { message: $t('authentication.codeTip', [5]) }),
+      }),
+    },
   ];
 });
 
 /**
  * 提交注册，并自动登录
+ * @param value 包含 `username`、`password`、`confirmPassword`、`agreePolicy`、`captcha`
  */
 async function handleSubmit(value: Recordable<any>) {
   try {
     loading.value = true;
-    const { username, password } = value ?? {};
+    const { username, password, captcha } = value ?? {};
     await registerApi({ username, password });
-    await authStore.authLogin({ username, password });
+    await authStore.authLogin({ username, password, captcha });
+  } catch (err: any) {
+    const msg = err?.message || $t('authentication.registerFail');
+    notification.error({ message: $t('authentication.register'), description: msg, duration: 3 });
+    throw err;
   } finally {
     loading.value = false;
   }
