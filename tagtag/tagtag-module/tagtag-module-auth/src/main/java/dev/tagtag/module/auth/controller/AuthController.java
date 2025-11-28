@@ -124,9 +124,6 @@ public class AuthController {
     @GetMapping("/me")
     public Result<UserDTO> me(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
         String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
-        if (!valid) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
-        }
         String subject = jwtService.getSubject(token);
         UserDTO user = userApi.getUserByUsername(subject).getData();
         if (user != null) {

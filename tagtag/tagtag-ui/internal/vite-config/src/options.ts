@@ -6,8 +6,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 const getDefaultPwaOptions = (name: string): Partial<PwaPluginOptions> => ({
   manifest: {
-    description:
-      'Tagtag is a modern admin dashboard template based on Vue 3. ',
+    description: 'Tagtag is a modern admin dashboard template based on Vue 3. ',
     icons: [
       {
         sizes: '192x192',

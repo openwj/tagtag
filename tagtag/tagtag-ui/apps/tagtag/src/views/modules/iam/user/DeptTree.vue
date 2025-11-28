@@ -7,10 +7,10 @@ import {
   Button as AButton,
   Empty as AEmpty,
   Input as AInput,
-  Tree as ATree,
-  Tooltip as ATooltip,
   Spin as ASpin,
   Tag as ATag,
+  Tooltip as ATooltip,
+  Tree as ATree,
 } from 'ant-design-vue';
 
 import { getDeptTree } from '#/api/modules/iam/dept';
@@ -199,7 +199,7 @@ async function fetch() {
  * @param keys 选中的节点key数组
  */
 function handleSelect(keys: any[]) {
-  const stringKeys = keys.map(key => String(key));
+  const stringKeys = keys.map(String);
   selectedKeys.value = stringKeys;
   emit('select', stringKeys[0]);
 }
@@ -255,14 +255,16 @@ defineExpose({ clearSelection });
 </script>
 
 <template>
-  <div class="bg-card flex h-full flex-col rounded-lg border p-3 shadow-sm">
+  <div class="flex h-full flex-col rounded-lg border bg-card p-3 shadow-sm">
     <div class="mb-2 flex items-center justify-between gap-2 whitespace-nowrap">
-      <div class="flex items-center gap-1 min-w-0 pl-1 text-[0.95rem] font-medium">
+      <div
+        class="flex min-w-0 items-center gap-1 pl-1 text-[0.95rem] font-medium"
+      >
         <span class="icon-[material-symbols--apartment] text-blue-500"></span>
         <span class="truncate">部门</span>
         <ATag color="processing" class="ml-1">{{ totalCount }}</ATag>
       </div>
-      <div class="flex items-center gap-1 shrink-0">
+      <div class="flex shrink-0 items-center gap-1">
         <ATooltip title="展开全部">
           <AButton
             size="small"
@@ -279,7 +281,7 @@ defineExpose({ clearSelection });
             size="small"
             shape="circle"
             type="default"
-            class="hidden sm:flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+            class="hidden h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm sm:flex"
             @click="collapseAll"
           >
             <span class="icon-[material-symbols--unfold-less]"></span>
@@ -310,7 +312,7 @@ defineExpose({ clearSelection });
       <ASpin :spinning="loading">
         <ATree
           v-if="treeData && treeData.length > 0"
-          v-model:selectedKeys="selectedKeys"
+          v-model:selected-keys="selectedKeys"
           :tree-data="treeData"
           :expanded-keys="computedExpandedKeys"
           :auto-expand-parent="autoExpandParent"
@@ -322,33 +324,33 @@ defineExpose({ clearSelection });
           @select="handleSelect"
           @expand="handleExpand"
         >
-        <!-- 自定义节点标题，支持搜索高亮 -->
-        <template #title="nodeData">
-          <!-- 从节点数据中获取部门名称 -->
-          <span
-            v-if="
-              searchValue &&
-              nodeData.title &&
-              nodeData.title.toLowerCase().includes(searchValue.toLowerCase())
-            "
-          >
-            <template
-              v-for="(part, index) in nodeData.title.split(
-                new RegExp(`(${searchValue})`, 'gi'),
-              )"
-              :key="index"
+          <!-- 自定义节点标题，支持搜索高亮 -->
+          <template #title="nodeData">
+            <!-- 从节点数据中获取部门名称 -->
+            <span
+              v-if="
+                searchValue &&
+                nodeData.title &&
+                nodeData.title.toLowerCase().includes(searchValue.toLowerCase())
+              "
             >
-              <span
-                v-if="part.toLowerCase() === searchValue.toLowerCase()"
-                class="rounded bg-yellow-200 px-1 text-yellow-800"
+              <template
+                v-for="(part, index) in nodeData.title.split(
+                  new RegExp(`(${searchValue})`, 'gi'),
+                )"
+                :key="index"
               >
-                {{ part }}
-              </span>
-              <span v-else>{{ part }}</span>
-            </template>
-          </span>
-          <span v-else>{{ nodeData.title || '未知部门' }}</span>
-        </template>
+                <span
+                  v-if="part.toLowerCase() === searchValue.toLowerCase()"
+                  class="rounded bg-yellow-200 px-1 text-yellow-800"
+                >
+                  {{ part }}
+                </span>
+                <span v-else>{{ part }}</span>
+              </template>
+            </span>
+            <span v-else>{{ nodeData.title || '未知部门' }}</span>
+          </template>
         </ATree>
       </ASpin>
 

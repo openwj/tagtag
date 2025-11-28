@@ -4,7 +4,7 @@ export namespace RoleApiParams {
   export interface PageQuery {
     pageNo?: number;
     pageSize?: number;
-    sortFields?: Array<{ field: string; asc: boolean }>;
+    sortFields?: Array<{ asc: boolean; field: string }>;
   }
   export interface RoleQuery {
     code?: string;

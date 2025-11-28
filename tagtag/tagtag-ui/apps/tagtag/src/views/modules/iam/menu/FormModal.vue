@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { MenuApiParams } from '#/api/modules/iam/menu';
+
 import { ref } from 'vue';
 
 import { useVbenModal } from '@vben/common-ui';
@@ -6,11 +8,10 @@ import { useVbenModal } from '@vben/common-ui';
 import { useVbenForm } from '#/adapter/form';
 import {
   addMenu,
+  editMenu,
   getMenuById,
   getMenuTree,
-  editMenu,
 } from '#/api/modules/iam/menu';
-import type { MenuApiParams } from '#/api/modules/iam/menu';
 
 import { formSchema } from './data';
 

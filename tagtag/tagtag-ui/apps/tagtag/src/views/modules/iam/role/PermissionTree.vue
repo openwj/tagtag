@@ -4,7 +4,16 @@ import type { DataNode } from 'ant-design-vue/es/tree';
 import { ref, watch } from 'vue';
 
 import { Icon } from '@iconify/vue';
-import { Button, Dropdown, Menu, Spin, Tag, Tree, Input, Tooltip } from 'ant-design-vue';
+import {
+  Button,
+  Dropdown,
+  Input,
+  Menu,
+  Spin,
+  Tag,
+  Tooltip,
+  Tree,
+} from 'ant-design-vue';
 
 import { getMenuTree } from '#/api/modules/iam/menu';
 
@@ -42,7 +51,10 @@ const searchText = ref('');
 const toggleCheckStrictly = () => {
   checkStrictly.value = !checkStrictly.value;
   try {
-    localStorage.setItem(storageKeyCheckStrictly, JSON.stringify(checkStrictly.value));
+    localStorage.setItem(
+      storageKeyCheckStrictly,
+      JSON.stringify(checkStrictly.value),
+    );
   } catch {}
 };
 
@@ -188,12 +200,17 @@ function applyFilter(source: DataNode[], keyword: string): DataNode[] {
   const k = keyword.trim().toLowerCase();
   if (!k) return source;
   const match = (n: any) =>
-    String(n.title).toLowerCase().includes(k) || String(n.menuCode || '').toLowerCase().includes(k);
+    String(n.title).toLowerCase().includes(k) ||
+    String(n.menuCode || '')
+      .toLowerCase()
+      .includes(k);
   const loop = (nodes: DataNode[]): DataNode[] => {
     const res: DataNode[] = [];
     for (const node of nodes) {
-      const children = node.children ? loop(node.children as DataNode[]) : undefined;
-      if (match(node) || (children && children.length)) {
+      const children = node.children
+        ? loop(node.children as DataNode[])
+        : undefined;
+      if (match(node) || (children && children.length > 0)) {
         res.push({ ...node, children });
       }
     }
@@ -224,13 +241,20 @@ watch(
 
 <template>
   <div class="w-full">
-  <div class="mb-3 flex items-center justify-between">
+    <div class="mb-3 flex items-center justify-between">
       <span class="text-sm font-medium">权限分配</span>
-      <div class="flex items-center gap-2 w-3/4">
-        <Input v-model:value="searchText" size="small" placeholder="搜索菜单/编码" class="flex-1" />
+      <div class="flex w-3/4 items-center gap-2">
+        <Input
+          v-model:value="searchText"
+          size="small"
+          placeholder="搜索菜单/编码"
+          class="flex-1"
+        />
         <Tooltip :title="checkStrictly ? '父子独立' : '父子联动'">
           <Button size="small" @click="toggleCheckStrictly">
-            <Icon :icon="checkStrictly ? 'lucide:git-fork' : 'lucide:git-merge'" />
+            <Icon
+              :icon="checkStrictly ? 'lucide:git-fork' : 'lucide:git-merge'"
+            />
           </Button>
         </Tooltip>
         <Tooltip title="展开全部">

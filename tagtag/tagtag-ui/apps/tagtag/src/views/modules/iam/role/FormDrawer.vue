@@ -7,13 +7,13 @@ import { message } from 'ant-design-vue';
 
 import { useVbenForm } from '#/adapter/form';
 import {
-  assignRoleMenus,
   addRole,
-  getRoleDetail,
-  listRoleMenuIds,
+  assignRoleMenus,
   editRole,
   getRoleByCode,
   getRoleByName,
+  getRoleDetail,
+  listRoleMenuIds,
 } from '#/api/modules/iam/role';
 
 import { formSchema } from './data';
@@ -56,7 +56,11 @@ const [Drawer, drawerApi] = useVbenDrawer({
       if (code) {
         try {
           const existedByCode = await getRoleByCode(code);
-          if (existedByCode && String(existedByCode.id || '') && String(existedByCode.id) !== selfId) {
+          if (
+            existedByCode &&
+            String(existedByCode.id || '') &&
+            String(existedByCode.id) !== selfId
+          ) {
             message.error('角色编码已存在');
             return;
           }
@@ -65,7 +69,11 @@ const [Drawer, drawerApi] = useVbenDrawer({
       if (name) {
         try {
           const existedByName = await getRoleByName(name);
-          if (existedByName && String(existedByName.id || '') && String(existedByName.id) !== selfId) {
+          if (
+            existedByName &&
+            String(existedByName.id || '') &&
+            String(existedByName.id) !== selfId
+          ) {
             message.error('角色名称已存在');
             return;
           }
@@ -73,7 +81,9 @@ const [Drawer, drawerApi] = useVbenDrawer({
       }
 
       // 保存角色基本信息并获取返回值（优先使用返回的 id）
-      const saved = await (isUpdate.value ? editRole(formData) : addRole(formData));
+      const saved = await (isUpdate.value
+        ? editRole(formData)
+        : addRole(formData));
 
       // 计算当前角色 ID（更新场景优先用已有 id；新增用返回值兜底编码查询）
       let currentRoleId = '';

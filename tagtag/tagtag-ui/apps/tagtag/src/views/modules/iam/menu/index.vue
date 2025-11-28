@@ -278,7 +278,6 @@ const handleCollapseAllMenus = async () => {
     gridApi.reload();
   }
 };
-
 </script>
 
 <template>
@@ -290,7 +289,11 @@ const handleCollapseAllMenus = async () => {
     >
       <template #toolbar-tools>
         <div class="flex items-center gap-3">
-          <AButton class="flex items-center px-2" type="primary" @click="handleAdd">
+          <AButton
+            class="flex items-center px-2"
+            type="primary"
+            @click="handleAdd"
+          >
             <template #icon>
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
@@ -379,7 +382,16 @@ const handleCollapseAllMenus = async () => {
         </div>
       </template>
       <template #icon="{ row }">
-        <ATooltip :title="row.icon || (row.menuType === 0 ? 'lucide:folder' : row.menuType === 1 ? 'lucide:file-text' : 'lucide:zap')">
+        <ATooltip
+          :title="
+            row.icon ||
+            (row.menuType === 0
+              ? 'lucide:folder'
+              : row.menuType === 1
+                ? 'lucide:file-text'
+                : 'lucide:zap')
+          "
+        >
           <div class="group flex cursor-help items-center justify-center">
             <div v-if="row.icon">
               <Icon :icon="row.icon" color="orange" v-if="row.menuType === 0" />
@@ -387,8 +399,16 @@ const handleCollapseAllMenus = async () => {
               <Icon :icon="row.icon" color="green" v-if="row.menuType === 2" />
             </div>
             <div v-else>
-              <Icon icon="lucide:folder" color="orange" v-if="row.menuType === 0" />
-              <Icon icon="lucide:file-text" color="blue" v-if="row.menuType === 1" />
+              <Icon
+                icon="lucide:folder"
+                color="orange"
+                v-if="row.menuType === 0"
+              />
+              <Icon
+                icon="lucide:file-text"
+                color="blue"
+                v-if="row.menuType === 1"
+              />
               <Icon icon="lucide:zap" color="green" v-if="row.menuType === 2" />
             </div>
           </div>

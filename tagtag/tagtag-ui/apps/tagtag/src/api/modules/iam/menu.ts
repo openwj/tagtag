@@ -4,7 +4,7 @@ export namespace MenuApiParams {
   export interface PageQuery {
     pageNo?: number;
     pageSize?: number;
-    sortFields?: Array<{ field: string; asc: boolean }>;
+    sortFields?: Array<{ asc: boolean; field: string }>;
   }
   export interface MenuQuery {
     menuCode?: string;
@@ -39,7 +39,10 @@ const Api = {
  * @param query 菜单查询条件
  * @param page 分页与排序参数
  */
-export async function getMenuPage(query: MenuApiParams.MenuQuery, page: MenuApiParams.PageQuery) {
+export async function getMenuPage(
+  query: MenuApiParams.MenuQuery,
+  page: MenuApiParams.PageQuery,
+) {
   return requestClient.post(`${Api.BaseApi}/page`, { query, page });
 }
 
@@ -73,7 +76,9 @@ export async function getMenuByCode(menuCode: string) {
  * 菜单树查询（不分页）
  * @param query 菜单查询条件
  */
-export async function getMenuTree(query: MenuApiParams.MenuQuery & { status?: number; menuType?: number } = {}) {
+export async function getMenuTree(
+  query: MenuApiParams.MenuQuery & { menuType?: number; status?: number } = {},
+) {
   return requestClient.get(`${Api.BaseApi}/tree`, { params: { ...query } });
 }
 
@@ -135,6 +140,9 @@ export function updateMenuStatus(id: number | string, disabled: boolean) {
  * @param ids 菜单ID列表
  * @param disabled 是否禁用（true=禁用，false=启用）
  */
-export function batchUpdateMenuStatus(ids: Array<number | string>, disabled: boolean) {
+export function batchUpdateMenuStatus(
+  ids: Array<number | string>,
+  disabled: boolean,
+) {
   return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, disabled });
 }

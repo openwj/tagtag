@@ -2,14 +2,16 @@
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
-import { computed, h, ref, markRaw } from 'vue';
+import { computed, h, markRaw, ref } from 'vue';
 
 import { AuthenticationRegister, ImageCaptchaInput, z } from '@vben/common-ui';
+import { $t } from '@vben/locales';
+
+import { notification } from 'ant-design-vue';
+
 import { registerApi } from '#/api/core/auth';
 import { fetchImageCaptchaApi } from '#/api/core/captcha';
 import { useAuthStore } from '#/store';
-import { $t } from '@vben/locales';
-import { notification } from 'ant-design-vue';
 
 defineOptions({ name: 'Register' });
 
@@ -96,7 +98,9 @@ const formSchema = computed((): VbenFormSchema[] => {
       label: $t('authentication.code'),
       rules: z.object({
         code: z.string().min(5, { message: $t('authentication.codeTip', [5]) }),
-        captchaId: z.string().min(1, { message: $t('authentication.codeTip', [5]) }),
+        captchaId: z
+          .string()
+          .min(1, { message: $t('authentication.codeTip', [5]) }),
       }),
     },
   ];
@@ -112,10 +116,14 @@ async function handleSubmit(value: Recordable<any>) {
     const { username, password, captcha } = value ?? {};
     await registerApi({ username, password });
     await authStore.authLogin({ username, password, captcha });
-  } catch (err: any) {
-    const msg = err?.message || $t('authentication.registerFail');
-    notification.error({ message: $t('authentication.register'), description: msg, duration: 3 });
-    throw err;
+  } catch (error: any) {
+    const msg = error?.message || $t('authentication.registerFail');
+    notification.error({
+      message: $t('authentication.register'),
+      description: msg,
+      duration: 3,
+    });
+    throw error;
   } finally {
     loading.value = false;
   }

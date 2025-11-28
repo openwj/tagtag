@@ -127,7 +127,11 @@ const handleSuccess = () => {
       table-title-help="公司组织架构信息"
     >
       <template #toolbar-tools>
-        <AButton class="flex items-center px-2" type="primary" @click="handleAdd">
+        <AButton
+          class="flex items-center px-2"
+          type="primary"
+          @click="handleAdd"
+        >
           <template #icon>
             <span class="icon-[material-symbols--add-circle] mr-1"></span>
           </template>

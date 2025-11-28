@@ -214,7 +214,7 @@ export interface ImageCaptchaInputProps {
   /** 初始验证码图片地址 */
   src?: string;
   /** 点击图片时异步拉取新验证码 */
-  fetchImage?: () => Promise<{ src: string; captchaId?: string }>;
+  fetchImage?: () => Promise<{ captchaId?: string; src: string }>;
   /** 是否禁用输入 */
   disabled?: boolean;
   /** 输入框占位符 */

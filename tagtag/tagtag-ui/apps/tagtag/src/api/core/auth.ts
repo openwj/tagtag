@@ -1,4 +1,4 @@
-import { requestClient, baseRequestClient } from '#/api/request';
+import { baseRequestClient, requestClient } from '#/api/request';
 
 export namespace AuthApi {
   /** 登录接口参数 */
@@ -48,7 +48,8 @@ export async function loginApi(data: AuthApi.LoginParams) {
  * @returns 新的令牌信息，含 `accessToken` 与可选 `refreshToken`
  */
 export async function refreshTokenApi(data: AuthApi.RefreshTokenParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/refresh', data);
+  const response = await baseRequestClient.post<any>('/auth/refresh', data);
+  return response.data?.data;
 }
 
 /**
