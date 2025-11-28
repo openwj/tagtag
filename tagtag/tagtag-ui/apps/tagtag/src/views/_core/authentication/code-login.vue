@@ -55,8 +55,14 @@ const formSchema = computed((): VbenFormSchema[] => {
  * @param values 登录表单数据
  */
 async function handleLogin(values: Recordable<any>) {
-  // eslint-disable-next-line no-console
-  console.log(values);
+  /**
+   * 开发环境日志输出
+   * @param args 任意日志参数
+   */
+  function devLog(...args: unknown[]) {
+    if (import.meta.env.DEV) console.log(...args);
+  }
+  devLog(values);
 }
 </script>
 

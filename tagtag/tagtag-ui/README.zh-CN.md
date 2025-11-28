@@ -30,6 +30,11 @@ Vue Tagtag 是 Vue Tagtag 的升级版本。作为一个免费开源的中后台
 - **国际化**：内置完善的国际化方案
 - **权限**：内置完善的动态路由权限生成方案
 
+## 路由说明
+
+- 本项目路由采用“后端菜单驱动”的动态模式，静态演示路由已清理，前端根据后端 IAM 菜单接口生成权限路由。
+- 后端菜单接口参考：`tagtag-module/tagtag-module-iam/src/main/java/dev/tagtag/module/iam/controller/MenuController.java:23-141`。
+
 ## 预览
 
 - [Tagtag](https://vben.pro/) - 完整版中文站点

@@ -58,9 +58,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
-    public void create(MenuDTO menu) {
+    public Long create(MenuDTO menu) {
         Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
+        return entity.getId();
     }
 
     /** 更新菜单（忽略源对象中的空值） */
@@ -208,7 +209,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     public void batchUpdateStatus(List<Long> ids, boolean disabled) {
         if (ids == null || ids.isEmpty()) return;
         int status = disabled ? 0 : 1;
-        for (Long id : ids) {
+        java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
+        for (Long id : uniq) {
             if (id == null) continue;
             Menu entity = super.getById(id);
             if (entity == null) continue;
@@ -226,13 +228,14 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
     public void batchDelete(List<Long> ids) {
         if (ids == null || ids.isEmpty()) return;
-        for (Long id : ids) {
+        java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
+        for (Long id : uniq) {
             if (id == null) continue;
             boolean hasChildren = this.lambdaQuery().eq(Menu::getParentId, id).count() > 0;
             if (hasChildren) {
                 throw new BusinessException(ErrorCode.BAD_REQUEST, "存在包含子菜单的项，无法批量删除");
             }
         }
-        super.removeBatchByIds(ids);
+        super.removeBatchByIds(uniq);
     }
 }

@@ -14,8 +14,8 @@ public interface MenuService {
     /** 获取权限详情 */
     MenuDTO getById(Long id);
 
-    /** 创建权限 */
-    void create(MenuDTO menu);
+    /** 创建权限（返回新建ID） */
+    Long create(MenuDTO menu);
 
     /** 更新权限（忽略源对象中的空值） */
     void update(MenuDTO menu);

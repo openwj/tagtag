@@ -10,6 +10,24 @@ export namespace MenuApiParams {
     menuCode?: string;
     menuName?: string;
   }
+  /** 菜单表单类型 */
+  export interface MenuForm {
+    id?: number | string;
+    menuCode: string;
+    menuName: string;
+    parentId?: number | string;
+    path?: string;
+    component?: string;
+    icon?: string;
+    sort?: number;
+    status?: number;
+    menuType?: number; // 0目录 1菜单 2按钮
+    isHidden?: number;
+    isExternal?: number;
+    externalUrl?: string;
+    isKeepalive?: number;
+    remark?: string;
+  }
 }
 
 const Api = {
@@ -71,7 +89,7 @@ export async function existsByCode(menuCode: string) {
  * 新增菜单
  * @param data 菜单表单数据
  */
-export function addMenu(data: Record<string, any>) {
+export function addMenu(data: MenuApiParams.MenuForm) {
   return requestClient.post(`${Api.BaseApi}`, data);
 }
 
@@ -79,7 +97,7 @@ export function addMenu(data: Record<string, any>) {
  * 编辑菜单
  * @param data 菜单表单数据（包含 id）
  */
-export function editMenu(data: Record<string, any>) {
+export function editMenu(data: MenuApiParams.MenuForm) {
   return requestClient.put(`${Api.BaseApi}`, data);
 }
 

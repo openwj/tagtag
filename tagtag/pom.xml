@@ -17,7 +17,6 @@
         <module>tagtag-kernel</module>
         <module>tagtag-contract</module>
         <module>tagtag-module</module>
-        <module>tagtag-integration</module>
         <module>tagtag-start</module>
     </modules>
 

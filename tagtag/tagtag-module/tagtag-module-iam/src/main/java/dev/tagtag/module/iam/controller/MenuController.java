@@ -75,9 +75,9 @@ public class MenuController {
     /** 创建菜单 */
     @PostMapping
     @PreAuthorize("hasAuthority('" + Permissions.MENU_CREATE + "')")
-    public Result<Void> create(@Valid @RequestBody MenuDTO menu) {
-        menuService.create(menu);
-        return Result.okMsg(AppMessages.CREATE_SUCCESS);
+    public Result<Long> create(@Valid @RequestBody MenuDTO menu) {
+        Long id = menuService.create(menu);
+        return Result.ok(id);
     }
 
     /** 更新菜单（忽略源对象中的空值） */

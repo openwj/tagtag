@@ -10,6 +10,7 @@ import {
   getMenuTree,
   editMenu,
 } from '#/api/modules/iam/menu';
+import type { MenuApiParams } from '#/api/modules/iam/menu';
 
 import { formSchema } from './data';
 
@@ -97,7 +98,8 @@ const [Modal, modalApi] = useVbenModal({
         parentId: Number(formData.parentId) || 0,
       };
 
-      await (isUpdate.value ? editMenu(data) : addMenu(data));
+      const payload = data as MenuApiParams.MenuForm;
+      await (isUpdate.value ? editMenu(payload) : addMenu(payload));
       modalApi.close();
       emit('success');
     }
