@@ -61,7 +61,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     public void create(MenuDTO menu) {
         Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
-        if (menu != null) menu.setId(entity.getId());
     }
 
     /** 更新菜单（忽略源对象中的空值） */

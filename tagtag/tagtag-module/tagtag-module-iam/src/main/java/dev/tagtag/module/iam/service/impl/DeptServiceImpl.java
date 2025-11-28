@@ -75,9 +75,6 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         validateForCreate(dept);
         Dept entity = deptMapperConvert.toEntity(dept);
         super.save(entity);
-        if (dept != null) {
-            dept.setId(entity.getId());
-        }
         log.info("dept create: id={}, name={}", entity.getId(), entity.getName());
     }
 

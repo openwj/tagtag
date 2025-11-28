@@ -45,12 +45,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(readOnly = true)
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
-        // 先规范化字符串条件，减少 XML 中的冗余空串判断
-        UserQueryDTO q = normalizeQuery(query);
         IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
-                (p, orderBy) -> baseMapper.selectPage(p, q, orderBy));
+                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
         IPage<UserDTO> dtoPage = page.convert(e -> {
-            if (e instanceof dev.tagtag.module.iam.entity.vo.UserVO vo) {
+            if (e instanceof UserVO vo) {
                 return userMapperConvert.toDTO(vo);
             }
             return userMapperConvert.toDTO(e);
@@ -72,16 +70,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return dto;
     }
 
-    /** 创建用户（使用 MetaObjectHandler 自动填充审计字段） */
+    /**
+     * 创建用户（服务端安全编码密码）
+     * @param user 用户DTO，若包含明文密码则在服务端进行BCrypt编码
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void create(UserDTO user) {
         User entity = userMapperConvert.toEntity(user);
-        super.save(entity);
-        if (user != null) {
-            user.setId(entity.getId());
+        if (user != null && user.getPassword() != null && !user.getPassword().isBlank()) {
+            String encoded = new BCryptPasswordEncoder().encode(user.getPassword());
+            entity.setPassword(encoded);
+            entity.setPasswordUpdatedAt(LocalDateTime.now());
         }
+        super.save(entity);
     }
 
     /** 更新用户（忽略源对象中的空值，实现 PATCH 语义） */
@@ -221,16 +224,5 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
-    /**
-     * 规范化查询条件中的字符串字段（空白转 null）
-     */
-    private UserQueryDTO normalizeQuery(UserQueryDTO q) {
-        if (q == null) return null;
-        q.setUsername(dev.tagtag.common.util.Strings.normalizeToNull(q.getUsername()));
-        q.setNickname(dev.tagtag.common.util.Strings.normalizeToNull(q.getNickname()));
-        q.setEmail(dev.tagtag.common.util.Strings.normalizeToNull(q.getEmail()));
-        q.setPhone(dev.tagtag.common.util.Strings.normalizeToNull(q.getPhone()));
-        q.setEmployeeNo(dev.tagtag.common.util.Strings.normalizeToNull(q.getEmployeeNo()));
-        return q;
-    }
+    
 }

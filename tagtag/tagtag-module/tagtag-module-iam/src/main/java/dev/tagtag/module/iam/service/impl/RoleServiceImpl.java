@@ -117,7 +117,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public void create(RoleDTO role) {
         Role entity = roleMapperConvert.toEntity(role);
         super.save(entity);
-        if (role != null) role.setId(entity.getId());
     }
 
     /** 更新角色（忽略源对象中的空值） */
