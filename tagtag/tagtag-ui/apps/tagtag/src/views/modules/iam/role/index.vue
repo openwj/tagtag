@@ -252,6 +252,7 @@ const handleSuccess = () => {
           <AButton
             class="flex items-center px-2"
             type="primary"
+            v-access:code="'role:create'"
             @click="handleAdd"
           >
             <template #icon>
@@ -268,6 +269,7 @@ const handleSuccess = () => {
               <Menu>
                 <Menu.Item
                   key="enable"
+                  v-access:code="'role:update'"
                   @click="
                     () =>
                       AModal.confirm({
@@ -284,6 +286,7 @@ const handleSuccess = () => {
                 </Menu.Item>
                 <Menu.Item
                   key="disable"
+                  v-access:code="'role:update'"
                   @click="
                     () =>
                       AModal.confirm({
@@ -300,6 +303,7 @@ const handleSuccess = () => {
                 </Menu.Item>
                 <Menu.Item
                   key="delete"
+                  v-access:code="'role:delete'"
                   @click="
                     () =>
                       AModal.confirm({
@@ -351,6 +355,7 @@ const handleSuccess = () => {
 
       <template #status="{ row }">
         <ASwitch
+          v-access:code="'role:update'"
           :checked="row.status === 1"
           :loading="row.statusLoading"
           checked-children="启用"
@@ -370,6 +375,7 @@ const handleSuccess = () => {
               shape="circle"
               size="small"
               type="primary"
+              v-access:code="'role:update'"
               @click="handleEdit(row)"
             >
               <template #icon>
@@ -395,6 +401,7 @@ const handleSuccess = () => {
                 shape="circle"
                 size="small"
                 type="primary"
+                v-access:code="'role:delete'"
                 :loading="loading"
               >
                 <template #icon>

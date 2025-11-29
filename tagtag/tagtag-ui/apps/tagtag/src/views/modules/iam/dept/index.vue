@@ -130,6 +130,7 @@ const handleSuccess = () => {
         <AButton
           class="flex items-center px-2"
           type="primary"
+          v-access:code="'dept:create'"
           @click="handleAdd"
         >
           <template #icon>
@@ -140,6 +141,7 @@ const handleSuccess = () => {
       </template>
       <template #status="{ row }">
         <ASwitch
+          v-access:code="'dept:update'"
           :checked="row.status === 1"
           checked-children="启用"
           un-checked-children="禁用"
@@ -162,6 +164,7 @@ const handleSuccess = () => {
               shape="circle"
               size="small"
               type="primary"
+              v-access:code="'dept:create'"
               @click="handleAdd(row)"
             >
               <template #icon>
@@ -178,6 +181,7 @@ const handleSuccess = () => {
               shape="circle"
               size="small"
               type="primary"
+              v-access:code="'dept:update'"
               @click="handleEdit(row)"
             >
               <template #icon>
@@ -203,6 +207,7 @@ const handleSuccess = () => {
                 shape="circle"
                 size="small"
                 type="primary"
+                v-access:code="'dept:delete'"
               >
                 <template #icon>
                   <div class="icon-[material-symbols--delete-rounded]"></div>

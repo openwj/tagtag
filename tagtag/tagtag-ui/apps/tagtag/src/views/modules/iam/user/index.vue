@@ -459,6 +459,7 @@ function handleClearDept() {
               <AButton
                 class="flex items-center px-4"
                 type="primary"
+                v-access:code="'user:create'"
                 @click="handleAdd"
               >
                 <template #icon>
@@ -472,7 +473,7 @@ function handleClearDept() {
                 批量操作
                 <template #overlay>
                   <AMenu>
-                    <AMenu.Item key="delete" @click="handleBatchDelete">
+                    <AMenu.Item key="delete" v-access:code="'user:delete'" @click="handleBatchDelete">
                       <div
                         class="icon-[material-symbols--delete-rounded] mr-2"
                       ></div>
@@ -480,6 +481,7 @@ function handleClearDept() {
                     </AMenu.Item>
                     <AMenu.Item
                       key="enable"
+                      v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(1)"
                     >
                       <div
@@ -489,12 +491,13 @@ function handleClearDept() {
                     </AMenu.Item>
                     <AMenu.Item
                       key="disable"
+                      v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(0)"
                     >
                       <div class="icon-[material-symbols--cancel] mr-2"></div>
                       批量禁用
                     </AMenu.Item>
-                    <AMenu.Item key="roles" @click="handleBatchAssignRoles">
+                    <AMenu.Item key="roles" v-access:code="'user:assignRole'" @click="handleBatchAssignRoles">
                       <div
                         class="icon-[material-symbols--group-add] mr-2"
                       ></div>
@@ -508,6 +511,7 @@ function handleClearDept() {
           <template #status="{ row }">
             <div class="flex items-center gap-2">
               <ASwitch
+                v-access:code="'user:update'"
                 :checked="row.status === 1"
                 checked-children="启用"
                 un-checked-children="禁用"
@@ -537,6 +541,7 @@ function handleClearDept() {
                   shape="circle"
                   size="small"
                   type="primary"
+                  v-access:code="'user:update'"
                   @click="handleEdit(row)"
                 >
                   <template #icon>
@@ -553,6 +558,7 @@ function handleClearDept() {
                   shape="circle"
                   size="small"
                   type="default"
+                  v-access:code="'user:update'"
                   @click="handleResetPassword(row)"
                 >
                   <template #icon>
@@ -569,6 +575,7 @@ function handleClearDept() {
                   shape="circle"
                   size="small"
                   type="default"
+                  v-access:code="'user:assignRole'"
                   @click="handleAssignRoles(row)"
                 >
                   <template #icon>
@@ -594,6 +601,7 @@ function handleClearDept() {
                     shape="circle"
                     size="small"
                     type="primary"
+                    v-access:code="'user:delete'"
                   >
                     <template #icon>
                       <div

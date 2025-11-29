@@ -292,6 +292,7 @@ const handleCollapseAllMenus = async () => {
           <AButton
             class="flex items-center px-2"
             type="primary"
+            v-access:code="'menu:create'"
             @click="handleAdd"
           >
             <template #icon>
@@ -308,6 +309,7 @@ const handleCollapseAllMenus = async () => {
               <Menu>
                 <Menu.Item
                   key="enable"
+                  v-access:code="'menu:update'"
                   @click="
                     () =>
                       AModal.confirm({
@@ -324,6 +326,7 @@ const handleCollapseAllMenus = async () => {
                 </Menu.Item>
                 <Menu.Item
                   key="disable"
+                  v-access:code="'menu:update'"
                   @click="
                     () =>
                       AModal.confirm({
@@ -340,6 +343,7 @@ const handleCollapseAllMenus = async () => {
                 </Menu.Item>
                 <Menu.Item
                   key="delete"
+                  v-access:code="'menu:delete'"
                   @click="
                     () =>
                       AModal.confirm({
@@ -414,6 +418,7 @@ const handleCollapseAllMenus = async () => {
       </template>
       <template #status="{ row }">
         <ASwitch
+          v-access:code="'menu:update'"
           :checked="row.status === 1"
           :loading="row.statusLoading"
           checked-children="启用"
@@ -459,6 +464,7 @@ const handleCollapseAllMenus = async () => {
               size="small"
               type="primary"
               aria-label="新增子菜单"
+              v-access:code="'menu:create'"
               @click="handleAdd(row)"
             >
               <template #icon>
@@ -477,6 +483,7 @@ const handleCollapseAllMenus = async () => {
               size="small"
               type="primary"
               aria-label="编辑菜单"
+              v-access:code="'menu:update'"
               @click="handleEdit(row)"
             >
               <template #icon>
@@ -504,6 +511,7 @@ const handleCollapseAllMenus = async () => {
                 type="primary"
                 :loading="loading"
                 aria-label="删除菜单"
+                v-access:code="'menu:delete'"
               >
                 <template #icon>
                   <div class="icon-[lucide--trash-2] text-xs"></div>
