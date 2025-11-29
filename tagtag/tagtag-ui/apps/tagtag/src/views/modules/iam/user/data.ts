@@ -250,6 +250,7 @@ export const formSchema: VbenFormProps['schema'] = [
       format: 'YYYY-MM-DD',
       valueFormat: 'YYYY-MM-DD HH:mm:ss',
       showTime: false,
+      class: 'w-full',
     },
     fieldName: 'birthday',
     label: '生日',

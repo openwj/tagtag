@@ -58,19 +58,6 @@ const deptTreeRef = ref();
 
 // 取消筛选条件的前端缓存
 
-/**
- * 表格查询（按角色页风格简化）：返回 { list, total }
- * @param page 分页参数
- * @param formValues 表单查询参数
- */
-const queryUserData = async (page: any, formValues: any) => {
-  const query = selectedDeptId.value
-    ? { ...formValues, deptId: selectedDeptId.value }
-    : formValues || {};
-  const { list, total } = await getUserPage(query, page);
-  return { list, total };
-};
-
 const formOptions: VbenFormProps = {
   schema: searchFormSchema,
   collapsed: true,
@@ -110,7 +97,13 @@ const gridOptions: VxeGridProps = {
       total: 'total',
     },
     ajax: {
-      query: queryUserData,
+      query: async ({ page }, formValues) => {
+        const query = selectedDeptId.value
+          ? { ...formValues, deptId: selectedDeptId.value }
+          : formValues || {};
+        const { list, total } = await getUserPage(query, page);
+        return { list, total };
+      },
     },
   },
   exportConfig: {},
@@ -480,32 +473,32 @@ function handleClearDept() {
                 <template #overlay>
                   <AMenu>
                     <AMenu.Item key="delete" @click="handleBatchDelete">
-                      <span
+                      <div
                         class="icon-[material-symbols--delete-rounded] mr-2"
-                      ></span
-                      >批量删除
+                      ></div>
+                      批量删除
                     </AMenu.Item>
                     <AMenu.Item
                       key="enable"
                       @click="handleBatchStatusUpdate(1)"
                     >
-                      <span
+                      <div
                         class="icon-[material-symbols--check-circle] mr-2"
-                      ></span
-                      >批量启用
+                      ></div>
+                      批量启用
                     </AMenu.Item>
                     <AMenu.Item
                       key="disable"
                       @click="handleBatchStatusUpdate(0)"
                     >
-                      <span class="icon-[material-symbols--cancel] mr-2"></span
-                      >批量禁用
+                      <div class="icon-[material-symbols--cancel] mr-2"></div>
+                      批量禁用
                     </AMenu.Item>
                     <AMenu.Item key="roles" @click="handleBatchAssignRoles">
-                      <span
+                      <div
                         class="icon-[material-symbols--group-add] mr-2"
-                      ></span
-                      >批量分配角色
+                      ></div>
+                      批量分配角色
                     </AMenu.Item>
                   </AMenu>
                 </template>

@@ -359,10 +359,9 @@ const handleCollapseAllMenus = async () => {
           </Dropdown.Button>
           <ATooltip title="展开全部">
             <AButton
-              size="small"
               shape="circle"
               type="default"
-              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+              class="flex items-center justify-center"
               @click="handleExpandAllMenus"
             >
               <span class="icon-[material-symbols--unfold-more]"></span>
@@ -370,10 +369,9 @@ const handleCollapseAllMenus = async () => {
           </ATooltip>
           <ATooltip title="收起全部">
             <AButton
-              size="small"
               shape="circle"
               type="default"
-              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+              class="flex items-center justify-center"
               @click="handleCollapseAllMenus"
             >
               <span class="icon-[material-symbols--unfold-less]"></span>

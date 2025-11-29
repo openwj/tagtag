@@ -270,7 +270,7 @@ defineExpose({ clearSelection });
             size="small"
             shape="circle"
             type="default"
-            class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+            class="flex items-center justify-center"
             @click="expandAll"
           >
             <span class="icon-[material-symbols--unfold-more]"></span>
@@ -281,7 +281,7 @@ defineExpose({ clearSelection });
             size="small"
             shape="circle"
             type="default"
-            class="hidden h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm sm:flex"
+            class="flex items-center justify-center"
             @click="collapseAll"
           >
             <span class="icon-[material-symbols--unfold-less]"></span>

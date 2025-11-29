@@ -134,3 +134,11 @@ export const requestClient = createRequestClient(apiURL, {
 });
 
 export const baseRequestClient = new RequestClient({ baseURL: apiURL });
+// 为基础客户端挂载统一响应解包拦截器（不挂载鉴权/401刷新/错误提示拦截器）
+baseRequestClient.addResponseInterceptor(
+  defaultResponseInterceptor({
+    codeField: 'code',
+    dataField: 'data',
+    successCode: 200,
+  }),
+);

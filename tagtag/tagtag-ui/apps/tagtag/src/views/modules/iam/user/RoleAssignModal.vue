@@ -171,7 +171,7 @@ defineExpose({
   <Modal
     v-bind="$attrs"
     :title="modalTitle"
-    class="!w-[750px]"
+    class="!min-w-[750px]"
     :body-style="{ padding: '16px 20px' }"
     :confirm-loading="loading"
     @confirm="handleConfirm"
@@ -237,7 +237,7 @@ defineExpose({
           :data-source="transferData"
           v-model:target-keys="selectedRoleIds"
           :show-search="true"
-          :list-style="{ width: '45%', height: '320px' }"
+          :list-style="{ width: '50%', minHeight: '320px' }"
           :titles="['可选角色', '已选角色']"
           :render="(item: any) => item.title"
         />
