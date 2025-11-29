@@ -4,7 +4,6 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
-import dev.tagtag.contract.iam.dto.MenuDTO;
 
 import java.util.List;
 import java.util.Set;
@@ -28,9 +27,6 @@ public interface RoleService {
 
     /** 为角色分配菜单（按钮权限） */
     void assignMenus(Long roleId, List<Long> menuIds);
-
-    /** 查询指定角色的菜单列表（含按钮） */
-    List<MenuDTO> listMenusByRole(Long roleId);
 
     /** 按角色ID集合批量查询权限编码（按钮型菜单的 menu_code） */
     Set<String> listMenuCodesByRoleIds(List<Long> roleIds);
@@ -56,22 +52,9 @@ public interface RoleService {
      */
     RoleDTO getByName(String name);
 
-    /**
-     * 判断角色编码是否存在
-     * @param code 角色编码
-     * @return 是否存在
-     */
-    boolean existsByCode(String code);
-
-    /**
-     * 判断角色名称是否存在
-     * @param name 角色名称
-     * @return 是否存在
-     */
-    boolean existsByName(String name);
 
     /** 查询所有角色（简单列表） */
-    java.util.List<RoleDTO> listAll();
+    List<RoleDTO> listAll();
 
     /**
      * 更新角色状态
@@ -85,5 +68,5 @@ public interface RoleService {
      * @param ids 角色ID列表
      * @param disabled 是否禁用（true=禁用，false=启用）
      */
-    void batchUpdateStatus(java.util.List<Long> ids, boolean disabled);
+    void batchUpdateStatus(List<Long> ids, boolean disabled);
 }

@@ -89,14 +89,6 @@ export function deleteRole(id: number | string) {
 }
 
 /**
- * 查询角色已分配的菜单（含按钮）
- * @param id 角色ID
- */
-export async function listRoleMenus(id: number | string) {
-  return requestClient.get(`${Api.BaseApi}/${id}/menus`);
-}
-
-/**
  * 为角色分配菜单（覆盖式）
  * @param id 角色ID
  * @param menuIds 菜单ID列表

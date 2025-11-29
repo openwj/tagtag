@@ -49,5 +49,5 @@ public interface UserService {
     List<dev.tagtag.contract.iam.dto.RoleDTO> listRolesByUserId(Long userId);
 
     /** 批量为用户分配角色（覆盖式） */
-    void assignRolesBatch(java.util.List<Long> userIds, java.util.List<Long> roleIds);
+    void assignRolesBatch(List<Long> userIds, List<Long> roleIds);
 }

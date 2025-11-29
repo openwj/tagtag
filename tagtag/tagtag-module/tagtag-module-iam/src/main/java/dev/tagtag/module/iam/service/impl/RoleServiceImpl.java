@@ -9,11 +9,8 @@ import dev.tagtag.framework.util.Pages;
 import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
-import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.module.iam.convert.RoleMapperConvert;
-import dev.tagtag.module.iam.convert.MenuMapperConvert;
 import dev.tagtag.module.iam.entity.Role;
-import dev.tagtag.module.iam.entity.Menu;
 import dev.tagtag.module.iam.mapper.RoleMapper;
 import dev.tagtag.module.iam.service.RoleService;
 import org.springframework.stereotype.Service;
@@ -38,7 +35,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     
     private final PageProperties pageProperties;
     private final RoleMapperConvert roleMapperConvert;
-    private final MenuMapperConvert menuMapperConvert;
 
     
 
@@ -90,27 +86,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         return roleMapperConvert.toDTO(entity);
     }
 
-    /**
-     * 判断角色编码是否存在（LambdaQuery）
-     * @param code 角色编码
-     * @return 是否存在
-     */
-    @Override
-    public boolean existsByCode(String code) {
-        if (code == null || code.isBlank()) return false;
-        return this.lambdaQuery().eq(Role::getCode, code).exists();
-    }
-
-    /**
-     * 判断角色名称是否存在（LambdaQuery）
-     * @param name 角色名称
-     * @return 是否存在
-     */
-    @Override
-    public boolean existsByName(String name) {
-        if (name == null || name.isBlank()) return false;
-        return this.lambdaQuery().eq(Role::getName, name).exists();
-    }
 
     /** 创建角色 */
     @Override
@@ -142,7 +117,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 为角色分配菜单（覆盖式：先删后插） */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"roleMenuCodes", "roleMenus"}, allEntries = true)
+    @CacheEvict(cacheNames = {"roleMenuCodes"}, allEntries = true)
     public void assignMenus(Long roleId, List<Long> menuIds) {
         if (roleId == null) return;
         baseMapper.deleteRolePermissions(roleId);
@@ -152,15 +127,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         log.info("assignMenus: roleId={}, menuCount={}", roleId, menuIds == null ? 0 : menuIds.size());
     }
 
-    /** 查询指定角色的菜单列表（仅返回按钮型作为权限；单次 JOIN 查询） */
-    @Override
-    @Cacheable(cacheNames = "roleMenus", key = "#root.args[0]")
-    @Transactional(readOnly = true)
-    public List<MenuDTO> listMenusByRole(Long roleId) {
-        if (roleId == null) return Collections.emptyList();
-        List<Menu> menus = baseMapper.selectMenusByRoleId(roleId);
-        return menuMapperConvert.toDTOList(menus);
-    }
 
     /** 批量查询角色的权限编码集合（按钮型菜单的 menu_code，去重） */
     @Override
@@ -189,8 +155,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 查询所有角色（简单列表） */
     @Override
     @Transactional(readOnly = true)
-    public java.util.List<RoleDTO> listAll() {
-        java.util.List<Role> entities = this.list();
+    public List<RoleDTO> listAll() {
+        List<Role> entities = this.list();
         return roleMapperConvert.toDTOList(entities);
     }
 
