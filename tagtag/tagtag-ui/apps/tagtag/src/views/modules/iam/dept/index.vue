@@ -4,14 +4,14 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import {
   Button,
   Divider,
+  message,
   Popconfirm,
   Switch,
   Tooltip,
-  message,
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteDept, editDept, getDeptTree } from '#/api/modules/iam/dept';
+import { deleteDept, getDeptTree } from '#/api/modules/iam/dept';
 // 注：不再依赖分页封装，页面内直接适配后端字段
 
 import { columns, searchFormSchema } from './data';
@@ -92,7 +92,7 @@ const handleStatusChange = async (record: any) => {
     const statusValue = record.status ? 1 : 0;
     await updateDeptStatus(record.id, statusValue);
     message.success({ content: '状态更新成功', duration: 2 });
-  } catch (e) {
+  } catch {
     record.status = prevStatus;
     message.error({ content: '状态更新失败', duration: 3 });
   } finally {

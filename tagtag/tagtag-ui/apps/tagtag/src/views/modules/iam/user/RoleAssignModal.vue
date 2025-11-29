@@ -4,11 +4,7 @@ import { computed, ref, watch } from 'vue';
 // import { SearchOutlined } from '@ant-design/icons-vue';
 import { useVbenModal } from '@vben/common-ui';
 
-import {
-  Alert,
-  Spin,
-  Transfer,
-} from 'ant-design-vue';
+import { Alert, Spin, Transfer } from 'ant-design-vue';
 
 interface Props {
   user?: null | Record<string, any>;

@@ -10,14 +10,14 @@ import { Icon } from '@iconify/vue';
 import {
   Button,
   Divider,
+  Dropdown,
+  Menu,
+  message,
   Modal,
   Popconfirm,
   Switch,
   Tag,
   Tooltip,
-  Dropdown,
-  Menu,
-  message,
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -118,7 +118,10 @@ const hasChildren = (menuId: string) => {
 const handleDelete = async (id: string) => {
   // 检查是否有子菜单
   if (hasChildren(id)) {
-    message.warning({ content: '该菜单下存在子菜单，请先删除子菜单', duration: 3 });
+    message.warning({
+      content: '该菜单下存在子菜单，请先删除子菜单',
+      duration: 3,
+    });
     return;
   }
 
@@ -172,7 +175,10 @@ const handleBatchDelete = async () => {
   // 检查选中的菜单是否有子菜单
   const hasChildrenMenus = selectedRows.some((row) => hasChildren(row.id));
   if (hasChildrenMenus) {
-    message.warning({ content: '选中的菜单中存在有子菜单的项，请先删除子菜单', duration: 3 });
+    message.warning({
+      content: '选中的菜单中存在有子菜单的项，请先删除子菜单',
+      duration: 3,
+    });
     return;
   }
 
@@ -180,10 +186,13 @@ const handleBatchDelete = async () => {
   try {
     const ids = selectedRows.map((row) => row.id);
     await batchDeleteMenu(ids);
-    message.success({ content: `成功删除 ${selectedRows.length} 个菜单`, duration: 2 });
+    message.success({
+      content: `成功删除 ${selectedRows.length} 个菜单`,
+      duration: 2,
+    });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch (e) {
+  } catch {
     message.error({ content: '批量删除失败', duration: 3 });
   } finally {
     batchLoading.value = false;
@@ -210,10 +219,13 @@ const handleBatchEnable = async () => {
   try {
     const ids = selectedRows.map((row) => row.id);
     await batchUpdateMenuStatus(ids, 1);
-    message.success({ content: `成功启用 ${selectedRows.length} 个菜单`, duration: 2 });
+    message.success({
+      content: `成功启用 ${selectedRows.length} 个菜单`,
+      duration: 2,
+    });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch (e) {
+  } catch {
     message.error({ content: '批量启用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
@@ -240,10 +252,13 @@ const handleBatchDisable = async () => {
   try {
     const ids = selectedRows.map((row) => row.id);
     await batchUpdateMenuStatus(ids, 0);
-    message.success({ content: `成功禁用 ${selectedRows.length} 个菜单`, duration: 2 });
+    message.success({
+      content: `成功禁用 ${selectedRows.length} 个菜单`,
+      duration: 2,
+    });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch (e) {
+  } catch {
     message.error({ content: '批量禁用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
@@ -270,11 +285,17 @@ const handleStatusChange = async (
   row.status = checked ? 1 : 0;
   try {
     await updateMenuStatus(row.id, checked ? 1 : 0);
-    message.success({ content: `菜单${checked ? '启用' : '禁用'}成功`, duration: 2 });
-  } catch (e) {
+    message.success({
+      content: `菜单${checked ? '启用' : '禁用'}成功`,
+      duration: 2,
+    });
+  } catch {
     // 失败回滚到原状态
     row.status = prevStatus;
-    message.error({ content: `菜单${checked ? '启用' : '禁用'}失败`, duration: 3 });
+    message.error({
+      content: `菜单${checked ? '启用' : '禁用'}失败`,
+      duration: 3,
+    });
   } finally {
     row.statusLoading = false;
   }

@@ -34,8 +34,6 @@ const Api = {
   BaseApi: `/iam/menus`,
 };
 
-
-
 /**
  * 获取菜单详情
  * @param id 菜单ID
@@ -46,7 +44,6 @@ export async function getMenuById(id: number | string) {
 
 // 删除重复别名方法：保持单一 getMenuById
 
-
 /**
  * 菜单树查询（不分页）
  * @param query 菜单查询条件
@@ -56,7 +53,6 @@ export async function getMenuTree(
 ) {
   return requestClient.get(`${Api.BaseApi}/tree`, { params: { ...query } });
 }
-
 
 /**
  * 新增菜单

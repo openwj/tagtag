@@ -11,12 +11,12 @@ import {
   Button,
   Dropdown,
   Menu,
+  message,
+  Modal,
   Popconfirm,
   Switch,
   Tag,
   Tooltip,
-  message,
-  Modal,
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -205,7 +205,10 @@ const handleBatchDelete = async () => {
       batchLoading.value = true;
       const ids = selectedRows.map((row: any) => row.id);
       await batchDeleteUsers(ids);
-      message.success({ content: `成功删除 ${selectedRows.length} 个用户`, duration: 2 });
+      message.success({
+        content: `成功删除 ${selectedRows.length} 个用户`,
+        duration: 2,
+      });
       gridApi.grid.clearCheckboxRow();
       gridApi.reload();
       batchLoading.value = false;
@@ -264,7 +267,10 @@ const handleBatchStatusUpdate = async (status: number) => {
         batchLoading.value = true;
         const ids = needUpdateRows.map((row: any) => row.id);
         await batchUpdateUserStatus(ids, status);
-        message.success({ content: `成功${actionText} ${needUpdateRows.length} 个用户`, duration: 2 });
+        message.success({
+          content: `成功${actionText} ${needUpdateRows.length} 个用户`,
+          duration: 2,
+        });
         gridApi.grid.clearCheckboxRow();
         gridApi.reload();
       } finally {
@@ -327,7 +333,10 @@ const handleAssignRoles = async (row: Record<string, any>) => {
     loadingMessage();
     roleAssignModalRef.value?.openModal();
   } catch {
-    message.info({ content: '角色分配暂不可用：角色查询接口不可用', duration: 3 });
+    message.info({
+      content: '角色分配暂不可用：角色查询接口不可用',
+      duration: 3,
+    });
   }
 };
 
@@ -353,7 +362,10 @@ const handleBatchAssignRoles = async () => {
     loadingMessage();
     roleAssignModalRef.value?.openModal();
   } catch {
-    message.info({ content: '批量分配角色暂不可用：角色查询接口不可用', duration: 3 });
+    message.info({
+      content: '批量分配角色暂不可用：角色查询接口不可用',
+      duration: 3,
+    });
   }
 };
 
@@ -478,7 +490,11 @@ function handleClearDept() {
                 批量操作
                 <template #overlay>
                   <Menu>
-                    <Menu.Item key="delete" v-access:code="'user:delete'" @click="handleBatchDelete">
+                    <Menu.Item
+                      key="delete"
+                      v-access:code="'user:delete'"
+                      @click="handleBatchDelete"
+                    >
                       <div class="icon-[lucide--trash-2] mr-2"></div>
                       批量删除
                     </Menu.Item>
@@ -498,7 +514,11 @@ function handleClearDept() {
                       <div class="icon-[lucide--x-circle] mr-2"></div>
                       批量禁用
                     </Menu.Item>
-                    <Menu.Item key="roles" v-access:code="'user:assignRole'" @click="handleBatchAssignRoles">
+                    <Menu.Item
+                      key="roles"
+                      v-access:code="'user:assignRole'"
+                      @click="handleBatchAssignRoles"
+                    >
                       <div class="icon-[lucide--users] mr-2"></div>
                       批量分配角色
                     </Menu.Item>

@@ -9,13 +9,13 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import {
   Button,
   Divider,
+  Dropdown,
+  Menu,
+  message,
   Modal,
   Popconfirm,
   Switch,
   Tooltip,
-  Dropdown,
-  Menu,
-  message,
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -146,10 +146,13 @@ const handleBatchDelete = async () => {
   try {
     const roleIds = selectedRows.map((row: any) => row.id);
     await batchDeleteRole(roleIds);
-    message.success({ content: `成功删除 ${selectedRows.length} 个角色`, duration: 2 });
+    message.success({
+      content: `成功删除 ${selectedRows.length} 个角色`,
+      duration: 2,
+    });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch (e) {
+  } catch {
     message.error({ content: '批量删除失败', duration: 3 });
   } finally {
     batchLoading.value = false;
@@ -170,10 +173,13 @@ const handleBatchEnable = async () => {
   try {
     const roleIds = selectedRows.map((row: any) => row.id);
     await batchUpdateRoleStatus(roleIds, 1);
-    message.success({ content: `成功启用 ${selectedRows.length} 个角色`, duration: 2 });
+    message.success({
+      content: `成功启用 ${selectedRows.length} 个角色`,
+      duration: 2,
+    });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch (e) {
+  } catch {
     message.error({ content: '批量启用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
@@ -194,10 +200,13 @@ const handleBatchDisable = async () => {
   try {
     const roleIds = selectedRows.map((row: any) => row.id);
     await batchUpdateRoleStatus(roleIds, 0);
-    message.success({ content: `成功禁用 ${selectedRows.length} 个角色`, duration: 2 });
+    message.success({
+      content: `成功禁用 ${selectedRows.length} 个角色`,
+      duration: 2,
+    });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch (e) {
+  } catch {
     message.error({ content: '批量禁用失败', duration: 3 });
   } finally {
     batchLoading.value = false;

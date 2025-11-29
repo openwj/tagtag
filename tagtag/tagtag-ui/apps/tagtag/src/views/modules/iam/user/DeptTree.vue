@@ -3,15 +3,7 @@ import type { DataNode } from 'ant-design-vue/es/tree';
 
 import { computed, onMounted, ref } from 'vue';
 
-import {
-  Button,
-  Empty,
-  Input,
-  Spin,
-  Tag,
-  Tooltip,
-  Tree,
-} from 'ant-design-vue';
+import { Button, Empty, Input, Spin, Tag, Tooltip, Tree } from 'ant-design-vue';
 
 import { getDeptTree } from '#/api/modules/iam/dept';
 

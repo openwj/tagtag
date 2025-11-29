@@ -20,11 +20,6 @@ export async function getDeptTree(params: ApiParams.PageFetchParams) {
   return requestClient.get(`${Api.BaseApi}/tree`, { params });
 }
 
-
-
-
-
-
 /**
  * 统计部门下的用户数量
  */
@@ -34,7 +29,6 @@ export async function getDeptTree(params: ApiParams.PageFetchParams) {
  * 查询子部门列表
  */
 // 删除未实现且未使用的方法：保持最小接口集合
-
 
 /**
  * 新增部门
@@ -69,12 +63,10 @@ export function updateDeptStatus(id: number | string, status: number) {
   return requestClient.put(`${Api.BaseApi}/${id}/status`, { status });
 }
 
-
 /**
  * 移动部门
  */
 // 删除未实现且未使用的方法：保持最小接口集合
-
 
 /**
  * 检查部门是否有用户
