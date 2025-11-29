@@ -1,7 +1,5 @@
 package dev.tagtag.module.iam.controller;
 
-import dev.tagtag.common.model.PageQuery;
-import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
@@ -10,11 +8,9 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.validation.annotation.Validated;
 import dev.tagtag.kernel.validation.CreateGroup;
 import dev.tagtag.kernel.validation.UpdateGroup;
-import jakarta.validation.Valid;
 import dev.tagtag.kernel.constant.AppMessages;
 import org.springframework.security.access.prepost.PreAuthorize;
 import dev.tagtag.kernel.constant.Permissions;

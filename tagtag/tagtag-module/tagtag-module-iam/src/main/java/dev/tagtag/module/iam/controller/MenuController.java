@@ -1,7 +1,5 @@
 package dev.tagtag.module.iam.controller;
 
-import dev.tagtag.common.model.PageQuery;
-import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.common.constant.GlobalConstants;
