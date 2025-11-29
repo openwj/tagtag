@@ -82,18 +82,21 @@ const handleAdd = (row: Record<string, any>) => {
 };
 
 /**
- * 处理状态切换
+ * 状态切换（乐观更新，失败回滚）
  * @param record 部门记录
  */
 const handleStatusChange = async (record: any) => {
+  const prevStatus = record.status;
   record.statusLoading = true;
   try {
     const statusValue = record.status ? 1 : 0;
-    await editDept({ id: record.id, status: statusValue });
+    await updateDeptStatus(record.id, statusValue);
     message.success({ content: '状态更新成功', duration: 2 });
+  } catch (e) {
+    record.status = prevStatus;
+    message.error({ content: '状态更新失败', duration: 3 });
   } finally {
     record.statusLoading = false;
-    await gridApi.query();
   }
 };
 

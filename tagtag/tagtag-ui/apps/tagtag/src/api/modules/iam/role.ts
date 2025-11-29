@@ -116,24 +116,22 @@ export function batchDeleteRole(ids: Array<number | string>) {
 /**
  * 更新单条角色状态
  * @param id 角色ID
- * @param disabled 是否禁用（true=禁用，false=启用）
+ * @param status 状态（0=禁用，1=启用）
  */
-export function updateRoleStatus(id: number | string, disabled: boolean) {
-  return requestClient.put(`${Api.BaseApi}/${id}/status`, undefined, {
-    params: { disabled },
-  });
+export function updateRoleStatus(id: number | string, status: number) {
+  return requestClient.put(`${Api.BaseApi}/${id}/status`, { status });
 }
 
 /**
  * 批量更新角色状态
  * @param ids 角色ID列表
- * @param disabled 是否禁用（true=禁用，false=启用）
+ * @param status 状态（0=禁用，1=启用）
  */
 export function batchUpdateRoleStatus(
   ids: Array<number | string>,
-  disabled: boolean,
+  status: number,
 ) {
-  return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, disabled });
+  return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, status });
 }
 
 /**

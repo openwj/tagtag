@@ -28,20 +28,6 @@ public class DeptController {
 
     private final DeptService deptService;
 
-    /** 部门分页查询接口 */
-    @PostMapping("/page")
-    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<PageResult<DeptDTO>> page(@Valid @RequestBody DeptPageRequest req) {
-        PageResult<DeptDTO> pr = deptService.page(req.getQuery(), req.getPage());
-        return Result.ok(pr);
-    }
-
-    /** 获取部门详情 */
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<DeptDTO> get(@PathVariable("id") Long id) {
-        return Result.ok(deptService.getById(id));
-    }
 
     /** 创建部门 */
     @PostMapping
@@ -67,6 +53,29 @@ public class DeptController {
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
+    /**
+     * 更新部门状态
+     * @param id 部门ID
+     * @param req 包含 status（0=禁用，1=启用）
+     */
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_UPDATE + "')")
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody DeptStatusUpdateRequest req) {
+        deptService.updateStatus(id, req.getStatus());
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 批量更新部门状态
+     * @param req 包含 id 列表与 status
+     */
+    @PutMapping("/status/batch")
+    @PreAuthorize("hasAuthority('" + Permissions.DEPT_UPDATE + "')")
+    public Result<Void> batchUpdateStatus(@RequestBody DeptStatusBatchRequest req) {
+        deptService.batchUpdateStatus(req.getIds(), req.getStatus());
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
     /** 部门树列表（支持查询条件） */
     @GetMapping("/tree")
     @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
@@ -74,46 +83,18 @@ public class DeptController {
         return Result.ok(deptService.listTree(query));
     }
 
-    /**
-     * 检查部门是否存在用户
-     * @param deptId 部门ID
-     * @return 是否存在用户
-     */
-    @GetMapping("/check/users")
-    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<Boolean> checkUsers(@RequestParam("deptId") Long deptId) {
-        return Result.ok(deptService.hasUsers(deptId));
-    }
 
-    /**
-     * 检查部门是否存在子部门
-     * @param deptId 部门ID
-     * @return 是否存在子部门
-     */
-    @GetMapping("/check/children")
-    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<Boolean> checkChildren(@RequestParam("deptId") Long deptId) {
-        return Result.ok(deptService.hasChildren(deptId));
-    }
 
-    /**
-     * 检查部门编码是否占用
-     * @param code 部门编码
-     * @param excludeId 可选排除的部门ID（用于编辑场景）
-     * @return 是否已占用
-     */
-    @GetMapping("/check/code")
-    @PreAuthorize("hasAuthority('" + Permissions.DEPT_READ + "')")
-    public Result<Boolean> checkCode(@RequestParam("code") String code,
-                                     @RequestParam(value = "excludeId", required = false) Long excludeId) {
-        if (code == null || code.isBlank()) return Result.ok(false);
-        return Result.ok(deptService.existsByCode(code, excludeId));
-    }
-
+    /** 部门状态更新请求 */
     @Data
-    public static class DeptPageRequest {
-        private DeptQueryDTO query;
-        @Valid
-        private PageQuery page;
+    public static class DeptStatusUpdateRequest {
+        private int status;
+    }
+
+    /** 部门批量状态更新请求 */
+    @Data
+    public static class DeptStatusBatchRequest {
+        private List<Long> ids;
+        private int status;
     }
 }

@@ -21,7 +21,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import java.util.List;
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 创建菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
     public Long create(MenuDTO menu) {
         Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
@@ -67,7 +66,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 更新菜单（忽略源对象中的空值） */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
     public void update(MenuDTO menu) {
         if (menu == null || menu.getId() == null) return;
         Menu entity = super.getById(menu.getId());
@@ -76,10 +75,13 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         super.updateById(entity);
     }
 
-    /** 删除菜单 */
+    /**
+     * 删除菜单
+     * @param id 菜单ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
     public void delete(Long id) {
         if (id == null) return;
         // 保护：存在子菜单禁止删除
@@ -90,35 +92,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         super.removeById(id);
     }
 
-    /**
-     * 根据父ID查询子菜单列表（LambdaQuery）
-     * @param parentId 父菜单ID
-     * @return 子菜单列表
-     */
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "menusByParent", key = "#root.args[0]")
-    public List<MenuDTO> listByParentId(Long parentId) {
-        if (parentId == null) return Collections.emptyList();
-        List<Menu> list = this.lambdaQuery().eq(Menu::getParentId, parentId).orderByAsc(Menu::getSort, Menu::getId).list();
-        return menuMapperConvert.toDTOList(list);
-    }
-
-    /**
-     * 根据菜单编码查询单条（LambdaQuery）
-     * @param menuCode 菜单编码
-     * @return 菜单详情
-     */
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "menuByCode", key = "#root.args[0]", unless = "#result == null")
-    public MenuDTO getByMenuCode(String menuCode) {
-        if (menuCode == null || menuCode.isBlank()) return null;
-        Menu entity = this.getOne(this.lambdaQuery()
-                .eq(Menu::getMenuCode, menuCode)
-                .getWrapper(), false);
-        return menuMapperConvert.toDTO(entity);
-    }
 
     /**
      * 菜单树查询（不分页，一次性查询后在内存构树）
@@ -169,72 +142,50 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return roots;
     }
 
-    /**
-     * 判断菜单编码是否存在
-     * @param menuCode 菜单编码
-     * @return 是否存在
-     */
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "menuCodeExists", key = "#menuCode", unless = "#result == false")
-    public boolean existsByCode(String menuCode) {
-        if (menuCode == null || menuCode.isBlank()) return false;
-        return this.lambdaQuery().eq(Menu::getMenuCode, menuCode).count() > 0;
-    }
 
     /**
      * 更新菜单状态
      * @param id 菜单ID
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
-    public void updateStatus(Long id, boolean disabled) {
+    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    public void updateStatus(Long id, int status) {
         if (id == null) return;
-        Menu entity = super.getById(id);
-        if (entity == null) return;
-        entity.setStatus(disabled ? 0 : 1);
-        super.updateById(entity);
+        this.lambdaUpdate().eq(Menu::getId, id).set(Menu::getStatus, status).update();
     }
 
     /**
-     * 批量更新菜单状态
+     * 批量更新菜单状态（单SQL）
      * @param ids 菜单ID列表
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
-    public void batchUpdateStatus(List<Long> ids, boolean disabled) {
+    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    public void batchUpdateStatus(List<Long> ids, int status) {
         if (ids == null || ids.isEmpty()) return;
-        int status = disabled ? 0 : 1;
         java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
-        for (Long id : uniq) {
-            if (id == null) continue;
-            Menu entity = super.getById(id);
-            if (entity == null) continue;
-            entity.setStatus(status);
-            super.updateById(entity);
-        }
+        this.lambdaUpdate()
+                .in(Menu::getId, uniq)
+                .set(Menu::getStatus, status)
+                .update();
     }
 
     /**
-     * 批量删除菜单（含子菜单保护）
+     * 批量删除菜单（一次性子菜单校验）
      * @param ids 菜单ID列表
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menusByParent", "menuByCode", "menuTree", "menuCodeExists"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
     public void batchDelete(List<Long> ids) {
         if (ids == null || ids.isEmpty()) return;
         java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
-        for (Long id : uniq) {
-            if (id == null) continue;
-            boolean hasChildren = this.lambdaQuery().eq(Menu::getParentId, id).count() > 0;
-            if (hasChildren) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "存在包含子菜单的项，无法批量删除");
-            }
+        boolean existChildren = this.lambdaQuery().in(Menu::getParentId, uniq).exists();
+        if (existChildren) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "选中的菜单中存在子菜单，无法批量删除");
         }
         super.removeBatchByIds(uniq);
     }

@@ -54,4 +54,18 @@ public interface DeptService {
      * @return 是否已占用
      */
     boolean existsByCode(String code, Long excludeId);
+
+    /**
+     * 更新部门状态
+     * @param id 部门ID
+     * @param status 状态（0=禁用，1=启用）
+     */
+    void updateStatus(Long id, int status);
+
+    /**
+     * 批量更新部门状态
+     * @param ids 部门ID列表
+     * @param status 状态（0=禁用，1=启用）
+     */
+    void batchUpdateStatus(java.util.List<Long> ids, int status);
 }

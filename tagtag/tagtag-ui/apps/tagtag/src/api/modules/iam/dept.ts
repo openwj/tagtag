@@ -20,41 +20,10 @@ export async function getDeptTree(params: ApiParams.PageFetchParams) {
   return requestClient.get(`${Api.BaseApi}/tree`, { params });
 }
 
-/**
- * 查询部门详情
- */
-export async function getDeptById(id: number | string) {
-  return requestClient.get(`${Api.BaseApi}/${id}`);
-}
 
-/**
- * 分页查询部门列表
- */
-// 统一分页为 POST 请求，携带查询条件与分页参数
-export async function getDeptPage(params: ApiParams.PageFetchParams) {
-  return requestClient.post(`${Api.BaseApi}/page`, params);
-}
 
-/**
- * 根据部门名称模糊查询
- */
-export async function searchDeptByName(params: { name: string }) {
-  return requestClient.get(`${Api.BaseApi}/search`, { params });
-}
 
-/**
- * 获取部门路径
- */
-export async function getDeptPath(deptId: number | string) {
-  return requestClient.get(`${Api.BaseApi}/path/${deptId}`);
-}
 
-/**
- * 获取部门层级深度
- */
-export async function getDeptLevel(deptId: number | string) {
-  return requestClient.get(`${Api.BaseApi}/level/${deptId}`);
-}
 
 /**
  * 统计部门下的用户数量
@@ -66,12 +35,6 @@ export async function getDeptLevel(deptId: number | string) {
  */
 // 删除未实现且未使用的方法：保持最小接口集合
 
-/**
- * 获取部门的所有子部门ID
- */
-export async function getDeptChildrenIds(deptId: number | string) {
-  return requestClient.get(`${Api.BaseApi}/children/ids/${deptId}`);
-}
 
 /**
  * 新增部门
@@ -99,34 +62,19 @@ export function deleteDept(id: number | string) {
  */
 /**
  * 更新部门状态
- * @param data 包含部门 `id` 与 `status(0|1)`
+ * @param id 部门ID
+ * @param status 状态（0=禁用，1=启用）
  */
-export function updateDeptStatus(data: {
-  id: number | string;
-  status: number;
-}) {
-  return requestClient.put(`${Api.BaseApi}`, data);
+export function updateDeptStatus(id: number | string, status: number) {
+  return requestClient.put(`${Api.BaseApi}/${id}/status`, { status });
 }
 
-/**
- * 批量更新部门状态
- */
-// 删除未实现且未使用的方法：保持最小接口集合
 
 /**
  * 移动部门
  */
 // 删除未实现且未使用的方法：保持最小接口集合
 
-/**
- * 检查部门编码是否存在
- */
-export function checkDeptCode(params: {
-  code: string;
-  excludeId?: number | string;
-}) {
-  return requestClient.get(`${Api.BaseApi}/check/code`, { params });
-}
 
 /**
  * 检查部门是否有用户

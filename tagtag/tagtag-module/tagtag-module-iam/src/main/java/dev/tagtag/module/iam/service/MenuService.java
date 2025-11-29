@@ -23,19 +23,6 @@ public interface MenuService {
     /** 删除权限 */
     void delete(Long id);
 
-    /**
-     * 根据父ID查询子菜单列表
-     * @param parentId 父菜单ID
-     * @return 子菜单列表
-     */
-    List<MenuDTO> listByParentId(Long parentId);
-
-    /**
-     * 根据菜单编码查询单条
-     * @param menuCode 菜单编码
-     * @return 菜单详情
-     */
-    MenuDTO getByMenuCode(String menuCode);
 
     /**
      * 菜单树查询（不分页）
@@ -44,26 +31,20 @@ public interface MenuService {
      */
     List<MenuDTO> listTree(MenuQueryDTO query);
 
-    /**
-     * 判断菜单编码是否存在
-     * @param menuCode 菜单编码
-     * @return 是否存在
-     */
-    boolean existsByCode(String menuCode);
 
     /**
      * 更新菜单状态
      * @param id 菜单ID
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
-    void updateStatus(Long id, boolean disabled);
+    void updateStatus(Long id, int status);
 
     /**
      * 批量更新菜单状态
      * @param ids 菜单ID列表
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
-    void batchUpdateStatus(List<Long> ids, boolean disabled);
+    void batchUpdateStatus(List<Long> ids, int status);
 
     /**
      * 批量删除菜单（含子菜单保护）

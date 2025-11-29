@@ -25,13 +25,6 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    /** 菜单分页查询 */
-    @PostMapping("/page")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
-    public Result<PageResult<MenuDTO>> page(@Valid @RequestBody MenuPageRequest req) {
-        PageResult<MenuDTO> pr = menuService.page(req.getQuery(), req.getPage());
-        return Result.ok(pr);
-    }
 
     /**
      * 菜单树查询（不分页）
@@ -50,27 +43,6 @@ public class MenuController {
         return Result.ok(menuService.getById(id));
     }
 
-    /**
-     * 根据父ID查询子菜单列表
-     * @param parentId 父菜单ID
-     * @return 子菜单列表
-     */
-    @GetMapping("/parent/{parentId}")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
-    public Result<List<MenuDTO>> listByParent(@PathVariable("parentId") Long parentId) {
-        return Result.ok(menuService.listByParentId(parentId));
-    }
-
-    /**
-     * 根据菜单编码查询单条
-     * @param menuCode 菜单编码
-     * @return 菜单详情
-     */
-    @GetMapping("/code/{menuCode}")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
-    public Result<MenuDTO> getByCode(@PathVariable("menuCode") String menuCode) {
-        return Result.ok(menuService.getByMenuCode(menuCode));
-    }
 
     /** 创建菜单 */
     @PostMapping
@@ -99,12 +71,12 @@ public class MenuController {
     /**
      * 更新菜单状态
      * @param id 菜单ID
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param req 包含 status（0=禁用，1=启用）
      */
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
-    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestParam("disabled") boolean disabled) {
-        menuService.updateStatus(id, disabled);
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody MenuStatusUpdateRequest req) {
+        menuService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
@@ -115,7 +87,7 @@ public class MenuController {
     @PutMapping("/status/batch")
     @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
     public Result<Void> batchUpdateStatus(@RequestBody MenuStatusBatchRequest req) {
-        menuService.batchUpdateStatus(req.getIds(), req.isDisabled());
+        menuService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
@@ -130,28 +102,17 @@ public class MenuController {
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
-    /**
-     * 判断菜单编码是否存在（唯一性校验）
-     * @param menuCode 菜单编码
-     * @return 是否存在
-     */
-    @GetMapping("/exist/code/{menuCode}")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
-    public Result<Boolean> existsByCode(@PathVariable("menuCode") String menuCode) {
-        return Result.ok(menuService.existsByCode(menuCode));
-    }
+
 
     @Data
-    public static class MenuPageRequest {
-        private MenuQueryDTO query;
-        @Valid
-        private PageQuery page;
+    public static class MenuStatusUpdateRequest {
+        private int status;
     }
 
     @Data
     public static class MenuStatusBatchRequest {
         private List<Long> ids;
-        private boolean disabled;
+        private int status;
     }
 
     @Data

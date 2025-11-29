@@ -53,11 +53,6 @@ public class RoleApiImpl implements RoleApi {
         return Result.ok();
     }
 
-    /** 查询指定角色的菜单（含按钮） */
-    @Override
-    public Result<List<MenuDTO>> listMenusByRole(Long roleId) {
-        return Result.ok(roleService.listMenusByRole(roleId));
-    }
 
     /** 批量查询角色的权限编码集合 */
     @Override

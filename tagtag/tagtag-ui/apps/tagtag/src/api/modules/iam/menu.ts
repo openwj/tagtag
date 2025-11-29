@@ -34,25 +34,7 @@ const Api = {
   BaseApi: `/iam/menus`,
 };
 
-/**
- * 菜单分页查询
- * @param query 菜单查询条件
- * @param page 分页与排序参数
- */
-export async function getMenuPage(
-  query: MenuApiParams.MenuQuery,
-  page: MenuApiParams.PageQuery,
-) {
-  return requestClient.post(`${Api.BaseApi}/page`, { query, page });
-}
 
-/**
- * 根据父ID查询子菜单列表
- * @param parentId 父菜单ID
- */
-export async function listMenusByParent(parentId: number | string) {
-  return requestClient.get(`${Api.BaseApi}/parent/${parentId}`);
-}
 
 /**
  * 获取菜单详情
@@ -64,13 +46,6 @@ export async function getMenuById(id: number | string) {
 
 // 删除重复别名方法：保持单一 getMenuById
 
-/**
- * 根据菜单编码查询单条
- * @param menuCode 菜单编码
- */
-export async function getMenuByCode(menuCode: string) {
-  return requestClient.get(`${Api.BaseApi}/code/${menuCode}`);
-}
 
 /**
  * 菜单树查询（不分页）
@@ -82,13 +57,6 @@ export async function getMenuTree(
   return requestClient.get(`${Api.BaseApi}/tree`, { params: { ...query } });
 }
 
-/**
- * 判断菜单编码是否存在
- * @param menuCode 菜单编码
- */
-export async function existsByCode(menuCode: string) {
-  return requestClient.get(`${Api.BaseApi}/exist/code/${menuCode}`);
-}
 
 /**
  * 新增菜单
@@ -127,22 +95,20 @@ export function batchDeleteMenu(ids: Array<number | string>) {
 /**
  * 更新单条菜单状态
  * @param id 菜单ID
- * @param disabled 是否禁用（true=禁用，false=启用）
+ * @param status 状态（0=禁用，1=启用）
  */
-export function updateMenuStatus(id: number | string, disabled: boolean) {
-  return requestClient.put(`${Api.BaseApi}/${id}/status`, undefined, {
-    params: { disabled },
-  });
+export function updateMenuStatus(id: number | string, status: number) {
+  return requestClient.put(`${Api.BaseApi}/${id}/status`, { status });
 }
 
 /**
  * 批量更新菜单状态
  * @param ids 菜单ID列表
- * @param disabled 是否禁用（true=禁用，false=启用）
+ * @param status 状态（0=禁用，1=启用）
  */
 export function batchUpdateMenuStatus(
   ids: Array<number | string>,
-  disabled: boolean,
+  status: number,
 ) {
-  return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, disabled });
+  return requestClient.put(`${Api.BaseApi}/status/batch`, { ids, status });
 }

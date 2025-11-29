@@ -158,6 +158,10 @@ const getSelectedRows = () => {
 /**
  * 批量删除菜单
  */
+/**
+ * 批量删除菜单
+ * @returns void
+ */
 const handleBatchDelete = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
@@ -173,14 +177,17 @@ const handleBatchDelete = async () => {
   }
 
   batchLoading.value = true;
-
-  const ids = selectedRows.map((row) => row.id);
-  await batchDeleteMenu(ids);
-  message.success({ content: `成功删除 ${selectedRows.length} 个菜单`, duration: 2 });
-  gridApi.grid?.clearCheckboxRow();
-  gridApi.reload();
-
-  batchLoading.value = false;
+  try {
+    const ids = selectedRows.map((row) => row.id);
+    await batchDeleteMenu(ids);
+    message.success({ content: `成功删除 ${selectedRows.length} 个菜单`, duration: 2 });
+    gridApi.grid?.clearCheckboxRow();
+    gridApi.reload();
+  } catch (e) {
+    message.error({ content: '批量删除失败', duration: 3 });
+  } finally {
+    batchLoading.value = false;
+  }
 };
 
 /**
@@ -188,6 +195,10 @@ const handleBatchDelete = async () => {
  */
 /**
  * 批量启用菜单
+ */
+/**
+ * 批量启用菜单
+ * @returns void
  */
 const handleBatchEnable = async () => {
   const selectedRows = getSelectedRows();
@@ -195,16 +206,18 @@ const handleBatchEnable = async () => {
     message.warning({ content: '请选择要启用的菜单', duration: 3 });
     return;
   }
-
   batchLoading.value = true;
-
-  const ids = selectedRows.map((row) => row.id);
-  await batchUpdateMenuStatus(ids, false);
-  message.success({ content: `成功启用 ${selectedRows.length} 个菜单`, duration: 2 });
-  gridApi.grid?.clearCheckboxRow();
-  gridApi.reload();
-
-  batchLoading.value = false;
+  try {
+    const ids = selectedRows.map((row) => row.id);
+    await batchUpdateMenuStatus(ids, 1);
+    message.success({ content: `成功启用 ${selectedRows.length} 个菜单`, duration: 2 });
+    gridApi.grid?.clearCheckboxRow();
+    gridApi.reload();
+  } catch (e) {
+    message.error({ content: '批量启用失败', duration: 3 });
+  } finally {
+    batchLoading.value = false;
+  }
 };
 
 /**
@@ -212,6 +225,10 @@ const handleBatchEnable = async () => {
  */
 /**
  * 批量禁用菜单
+ */
+/**
+ * 批量禁用菜单
+ * @returns void
  */
 const handleBatchDisable = async () => {
   const selectedRows = getSelectedRows();
@@ -219,16 +236,18 @@ const handleBatchDisable = async () => {
     message.warning({ content: '请选择要禁用的菜单', duration: 3 });
     return;
   }
-
   batchLoading.value = true;
-
-  const ids = selectedRows.map((row) => row.id);
-  await batchUpdateMenuStatus(ids, true);
-  message.success({ content: `成功禁用 ${selectedRows.length} 个菜单`, duration: 2 });
-  gridApi.grid?.clearCheckboxRow();
-  gridApi.reload();
-
-  batchLoading.value = false;
+  try {
+    const ids = selectedRows.map((row) => row.id);
+    await batchUpdateMenuStatus(ids, 0);
+    message.success({ content: `成功禁用 ${selectedRows.length} 个菜单`, duration: 2 });
+    gridApi.grid?.clearCheckboxRow();
+    gridApi.reload();
+  } catch (e) {
+    message.error({ content: '批量禁用失败', duration: 3 });
+  } finally {
+    batchLoading.value = false;
+  }
 };
 
 /**
@@ -236,23 +255,27 @@ const handleBatchDisable = async () => {
  * @param row 行数据
  * @param checked 是否选中
  */
+/**
+ * 状态切换（乐观更新，失败回滚）
+ * @param row 行数据
+ * @param checked 新状态
+ */
 const handleStatusChange = async (
   row: Record<string, any>,
   checked: boolean,
 ) => {
+  const prevStatus = row.status;
+  row.statusLoading = true;
+  // 乐观更新到目标状态
+  row.status = checked ? 1 : 0;
   try {
-    // 设置加载状态
-    row.statusLoading = true;
-
-    // 调用API更新状态
-    await updateMenuStatus(row.id, !checked); // 转换为disabled布尔值
-
-    // 更新本地状态
-    row.status = checked ? 1 : 0;
-
+    await updateMenuStatus(row.id, checked ? 1 : 0);
     message.success({ content: `菜单${checked ? '启用' : '禁用'}成功`, duration: 2 });
+  } catch (e) {
+    // 失败回滚到原状态
+    row.status = prevStatus;
+    message.error({ content: `菜单${checked ? '启用' : '禁用'}失败`, duration: 3 });
   } finally {
-    // 清除加载状态
     row.statusLoading = false;
   }
 };

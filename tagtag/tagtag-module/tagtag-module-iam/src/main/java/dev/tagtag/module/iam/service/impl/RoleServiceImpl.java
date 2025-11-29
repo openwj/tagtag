@@ -163,34 +163,32 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /**
      * 更新角色状态
      * @param id 角色ID
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateStatus(Long id, boolean disabled) {
+    public void updateStatus(Long id, int status) {
         if (id == null) return;
-        Role entity = super.getById(id);
-        if (entity == null) return;
-        int status = disabled ? StatusEnum.DISABLED.getCode() : StatusEnum.ENABLED.getCode();
-        entity.setStatus(status);
-        super.updateById(entity);
-        log.info("updateStatus: roleId={}, disabled={}, statusCode={}", id, disabled, status);
+        this.lambdaUpdate()
+                .eq(Role::getId, id)
+                .set(Role::getStatus, status)
+                .update();
+        log.info("updateStatus: roleId={}, statusCode={}", id, status);
     }
 
     /**
      * 批量更新角色状态
      * @param ids 角色ID列表
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void batchUpdateStatus(List<Long> ids, boolean disabled) {
+    public void batchUpdateStatus(List<Long> ids, int status) {
         if (ids == null || ids.isEmpty()) return;
-        int status = disabled ? StatusEnum.DISABLED.getCode() : StatusEnum.ENABLED.getCode();
         this.lambdaUpdate()
                 .in(Role::getId, ids)
                 .set(Role::getStatus, status)
                 .update();
-        log.info("batchUpdateStatus: roleCount={}, disabled={}, statusCode={}", ids.size(), disabled, status);
+        log.info("batchUpdateStatus: roleCount={}, statusCode={}", ids.size(), status);
     }
 }

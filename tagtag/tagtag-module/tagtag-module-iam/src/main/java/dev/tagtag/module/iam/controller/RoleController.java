@@ -89,13 +89,13 @@ public class RoleController {
     /**
      * 更新角色状态
      * @param id 角色ID
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param req 包含 status（0=禁用，1=启用）
      * @return 操作结果
      */
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
-    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestParam("disabled") boolean disabled) {
-        roleService.updateStatus(id, disabled);
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody RoleStatusUpdateRequest req) {
+        roleService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
@@ -107,7 +107,7 @@ public class RoleController {
     @PutMapping("/status/batch")
     @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
     public Result<Void> batchUpdateStatus(@Valid @RequestBody RoleStatusBatchRequest req) {
-        roleService.batchUpdateStatus(req.getIds(), req.isDisabled());
+        roleService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
@@ -147,13 +147,20 @@ public class RoleController {
     }
 
     /**
+     * 角色状态更新请求
+     */
+    @Data
+    public static class RoleStatusUpdateRequest {
+        private int status;
+    }
+
+    /**
      * 角色批量状态更新请求
-     * - ids: 角色ID列表
-     * - disabled: 是否禁用（true=禁用，false=启用）
      */
     @Data
     public static class RoleStatusBatchRequest {
         private List<Long> ids;
-        private boolean disabled;
+        private int status;
     }
 }
+

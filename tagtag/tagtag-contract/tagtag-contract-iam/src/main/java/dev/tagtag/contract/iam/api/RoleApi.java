@@ -51,12 +51,6 @@ public interface RoleApi {
      */
     Result<Void> deleteRole(Long roleId);
 
-    /**
-     * 查询指定角色的菜单（含按钮）
-     * @param roleId 角色ID
-     * @return 菜单列表
-     */
-    Result<List<MenuDTO>> listMenusByRole(Long roleId);
 
     /**
      * 按角色ID集合批量查询权限编码（按钮型菜单的 menu_code）

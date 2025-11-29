@@ -55,13 +55,6 @@ export async function getUserPage(
   return requestClient.post(`${Api.BaseApi}/page`, { query, page });
 }
 
-/**
- * 获取用户详情
- * @param id 用户ID
- */
-export async function getUserById(id: number | string) {
-  return requestClient.get(`${Api.BaseApi}/${id}`);
-}
 
 /**
  * 新增用户

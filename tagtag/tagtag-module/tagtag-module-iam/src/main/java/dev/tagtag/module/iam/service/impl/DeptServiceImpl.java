@@ -214,6 +214,33 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     /**
+     * 更新部门状态
+     * @param id 部门ID
+     * @param status 状态（0=禁用，1=启用）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "deptTree", allEntries = true)
+    public void updateStatus(Long id, int status) {
+        if (id == null) return;
+        this.lambdaUpdate().eq(Dept::getId, id).set(Dept::getStatus, status).update();
+    }
+
+    /**
+     * 批量更新部门状态（单SQL）
+     * @param ids 部门ID列表
+     * @param status 状态（0=禁用，1=启用）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "deptTree", allEntries = true)
+    public void batchUpdateStatus(java.util.List<Long> ids, int status) {
+        if (ids == null || ids.isEmpty()) return;
+        java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
+        this.lambdaUpdate().in(Dept::getId, uniq).set(Dept::getStatus, status).update();
+    }
+
+    /**
      * 创建校验：唯一性、父ID合法、状态合法
      */
     private void validateForCreate(DeptDTO dept) {

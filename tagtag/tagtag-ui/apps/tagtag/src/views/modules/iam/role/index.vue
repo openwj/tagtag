@@ -122,9 +122,7 @@ const handleStatusChange = async (row: any, checked: boolean) => {
   row.status = checked ? 1 : 0;
   row.statusLoading = true;
   try {
-    // API的disabled参数：true表示禁用，false表示启用
-    // checked为true表示启用，所以disabled应该为!checked
-    await updateRoleStatus(row.id, !checked);
+    await updateRoleStatus(row.id, checked ? 1 : 0);
     message.success({ content: '状态更新成功', duration: 2 });
   } catch {
     // 失败回滚到原状态
@@ -151,6 +149,8 @@ const handleBatchDelete = async () => {
     message.success({ content: `成功删除 ${selectedRows.length} 个角色`, duration: 2 });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
+  } catch (e) {
+    message.error({ content: '批量删除失败', duration: 3 });
   } finally {
     batchLoading.value = false;
   }
@@ -169,11 +169,12 @@ const handleBatchEnable = async () => {
   batchLoading.value = true;
   try {
     const roleIds = selectedRows.map((row: any) => row.id);
-    // API的disabled参数：false表示启用
-    await batchUpdateRoleStatus(roleIds, false);
+    await batchUpdateRoleStatus(roleIds, 1);
     message.success({ content: `成功启用 ${selectedRows.length} 个角色`, duration: 2 });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
+  } catch (e) {
+    message.error({ content: '批量启用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
   }
@@ -192,11 +193,12 @@ const handleBatchDisable = async () => {
   batchLoading.value = true;
   try {
     const roleIds = selectedRows.map((row: any) => row.id);
-    // API的disabled参数：true表示禁用
-    await batchUpdateRoleStatus(roleIds, true);
+    await batchUpdateRoleStatus(roleIds, 0);
     message.success({ content: `成功禁用 ${selectedRows.length} 个角色`, duration: 2 });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
+  } catch (e) {
+    message.error({ content: '批量禁用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
   }

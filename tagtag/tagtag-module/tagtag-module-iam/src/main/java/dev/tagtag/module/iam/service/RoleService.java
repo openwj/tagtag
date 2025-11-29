@@ -59,14 +59,14 @@ public interface RoleService {
     /**
      * 更新角色状态
      * @param id 角色ID
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
-    void updateStatus(Long id, boolean disabled);
+    void updateStatus(Long id, int status);
 
     /**
      * 批量更新角色状态
      * @param ids 角色ID列表
-     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @param status 状态（0=禁用，1=启用）
      */
-    void batchUpdateStatus(List<Long> ids, boolean disabled);
+    void batchUpdateStatus(List<Long> ids, int status);
 }
