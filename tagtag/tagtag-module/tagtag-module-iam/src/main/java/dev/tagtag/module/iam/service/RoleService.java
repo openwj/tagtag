@@ -72,4 +72,18 @@ public interface RoleService {
 
     /** 查询所有角色（简单列表） */
     java.util.List<RoleDTO> listAll();
+
+    /**
+     * 更新角色状态
+     * @param id 角色ID
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    void updateStatus(Long id, boolean disabled);
+
+    /**
+     * 批量更新角色状态
+     * @param ids 角色ID列表
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    void batchUpdateStatus(java.util.List<Long> ids, boolean disabled);
 }

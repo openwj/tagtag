@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import dev.tagtag.common.enums.StatusEnum;
 
 import java.util.List;
 import java.util.Set;
@@ -191,5 +192,39 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     public java.util.List<RoleDTO> listAll() {
         java.util.List<Role> entities = this.list();
         return roleMapperConvert.toDTOList(entities);
+    }
+
+    /**
+     * 更新角色状态
+     * @param id 角色ID
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStatus(Long id, boolean disabled) {
+        if (id == null) return;
+        Role entity = super.getById(id);
+        if (entity == null) return;
+        int status = disabled ? StatusEnum.DISABLED.getCode() : StatusEnum.ENABLED.getCode();
+        entity.setStatus(status);
+        super.updateById(entity);
+        log.info("updateStatus: roleId={}, disabled={}, statusCode={}", id, disabled, status);
+    }
+
+    /**
+     * 批量更新角色状态
+     * @param ids 角色ID列表
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchUpdateStatus(List<Long> ids, boolean disabled) {
+        if (ids == null || ids.isEmpty()) return;
+        int status = disabled ? StatusEnum.DISABLED.getCode() : StatusEnum.ENABLED.getCode();
+        this.lambdaUpdate()
+                .in(Role::getId, ids)
+                .set(Role::getStatus, status)
+                .update();
+        log.info("batchUpdateStatus: roleCount={}, disabled={}, statusCode={}", ids.size(), disabled, status);
     }
 }

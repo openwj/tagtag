@@ -87,6 +87,31 @@ public class RoleController {
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
+    /**
+     * 更新角色状态
+     * @param id 角色ID
+     * @param disabled 是否禁用（true=禁用，false=启用）
+     * @return 操作结果
+     */
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestParam("disabled") boolean disabled) {
+        roleService.updateStatus(id, disabled);
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 批量更新角色状态
+     * @param req 包含角色ID列表与禁用标记
+     * @return 操作结果
+     */
+    @PutMapping("/status/batch")
+    @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
+    public Result<Void> batchUpdateStatus(@Valid @RequestBody RoleStatusBatchRequest req) {
+        roleService.batchUpdateStatus(req.getIds(), req.isDisabled());
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
     /** 查询所有角色（简单列表） */
     @GetMapping
     @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
@@ -145,5 +170,16 @@ public class RoleController {
         private RoleQueryDTO query;
         @Valid
         private PageQuery page;
+    }
+
+    /**
+     * 角色批量状态更新请求
+     * - ids: 角色ID列表
+     * - disabled: 是否禁用（true=禁用，false=启用）
+     */
+    @Data
+    public static class RoleStatusBatchRequest {
+        private List<Long> ids;
+        private boolean disabled;
     }
 }
