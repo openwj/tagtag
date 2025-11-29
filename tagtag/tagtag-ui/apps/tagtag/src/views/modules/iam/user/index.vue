@@ -180,7 +180,7 @@ const handleAdd = () => {
  */
 const handleDelete = async (id: string) => {
   await deleteUser(id);
-  message.success('删除成功');
+  message.success({ content: '删除成功', duration: 2 });
   gridApi.reload();
 };
 
@@ -191,7 +191,7 @@ const handleDelete = async (id: string) => {
 const handleBatchDelete = async () => {
   const selectedRows = gridApi.grid.getCheckboxRecords();
   if (selectedRows.length === 0) {
-    message.warning('请选择要删除的用户');
+    message.warning({ content: '请选择要删除的用户', duration: 3 });
     return;
   }
   Modal.confirm({
@@ -205,7 +205,7 @@ const handleBatchDelete = async () => {
       batchLoading.value = true;
       const ids = selectedRows.map((row: any) => row.id);
       await batchDeleteUsers(ids);
-      message.success(`成功删除 ${selectedRows.length} 个用户`);
+      message.success({ content: `成功删除 ${selectedRows.length} 个用户`, duration: 2 });
       gridApi.grid.clearCheckboxRow();
       gridApi.reload();
       batchLoading.value = false;
@@ -220,12 +220,15 @@ const handleBatchDelete = async () => {
 const handleStatusToggle = async (row: Record<string, any>) => {
   const newStatus = row.status === 1 ? 0 : 1;
   const statusText = newStatus === 1 ? '启用' : '禁用';
+  row.statusLoading = true;
   try {
     await updateUserStatus(row.id, newStatus);
-    message.success(`用户${statusText}成功`);
-    gridApi.reload();
+    row.status = newStatus;
+    message.success({ content: `用户${statusText}成功`, duration: 2 });
   } catch {
-    message.error(`用户${statusText}失败`);
+    message.error({ content: `用户${statusText}失败`, duration: 3 });
+  } finally {
+    row.statusLoading = false;
   }
 };
 
@@ -237,7 +240,7 @@ const handleStatusToggle = async (row: Record<string, any>) => {
 const handleBatchStatusUpdate = async (status: number) => {
   const selectedRows = gridApi.grid.getCheckboxRecords();
   if (selectedRows.length === 0) {
-    message.warning('请选择要更新状态的用户');
+    message.warning({ content: '请选择要更新状态的用户', duration: 3 });
     return;
   }
   const needUpdateRows = selectedRows.filter(
@@ -245,7 +248,7 @@ const handleBatchStatusUpdate = async (status: number) => {
   );
   if (needUpdateRows.length === 0) {
     const statusText = status === 1 ? '启用' : '禁用';
-    message.info(`选中的用户已经是${statusText}状态`);
+    message.info({ content: `选中的用户已经是${statusText}状态`, duration: 2 });
     return;
   }
   const actionText = status === 1 ? '启用' : '禁用';
@@ -261,7 +264,7 @@ const handleBatchStatusUpdate = async (status: number) => {
         batchLoading.value = true;
         const ids = needUpdateRows.map((row: any) => row.id);
         await batchUpdateUserStatus(ids, status);
-        message.success(`成功${actionText} ${needUpdateRows.length} 个用户`);
+        message.success({ content: `成功${actionText} ${needUpdateRows.length} 个用户`, duration: 2 });
         gridApi.grid.clearCheckboxRow();
         gridApi.reload();
       } finally {
@@ -324,7 +327,7 @@ const handleAssignRoles = async (row: Record<string, any>) => {
     loadingMessage();
     roleAssignModalRef.value?.openModal();
   } catch {
-    message.info('角色分配暂不可用：角色查询接口不可用');
+    message.info({ content: '角色分配暂不可用：角色查询接口不可用', duration: 3 });
   }
 };
 
@@ -336,7 +339,7 @@ const handleBatchAssignRoles = async () => {
   try {
     const selectedRows = gridApi.grid.getCheckboxRecords();
     if (!selectedRows || selectedRows.length === 0) {
-      message.warning('请先选择要分配角色的用户');
+      message.warning({ content: '请先选择要分配角色的用户', duration: 3 });
       return;
     }
     const loadingMessage = message.loading('正在加载角色信息...', 0);
@@ -350,7 +353,7 @@ const handleBatchAssignRoles = async () => {
     loadingMessage();
     roleAssignModalRef.value?.openModal();
   } catch {
-    message.info('批量分配角色暂不可用：角色查询接口不可用');
+    message.info({ content: '批量分配角色暂不可用：角色查询接口不可用', duration: 3 });
   }
 };
 
@@ -365,13 +368,14 @@ const handleConfirmAssignRoles = async (roleIds: (number | string)[]) => {
 
     if (selectedUserForRole.value) {
       await assignUserRoles(selectedUserForRole.value.id, roleIds as number[]);
-      message.success('角色分配成功');
+      message.success({ content: '角色分配成功', duration: 2 });
     } else if (selectedUsersForBatchRole.value.length > 0) {
       const userIds = selectedUsersForBatchRole.value.map((user) => user.id);
       await batchAssignRoles(userIds, roleIds as number[]);
-      message.success(
-        `成功为 ${selectedUsersForBatchRole.value.length} 个用户分配角色`,
-      );
+      message.success({
+        content: `成功为 ${selectedUsersForBatchRole.value.length} 个用户分配角色`,
+        duration: 2,
+      });
 
       gridApi.grid.clearCheckboxRow();
     }
@@ -461,9 +465,10 @@ function handleClearDept() {
                 type="primary"
                 v-access:code="'user:create'"
                 @click="handleAdd"
+                aria-label="新增用户"
               >
                 <template #icon>
-                  <span class="icon-[material-symbols--add-circle] mr-1"></span>
+                  <span class="icon-[lucide--plus] mr-1"></span>
                 </template>
                 新增
               </Button>
@@ -474,9 +479,7 @@ function handleClearDept() {
                 <template #overlay>
                   <Menu>
                     <Menu.Item key="delete" v-access:code="'user:delete'" @click="handleBatchDelete">
-                      <div
-                        class="icon-[material-symbols--delete-rounded] mr-2"
-                      ></div>
+                      <div class="icon-[lucide--trash-2] mr-2"></div>
                       批量删除
                     </Menu.Item>
                     <Menu.Item
@@ -484,9 +487,7 @@ function handleClearDept() {
                       v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(1)"
                     >
-                      <div
-                        class="icon-[material-symbols--check-circle] mr-2"
-                      ></div>
+                      <div class="icon-[lucide--check-circle] mr-2"></div>
                       批量启用
                     </Menu.Item>
                     <Menu.Item
@@ -494,13 +495,11 @@ function handleClearDept() {
                       v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(0)"
                     >
-                      <div class="icon-[material-symbols--cancel] mr-2"></div>
+                      <div class="icon-[lucide--x-circle] mr-2"></div>
                       批量禁用
                     </Menu.Item>
                     <Menu.Item key="roles" v-access:code="'user:assignRole'" @click="handleBatchAssignRoles">
-                      <div
-                        class="icon-[material-symbols--group-add] mr-2"
-                      ></div>
+                      <div class="icon-[lucide--users] mr-2"></div>
                       批量分配角色
                     </Menu.Item>
                   </Menu>
@@ -513,6 +512,8 @@ function handleClearDept() {
               <Switch
                 v-access:code="'user:update'"
                 :checked="row.status === 1"
+                :disabled="row.statusLoading"
+                :loading="row.statusLoading"
                 checked-children="启用"
                 un-checked-children="禁用"
                 @change="handleStatusToggle(row)"
@@ -543,11 +544,10 @@ function handleClearDept() {
                   type="primary"
                   v-access:code="'user:update'"
                   @click="handleEdit(row)"
+                  aria-label="编辑用户"
                 >
                   <template #icon>
-                    <div
-                      class="icon-[material-symbols--edit-square-rounded] text-blue-500"
-                    ></div>
+                    <div class="icon-[lucide--edit] text-blue-500"></div>
                   </template>
                 </Button>
               </Tooltip>
@@ -560,11 +560,10 @@ function handleClearDept() {
                   type="default"
                   v-access:code="'user:update'"
                   @click="handleResetPassword(row)"
+                  aria-label="重置密码"
                 >
                   <template #icon>
-                    <div
-                      class="icon-[material-symbols--lock-reset] text-orange-500"
-                    ></div>
+                    <div class="icon-[lucide--lock] text-orange-500"></div>
                   </template>
                 </Button>
               </Tooltip>
@@ -577,11 +576,10 @@ function handleClearDept() {
                   type="default"
                   v-access:code="'user:assignRole'"
                   @click="handleAssignRoles(row)"
+                  aria-label="分配角色"
                 >
                   <template #icon>
-                    <div
-                      class="icon-[material-symbols--person-add] text-purple-500"
-                    ></div>
+                    <div class="icon-[lucide--user-plus] text-purple-500"></div>
                   </template>
                 </Button>
               </Tooltip>
@@ -602,11 +600,10 @@ function handleClearDept() {
                     size="small"
                     type="primary"
                     v-access:code="'user:delete'"
+                    aria-label="删除用户"
                   >
                     <template #icon>
-                      <div
-                        class="icon-[material-symbols--delete-rounded] text-red-500"
-                      ></div>
+                      <div class="icon-[lucide--trash-2] text-red-500"></div>
                     </template>
                   </Button>
                 </Tooltip>

@@ -86,11 +86,13 @@ const handleAdd = (row: Record<string, any>) => {
  * @param record 部门记录
  */
 const handleStatusChange = async (record: any) => {
+  record.statusLoading = true;
   try {
     const statusValue = record.status ? 1 : 0;
     await editDept({ id: record.id, status: statusValue });
-    message.success('状态更新成功');
+    message.success({ content: '状态更新成功', duration: 2 });
   } finally {
+    record.statusLoading = false;
     await gridApi.query();
   }
 };
@@ -101,7 +103,7 @@ const handleStatusChange = async (record: any) => {
  */
 const handleDelete = async (id: string) => {
   await deleteDept(id);
-  message.success('删除成功');
+  message.success({ content: '删除成功', duration: 2 });
   await gridApi.query();
 };
 
@@ -134,7 +136,7 @@ const handleSuccess = () => {
           @click="handleAdd"
         >
           <template #icon>
-            <span class="icon-[material-symbols--add-circle] mr-1"></span>
+            <span class="icon-[lucide--plus] mr-1"></span>
           </template>
           新增
         </Button>
@@ -143,6 +145,8 @@ const handleSuccess = () => {
         <Switch
           v-access:code="'dept:update'"
           :checked="row.status === 1"
+          :loading="row.statusLoading"
+          :disabled="row.statusLoading"
           checked-children="启用"
           un-checked-children="禁用"
           @change="
@@ -168,7 +172,7 @@ const handleSuccess = () => {
               @click="handleAdd(row)"
             >
               <template #icon>
-                <div class="icon-[material-symbols--add-circle]"></div>
+                <div class="icon-[lucide--plus]"></div>
               </template>
             </Button>
           </Tooltip>
@@ -185,7 +189,7 @@ const handleSuccess = () => {
               @click="handleEdit(row)"
             >
               <template #icon>
-                <div class="icon-[material-symbols--edit-square-rounded]"></div>
+                <div class="icon-[lucide--edit]"></div>
               </template>
             </Button>
           </Tooltip>

@@ -48,6 +48,7 @@ const formOptions: VbenFormProps = {
 const gridOptions: VxeGridProps = {
   columns,
   height: 'auto',
+  emptyText: '暂无菜单数据，点击“新增”创建首个菜单',
   pagerConfig: {
     enabled: false,
   },
@@ -117,14 +118,14 @@ const hasChildren = (menuId: string) => {
 const handleDelete = async (id: string) => {
   // 检查是否有子菜单
   if (hasChildren(id)) {
-    message.warning('该菜单下存在子菜单，请先删除子菜单');
+    message.warning({ content: '该菜单下存在子菜单，请先删除子菜单', duration: 3 });
     return;
   }
 
   loading.value = true;
   try {
     await deleteMenu(id);
-    message.success('删除成功');
+    message.success({ content: '删除成功', duration: 2 });
     gridApi.reload();
   } finally {
     loading.value = false;
@@ -160,14 +161,14 @@ const getSelectedRows = () => {
 const handleBatchDelete = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
-    message.warning('请选择要删除的菜单');
+    message.warning({ content: '请选择要删除的菜单', duration: 3 });
     return;
   }
 
   // 检查选中的菜单是否有子菜单
   const hasChildrenMenus = selectedRows.some((row) => hasChildren(row.id));
   if (hasChildrenMenus) {
-    message.warning('选中的菜单中存在有子菜单的项，请先删除子菜单');
+    message.warning({ content: '选中的菜单中存在有子菜单的项，请先删除子菜单', duration: 3 });
     return;
   }
 
@@ -175,7 +176,7 @@ const handleBatchDelete = async () => {
 
   const ids = selectedRows.map((row) => row.id);
   await batchDeleteMenu(ids);
-  message.success(`成功删除 ${selectedRows.length} 个菜单`);
+  message.success({ content: `成功删除 ${selectedRows.length} 个菜单`, duration: 2 });
   gridApi.grid?.clearCheckboxRow();
   gridApi.reload();
 
@@ -191,7 +192,7 @@ const handleBatchDelete = async () => {
 const handleBatchEnable = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
-    message.warning('请选择要启用的菜单');
+    message.warning({ content: '请选择要启用的菜单', duration: 3 });
     return;
   }
 
@@ -199,7 +200,7 @@ const handleBatchEnable = async () => {
 
   const ids = selectedRows.map((row) => row.id);
   await batchUpdateMenuStatus(ids, false);
-  message.success(`成功启用 ${selectedRows.length} 个菜单`);
+  message.success({ content: `成功启用 ${selectedRows.length} 个菜单`, duration: 2 });
   gridApi.grid?.clearCheckboxRow();
   gridApi.reload();
 
@@ -215,7 +216,7 @@ const handleBatchEnable = async () => {
 const handleBatchDisable = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
-    message.warning('请选择要禁用的菜单');
+    message.warning({ content: '请选择要禁用的菜单', duration: 3 });
     return;
   }
 
@@ -223,7 +224,7 @@ const handleBatchDisable = async () => {
 
   const ids = selectedRows.map((row) => row.id);
   await batchUpdateMenuStatus(ids, true);
-  message.success(`成功禁用 ${selectedRows.length} 个菜单`);
+  message.success({ content: `成功禁用 ${selectedRows.length} 个菜单`, duration: 2 });
   gridApi.grid?.clearCheckboxRow();
   gridApi.reload();
 
@@ -249,7 +250,7 @@ const handleStatusChange = async (
     // 更新本地状态
     row.status = checked ? 1 : 0;
 
-    message.success(`菜单${checked ? '启用' : '禁用'}成功`);
+    message.success({ content: `菜单${checked ? '启用' : '禁用'}成功`, duration: 2 });
   } finally {
     // 清除加载状态
     row.statusLoading = false;
@@ -421,6 +422,7 @@ const handleCollapseAllMenus = async () => {
           v-access:code="'menu:update'"
           :checked="row.status === 1"
           :loading="row.statusLoading"
+          :disabled="row.statusLoading"
           checked-children="启用"
           un-checked-children="禁用"
           @change="

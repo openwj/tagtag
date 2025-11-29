@@ -48,6 +48,7 @@ const gridOptions: VxeGridProps = {
   columns,
   height: 'auto',
   keepSource: true,
+  emptyText: '暂无角色数据，点击“新增”创建首个角色',
   pagerConfig: {
     enabled: true,
     pageSize: 10,
@@ -124,7 +125,7 @@ const handleStatusChange = async (row: any, checked: boolean) => {
     // API的disabled参数：true表示禁用，false表示启用
     // checked为true表示启用，所以disabled应该为!checked
     await updateRoleStatus(row.id, !checked);
-    message.success('状态更新成功');
+    message.success({ content: '状态更新成功', duration: 2 });
   } catch {
     // 失败回滚到原状态
     row.status = prevStatus;
@@ -139,7 +140,7 @@ const handleStatusChange = async (row: any, checked: boolean) => {
 const handleBatchDelete = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
-    message.warning('请选择要删除的角色');
+    message.warning({ content: '请选择要删除的角色', duration: 3 });
     return;
   }
 
@@ -147,7 +148,7 @@ const handleBatchDelete = async () => {
   try {
     const roleIds = selectedRows.map((row: any) => row.id);
     await batchDeleteRole(roleIds);
-    message.success(`成功删除 ${selectedRows.length} 个角色`);
+    message.success({ content: `成功删除 ${selectedRows.length} 个角色`, duration: 2 });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
   } finally {
@@ -161,7 +162,7 @@ const handleBatchDelete = async () => {
 const handleBatchEnable = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
-    message.warning('请选择要启用的角色');
+    message.warning({ content: '请选择要启用的角色', duration: 3 });
     return;
   }
 
@@ -170,7 +171,7 @@ const handleBatchEnable = async () => {
     const roleIds = selectedRows.map((row: any) => row.id);
     // API的disabled参数：false表示启用
     await batchUpdateRoleStatus(roleIds, false);
-    message.success(`成功启用 ${selectedRows.length} 个角色`);
+    message.success({ content: `成功启用 ${selectedRows.length} 个角色`, duration: 2 });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
   } finally {
@@ -184,7 +185,7 @@ const handleBatchEnable = async () => {
 const handleBatchDisable = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
-    message.warning('请选择要禁用的角色');
+    message.warning({ content: '请选择要禁用的角色', duration: 3 });
     return;
   }
 
@@ -193,7 +194,7 @@ const handleBatchDisable = async () => {
     const roleIds = selectedRows.map((row: any) => row.id);
     // API的disabled参数：true表示禁用
     await batchUpdateRoleStatus(roleIds, true);
-    message.success(`成功禁用 ${selectedRows.length} 个角色`);
+    message.success({ content: `成功禁用 ${selectedRows.length} 个角色`, duration: 2 });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
   } finally {
@@ -223,7 +224,7 @@ const handleDelete = async (id: string) => {
   loading.value = true;
   try {
     await deleteRole(id);
-    message.success('角色删除成功');
+    message.success({ content: '角色删除成功', duration: 2 });
     gridApi.reload();
   } finally {
     loading.value = false;
@@ -358,6 +359,7 @@ const handleSuccess = () => {
           v-access:code="'role:update'"
           :checked="row.status === 1"
           :loading="row.statusLoading"
+          :disabled="row.statusLoading"
           checked-children="启用"
           un-checked-children="禁用"
           @change="
@@ -377,6 +379,7 @@ const handleSuccess = () => {
               type="primary"
               v-access:code="'role:update'"
               @click="handleEdit(row)"
+              aria-label="编辑角色"
             >
               <template #icon>
                 <div class="icon-[lucide--edit] text-xs"></div>
@@ -403,6 +406,7 @@ const handleSuccess = () => {
                 type="primary"
                 v-access:code="'role:delete'"
                 :loading="loading"
+                aria-label="删除角色"
               >
                 <template #icon>
                   <div class="icon-[lucide--trash-2] text-xs"></div>
