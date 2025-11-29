@@ -7,14 +7,14 @@ import { onMounted, ref } from 'vue';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
-  Avatar as AAvatar,
-  Button as AButton,
-  Dropdown as ADropdown,
-  Menu as AMenu,
-  Popconfirm as APopconfirm,
-  Switch as ASwitch,
-  Tag as ATag,
-  Tooltip as ATooltip,
+  Avatar,
+  Button,
+  Dropdown,
+  Menu,
+  Popconfirm,
+  Switch,
+  Tag,
+  Tooltip,
   message,
   Modal,
 } from 'ant-design-vue';
@@ -448,15 +448,15 @@ function handleClearDept() {
           <template #toolbar-tools>
             <div class="flex items-center gap-4">
               <div v-if="selectedDeptId" class="flex items-center gap-2">
-                <ATag color="blue">已按部门筛选</ATag>
-                <ATooltip title="清除部门筛选">
-                  <AButton size="small" type="link" @click="handleClearDept">
+                <Tag color="blue">已按部门筛选</Tag>
+                <Tooltip title="清除部门筛选">
+                  <Button size="small" type="link" @click="handleClearDept">
                     清除
-                  </AButton>
-                </ATooltip>
+                  </Button>
+                </Tooltip>
               </div>
               <!-- 新增按钮单独放置 -->
-              <AButton
+              <Button
                 class="flex items-center px-4"
                 type="primary"
                 v-access:code="'user:create'"
@@ -466,20 +466,20 @@ function handleClearDept() {
                   <span class="icon-[material-symbols--add-circle] mr-1"></span>
                 </template>
                 新增
-              </AButton>
+              </Button>
 
               <!-- 批量操作下拉（参考菜单管理的分割样式） -->
-              <ADropdown.Button :disabled="batchLoading">
+              <Dropdown.Button :disabled="batchLoading">
                 批量操作
                 <template #overlay>
-                  <AMenu>
-                    <AMenu.Item key="delete" v-access:code="'user:delete'" @click="handleBatchDelete">
+                  <Menu>
+                    <Menu.Item key="delete" v-access:code="'user:delete'" @click="handleBatchDelete">
                       <div
                         class="icon-[material-symbols--delete-rounded] mr-2"
                       ></div>
                       批量删除
-                    </AMenu.Item>
-                    <AMenu.Item
+                    </Menu.Item>
+                    <Menu.Item
                       key="enable"
                       v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(1)"
@@ -488,29 +488,29 @@ function handleClearDept() {
                         class="icon-[material-symbols--check-circle] mr-2"
                       ></div>
                       批量启用
-                    </AMenu.Item>
-                    <AMenu.Item
+                    </Menu.Item>
+                    <Menu.Item
                       key="disable"
                       v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(0)"
                     >
                       <div class="icon-[material-symbols--cancel] mr-2"></div>
                       批量禁用
-                    </AMenu.Item>
-                    <AMenu.Item key="roles" v-access:code="'user:assignRole'" @click="handleBatchAssignRoles">
+                    </Menu.Item>
+                    <Menu.Item key="roles" v-access:code="'user:assignRole'" @click="handleBatchAssignRoles">
                       <div
                         class="icon-[material-symbols--group-add] mr-2"
                       ></div>
                       批量分配角色
-                    </AMenu.Item>
-                  </AMenu>
+                    </Menu.Item>
+                  </Menu>
                 </template>
-              </ADropdown.Button>
+              </Dropdown.Button>
             </div>
           </template>
           <template #status="{ row }">
             <div class="flex items-center gap-2">
-              <ASwitch
+              <Switch
                 v-access:code="'user:update'"
                 :checked="row.status === 1"
                 checked-children="启用"
@@ -521,9 +521,9 @@ function handleClearDept() {
           </template>
           <template #userCell="{ row }">
             <div class="flex items-center gap-2">
-              <AAvatar size="small">
+              <Avatar size="small">
                 {{ (row.username || '?').slice(0, 1).toUpperCase() }}
-              </AAvatar>
+              </Avatar>
               <div class="flex flex-col leading-tight">
                 <span class="text-sm font-medium">{{ row.username }}</span>
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{
@@ -534,8 +534,8 @@ function handleClearDept() {
           </template>
           <template #action="{ row }">
             <div class="flex items-center justify-center gap-1.5">
-              <ATooltip title="编辑">
-                <AButton
+              <Tooltip title="编辑">
+                <Button
                   class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                   ghost
                   shape="circle"
@@ -549,11 +549,11 @@ function handleClearDept() {
                       class="icon-[material-symbols--edit-square-rounded] text-blue-500"
                     ></div>
                   </template>
-                </AButton>
-              </ATooltip>
+                </Button>
+              </Tooltip>
 
-              <ATooltip title="重置密码">
-                <AButton
+              <Tooltip title="重置密码">
+                <Button
                   class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                   shape="circle"
                   size="small"
@@ -566,11 +566,11 @@ function handleClearDept() {
                       class="icon-[material-symbols--lock-reset] text-orange-500"
                     ></div>
                   </template>
-                </AButton>
-              </ATooltip>
+                </Button>
+              </Tooltip>
 
-              <ATooltip title="分配角色">
-                <AButton
+              <Tooltip title="分配角色">
+                <Button
                   class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                   shape="circle"
                   size="small"
@@ -583,18 +583,18 @@ function handleClearDept() {
                       class="icon-[material-symbols--person-add] text-purple-500"
                     ></div>
                   </template>
-                </AButton>
-              </ATooltip>
+                </Button>
+              </Tooltip>
 
-              <APopconfirm
+              <Popconfirm
                 cancel-text="取消"
                 ok-text="确定"
                 placement="left"
                 title="确定删除此数据?"
                 @confirm="handleDelete(row.id)"
               >
-                <ATooltip title="删除">
-                  <AButton
+                <Tooltip title="删除">
+                  <Button
                     class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                     danger
                     ghost
@@ -608,9 +608,9 @@ function handleClearDept() {
                         class="icon-[material-symbols--delete-rounded] text-red-500"
                       ></div>
                     </template>
-                  </AButton>
-                </ATooltip>
-              </APopconfirm>
+                  </Button>
+                </Tooltip>
+              </Popconfirm>
             </div>
           </template>
         </Grid>

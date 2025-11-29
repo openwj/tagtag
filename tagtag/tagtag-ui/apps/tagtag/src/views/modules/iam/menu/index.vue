@@ -8,13 +8,13 @@ import { Page, useVbenModal } from '@vben/common-ui';
 
 import { Icon } from '@iconify/vue';
 import {
-  Button as AButton,
-  Divider as ADivider,
-  Modal as AModal,
-  Popconfirm as APopconfirm,
-  Switch as ASwitch,
-  Tag as ATag,
-  Tooltip as ATooltip,
+  Button,
+  Divider,
+  Modal,
+  Popconfirm,
+  Switch,
+  Tag,
+  Tooltip,
   Dropdown,
   Menu,
   message,
@@ -289,7 +289,7 @@ const handleCollapseAllMenus = async () => {
     >
       <template #toolbar-tools>
         <div class="flex items-center gap-3">
-          <AButton
+          <Button
             class="flex items-center px-2"
             type="primary"
             v-access:code="'menu:create'"
@@ -299,7 +299,7 @@ const handleCollapseAllMenus = async () => {
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
             新增
-          </AButton>
+          </Button>
           <Dropdown.Button :disabled="batchLoading">
             批量操作
             <template #icon>
@@ -312,7 +312,7 @@ const handleCollapseAllMenus = async () => {
                   v-access:code="'menu:update'"
                   @click="
                     () =>
-                      AModal.confirm({
+                      Modal.confirm({
                         title: '批量启用',
                         content: '确定要启用选中的菜单吗？',
                         okText: '确定',
@@ -329,7 +329,7 @@ const handleCollapseAllMenus = async () => {
                   v-access:code="'menu:update'"
                   @click="
                     () =>
-                      AModal.confirm({
+                      Modal.confirm({
                         title: '批量禁用',
                         content: '确定要禁用选中的菜单吗？',
                         okText: '确定',
@@ -346,7 +346,7 @@ const handleCollapseAllMenus = async () => {
                   v-access:code="'menu:delete'"
                   @click="
                     () =>
-                      AModal.confirm({
+                      Modal.confirm({
                         title: '批量删除',
                         content: '确定要删除选中的菜单吗？',
                         okText: '确定',
@@ -361,30 +361,30 @@ const handleCollapseAllMenus = async () => {
               </Menu>
             </template>
           </Dropdown.Button>
-          <ATooltip title="展开全部">
-            <AButton
+          <Tooltip title="展开全部">
+            <Button
               shape="circle"
               type="default"
               class="flex items-center justify-center"
               @click="handleExpandAllMenus"
             >
               <span class="icon-[material-symbols--unfold-more]"></span>
-            </AButton>
-          </ATooltip>
-          <ATooltip title="收起全部">
-            <AButton
+            </Button>
+          </Tooltip>
+          <Tooltip title="收起全部">
+            <Button
               shape="circle"
               type="default"
               class="flex items-center justify-center"
               @click="handleCollapseAllMenus"
             >
               <span class="icon-[material-symbols--unfold-less]"></span>
-            </AButton>
-          </ATooltip>
+            </Button>
+          </Tooltip>
         </div>
       </template>
       <template #icon="{ row }">
-        <ATooltip
+        <Tooltip
           :title="
             row.icon ||
             (row.menuType === 0
@@ -414,10 +414,10 @@ const handleCollapseAllMenus = async () => {
               <Icon icon="lucide:zap" color="green" v-if="row.menuType === 2" />
             </div>
           </div>
-        </ATooltip>
+        </Tooltip>
       </template>
       <template #status="{ row }">
-        <ASwitch
+        <Switch
           v-access:code="'menu:update'"
           :checked="row.status === 1"
           :loading="row.statusLoading"
@@ -430,35 +430,35 @@ const handleCollapseAllMenus = async () => {
         />
       </template>
       <template #type="{ row }">
-        <ATag color="orange" v-if="row.menuType === 0">
+        <Tag color="orange" v-if="row.menuType === 0">
           <span class="icon-[lucide--folder] mr-1"></span>
           目录
-        </ATag>
-        <ATag color="blue" v-else-if="row.menuType === 1">
+        </Tag>
+        <Tag color="blue" v-else-if="row.menuType === 1">
           <span class="icon-[lucide--file-text] mr-1"></span>
           菜单
-        </ATag>
-        <ATag color="green" v-else-if="row.menuType === 2">
+        </Tag>
+        <Tag color="green" v-else-if="row.menuType === 2">
           <span class="icon-[lucide--zap] mr-1"></span>
           按钮
-        </ATag>
+        </Tag>
       </template>
       <template #external="{ row }">
-        <ATag color="red" v-if="row.isExternal === 1" class="flex items-center">
+        <Tag color="red" v-if="row.isExternal === 1" class="flex items-center">
           <span class="icon-[lucide--external-link] mr-1"></span>
           外链
-        </ATag>
-        <ATag color="default" v-else class="flex items-center">
+        </Tag>
+        <Tag color="default" v-else class="flex items-center">
           <span class="icon-[lucide--home] mr-1"></span>
           内部
-        </ATag>
+        </Tag>
       </template>
 
       <template #toolbar-actions> </template>
       <template #action="{ row }">
         <div class="flex items-center justify-center gap-0.5">
-          <ATooltip title="新增子菜单">
-            <AButton
+          <Tooltip title="新增子菜单">
+            <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               shape="circle"
               size="small"
@@ -470,13 +470,13 @@ const handleCollapseAllMenus = async () => {
               <template #icon>
                 <div class="icon-[lucide--plus] text-xs"></div>
               </template>
-            </AButton>
-          </ATooltip>
+            </Button>
+          </Tooltip>
 
-          <ADivider type="vertical" class="mx-1 h-4" />
+          <Divider type="vertical" class="mx-1 h-4" />
 
-          <ATooltip title="编辑菜单">
-            <AButton
+          <Tooltip title="编辑菜单">
+            <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
@@ -489,20 +489,20 @@ const handleCollapseAllMenus = async () => {
               <template #icon>
                 <div class="icon-[lucide--edit] text-xs"></div>
               </template>
-            </AButton>
-          </ATooltip>
+            </Button>
+          </Tooltip>
 
-          <ADivider type="vertical" class="mx-1 h-4" />
+          <Divider type="vertical" class="mx-1 h-4" />
 
-          <APopconfirm
+          <Popconfirm
             cancel-text="取消"
             ok-text="确定"
             placement="left"
             :title="`确定要删除菜单 '${row.menuName}' 吗？`"
             @confirm="handleDelete(row.id)"
           >
-            <ATooltip title="删除菜单">
-              <AButton
+            <Tooltip title="删除菜单">
+              <Button
                 class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                 danger
                 ghost
@@ -516,9 +516,9 @@ const handleCollapseAllMenus = async () => {
                 <template #icon>
                   <div class="icon-[lucide--trash-2] text-xs"></div>
                 </template>
-              </AButton>
-            </ATooltip>
-          </APopconfirm>
+              </Button>
+            </Tooltip>
+          </Popconfirm>
         </div>
       </template>
     </Grid>

@@ -5,9 +5,9 @@ import { computed, ref, watch } from 'vue';
 import { useVbenModal } from '@vben/common-ui';
 
 import {
-  Alert as AAlert,
-  Spin as ASpin,
-  Transfer as ATransfer,
+  Alert,
+  Spin,
+  Transfer,
 } from 'ant-design-vue';
 
 interface Props {
@@ -181,13 +181,13 @@ defineExpose({
     <div v-if="!isBatch && user" class="mb-4">
       <div class="mb-2 text-sm text-gray-600">为用户分配角色：</div>
 
-      <AAlert type="info">
+      <Alert type="info">
         <template #description>
           <div><strong>用户名：</strong>{{ user.username }}</div>
           <div><strong>姓名：</strong>{{ user.nickname }}</div>
           <div><strong>部门：</strong>{{ user.deptName }}</div>
         </template>
-      </AAlert>
+      </Alert>
     </div>
 
     <!-- 批量用户提示 -->
@@ -212,7 +212,7 @@ defineExpose({
         v-if="loading"
         class="flex flex-col items-center justify-center py-12"
       >
-        <ASpin size="large" class="mb-3" />
+        <Spin size="large" class="mb-3" />
         <div class="text-sm text-gray-500">正在加载角色列表...</div>
       </div>
 
@@ -232,7 +232,7 @@ defineExpose({
         </div>
 
         <!-- 角色选择双列 -->
-        <ATransfer
+        <Transfer
           v-else
           :data-source="transferData"
           v-model:target-keys="selectedRoleIds"

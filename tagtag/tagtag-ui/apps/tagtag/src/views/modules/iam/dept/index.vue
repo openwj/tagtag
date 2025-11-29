@@ -2,11 +2,11 @@
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
-  Button as AButton,
-  Divider as ADivider,
-  Popconfirm as APopconfirm,
-  Switch as ASwitch,
-  Tooltip as ATooltip,
+  Button,
+  Divider,
+  Popconfirm,
+  Switch,
+  Tooltip,
   message,
 } from 'ant-design-vue';
 
@@ -127,7 +127,7 @@ const handleSuccess = () => {
       table-title-help="公司组织架构信息"
     >
       <template #toolbar-tools>
-        <AButton
+        <Button
           class="flex items-center px-2"
           type="primary"
           v-access:code="'dept:create'"
@@ -137,10 +137,10 @@ const handleSuccess = () => {
             <span class="icon-[material-symbols--add-circle] mr-1"></span>
           </template>
           新增
-        </AButton>
+        </Button>
       </template>
       <template #status="{ row }">
-        <ASwitch
+        <Switch
           v-access:code="'dept:update'"
           :checked="row.status === 1"
           checked-children="启用"
@@ -157,8 +157,8 @@ const handleSuccess = () => {
 
       <template #action="{ row }">
         <div class="flex items-center justify-center">
-          <ATooltip title="新增">
-            <AButton
+          <Tooltip title="新增">
+            <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
@@ -170,12 +170,12 @@ const handleSuccess = () => {
               <template #icon>
                 <div class="icon-[material-symbols--add-circle]"></div>
               </template>
-            </AButton>
-          </ATooltip>
+            </Button>
+          </Tooltip>
 
-          <ADivider type="vertical" />
-          <ATooltip title="编辑">
-            <AButton
+          <Divider type="vertical" />
+          <Tooltip title="编辑">
+            <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
@@ -187,20 +187,20 @@ const handleSuccess = () => {
               <template #icon>
                 <div class="icon-[material-symbols--edit-square-rounded]"></div>
               </template>
-            </AButton>
-          </ATooltip>
+            </Button>
+          </Tooltip>
 
-          <ADivider type="vertical" />
+          <Divider type="vertical" />
 
-          <APopconfirm
+          <Popconfirm
             cancel-text="取消"
             ok-text="确定"
             placement="left"
             title="确定删除此数据?"
             @confirm="handleDelete(row.id)"
           >
-            <ATooltip title="删除">
-              <AButton
+            <Tooltip title="删除">
+              <Button
                 class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                 danger
                 ghost
@@ -212,9 +212,9 @@ const handleSuccess = () => {
                 <template #icon>
                   <div class="icon-[material-symbols--delete-rounded]"></div>
                 </template>
-              </AButton>
-            </ATooltip>
-          </APopconfirm>
+              </Button>
+            </Tooltip>
+          </Popconfirm>
         </div>
       </template>
     </Grid>

@@ -4,13 +4,13 @@ import type { DataNode } from 'ant-design-vue/es/tree';
 import { computed, onMounted, ref } from 'vue';
 
 import {
-  Button as AButton,
-  Empty as AEmpty,
-  Input as AInput,
-  Spin as ASpin,
-  Tag as ATag,
-  Tooltip as ATooltip,
-  Tree as ATree,
+  Button,
+  Empty,
+  Input,
+  Spin,
+  Tag,
+  Tooltip,
+  Tree,
 } from 'ant-design-vue';
 
 import { getDeptTree } from '#/api/modules/iam/dept';
@@ -262,11 +262,11 @@ defineExpose({ clearSelection });
       >
         <span class="icon-[material-symbols--apartment] text-blue-500"></span>
         <span class="truncate">部门</span>
-        <ATag color="processing" class="ml-1">{{ totalCount }}</ATag>
+        <Tag color="processing" class="ml-1">{{ totalCount }}</Tag>
       </div>
       <div class="flex shrink-0 items-center gap-1">
-        <ATooltip title="展开全部">
-          <AButton
+        <Tooltip title="展开全部">
+          <Button
             size="small"
             shape="circle"
             type="default"
@@ -274,10 +274,10 @@ defineExpose({ clearSelection });
             @click="expandAll"
           >
             <span class="icon-[material-symbols--unfold-more]"></span>
-          </AButton>
-        </ATooltip>
-        <ATooltip title="收起全部">
-          <AButton
+          </Button>
+        </Tooltip>
+        <Tooltip title="收起全部">
+          <Button
             size="small"
             shape="circle"
             type="default"
@@ -285,14 +285,14 @@ defineExpose({ clearSelection });
             @click="collapseAll"
           >
             <span class="icon-[material-symbols--unfold-less]"></span>
-          </AButton>
-        </ATooltip>
+          </Button>
+        </Tooltip>
       </div>
     </div>
 
     <!-- 搜索框 -->
     <div class="mb-3">
-      <AInput
+      <Input
         v-model:value="searchValue"
         placeholder="搜索部门名称"
         allow-clear
@@ -302,15 +302,15 @@ defineExpose({ clearSelection });
         <template #prefix>
           <span class="icon-[material-symbols--search] text-gray-400"></span>
         </template>
-      </AInput>
+      </Input>
     </div>
 
     <hr class="mb-3" />
 
     <!-- 部门树 -->
     <div class="flex-1 overflow-auto">
-      <ASpin :spinning="loading">
-        <ATree
+      <Spin :spinning="loading">
+        <Tree
           v-if="treeData && treeData.length > 0"
           v-model:selected-keys="selectedKeys"
           :tree-data="treeData"
@@ -351,11 +351,11 @@ defineExpose({ clearSelection });
             </span>
             <span v-else>{{ nodeData.title || '未知部门' }}</span>
           </template>
-        </ATree>
-      </ASpin>
+        </Tree>
+      </Spin>
 
       <!-- 空状态 -->
-      <AEmpty
+      <Empty
         v-if="!treeData || treeData.length === 0"
         description="暂无部门数据"
       />

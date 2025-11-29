@@ -7,12 +7,12 @@ import { ref } from 'vue';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
-  Button as AButton,
-  Divider as ADivider,
-  Modal as AModal,
-  Popconfirm as APopconfirm,
-  Switch as ASwitch,
-  Tooltip as ATooltip,
+  Button,
+  Divider,
+  Modal,
+  Popconfirm,
+  Switch,
+  Tooltip,
   Dropdown,
   Menu,
   message,
@@ -249,7 +249,7 @@ const handleSuccess = () => {
     <Grid table-title="角色信息" table-title-help="系统角色信息">
       <template #toolbar-tools>
         <div class="flex items-center gap-2">
-          <AButton
+          <Button
             class="flex items-center px-2"
             type="primary"
             v-access:code="'role:create'"
@@ -259,7 +259,7 @@ const handleSuccess = () => {
               <span class="icon-[lucide--plus] mr-1"></span>
             </template>
             新增
-          </AButton>
+          </Button>
           <Dropdown.Button class="px-2" :disabled="batchLoading">
             批量操作
             <template #icon>
@@ -272,7 +272,7 @@ const handleSuccess = () => {
                   v-access:code="'role:update'"
                   @click="
                     () =>
-                      AModal.confirm({
+                      Modal.confirm({
                         title: '批量启用',
                         content: '确定要启用选中的角色吗？',
                         okText: '确定',
@@ -289,7 +289,7 @@ const handleSuccess = () => {
                   v-access:code="'role:update'"
                   @click="
                     () =>
-                      AModal.confirm({
+                      Modal.confirm({
                         title: '批量禁用',
                         content: '确定要禁用选中的角色吗？',
                         okText: '确定',
@@ -306,7 +306,7 @@ const handleSuccess = () => {
                   v-access:code="'role:delete'"
                   @click="
                     () =>
-                      AModal.confirm({
+                      Modal.confirm({
                         title: '批量删除',
                         content: '确定要删除选中的角色吗？',
                         okText: '确定',
@@ -331,30 +331,30 @@ const handleSuccess = () => {
       </template>
 
       <template #roleType="{ row }">
-        <AButton v-if="row.roleType === 1" type="primary" size="small">
+        <Button v-if="row.roleType === 1" type="primary" size="small">
           <template #icon>
             <span class="icon-[lucide--shield] mr-1"></span>
           </template>
           系统角色
-        </AButton>
+        </Button>
 
-        <AButton v-else-if="row.roleType === 2" type="default" size="small">
+        <Button v-else-if="row.roleType === 2" type="default" size="small">
           <template #icon>
             <span class="icon-[lucide--briefcase] mr-1"></span>
           </template>
           业务角色
-        </AButton>
+        </Button>
 
-        <AButton v-else size="small">
+        <Button v-else size="small">
           <template #icon>
             <span class="icon-[lucide--help-circle] mr-1"></span>
           </template>
           未知
-        </AButton>
+        </Button>
       </template>
 
       <template #status="{ row }">
-        <ASwitch
+        <Switch
           v-access:code="'role:update'"
           :checked="row.status === 1"
           :loading="row.statusLoading"
@@ -368,8 +368,8 @@ const handleSuccess = () => {
       </template>
       <template #action="{ row }">
         <div class="flex items-center justify-center gap-0.5">
-          <ATooltip title="编辑角色">
-            <AButton
+          <Tooltip title="编辑角色">
+            <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
               ghost
               shape="circle"
@@ -381,20 +381,20 @@ const handleSuccess = () => {
               <template #icon>
                 <div class="icon-[lucide--edit] text-xs"></div>
               </template>
-            </AButton>
-          </ATooltip>
+            </Button>
+          </Tooltip>
 
-          <ADivider type="vertical" class="mx-1 h-4" />
+          <Divider type="vertical" class="mx-1 h-4" />
 
-          <APopconfirm
+          <Popconfirm
             cancel-text="取消"
             ok-text="确定"
             placement="left"
             :title="`确定要删除角色 '${row.name}' 吗？`"
             @confirm="handleDelete(row.id)"
           >
-            <ATooltip title="删除角色">
-              <AButton
+            <Tooltip title="删除角色">
+              <Button
                 class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
                 danger
                 ghost
@@ -407,9 +407,9 @@ const handleSuccess = () => {
                 <template #icon>
                   <div class="icon-[lucide--trash-2] text-xs"></div>
                 </template>
-              </AButton>
-            </ATooltip>
-          </APopconfirm>
+              </Button>
+            </Tooltip>
+          </Popconfirm>
         </div>
       </template>
     </Grid>
