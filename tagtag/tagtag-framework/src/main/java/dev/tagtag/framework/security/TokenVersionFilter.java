@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Map;
 import dev.tagtag.kernel.constant.SecurityClaims;
-import dev.tagtag.common.constant.GlobalConstants;
-import dev.tagtag.common.util.AuthHeaderUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
  * 令牌版本校验过滤器：当请求携带 Bearer Token 时，校验其 claims 中的 ver 是否为用户当前版本。
@@ -25,7 +25,6 @@ import dev.tagtag.common.util.AuthHeaderUtils;
 @Component
 public class TokenVersionFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
     private final TokenVersionService tokenVersionService;
     private final ObjectMapper objectMapper;
 
@@ -35,8 +34,7 @@ public class TokenVersionFilter extends OncePerRequestFilter {
      * @param tokenVersionService 令牌版本服务
      * @param objectMapper 全局 ObjectMapper（统一序列化配置）
      */
-    public TokenVersionFilter(JwtService jwtService, TokenVersionService tokenVersionService, ObjectMapper objectMapper) {
-        this.jwtService = jwtService;
+    public TokenVersionFilter(TokenVersionService tokenVersionService, ObjectMapper objectMapper) {
         this.tokenVersionService = tokenVersionService;
         this.objectMapper = objectMapper;
     }
@@ -49,15 +47,10 @@ public class TokenVersionFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = AuthHeaderUtils.parseBearerToken(request.getHeader(GlobalConstants.HEADER_AUTHORIZATION));
-        if (token != null) {
-            if (!jwtService.validateToken(token)) {
-                writeUnauthorized(response);
-                return;
-            }
-            Map<String, Object> claims = jwtService.getClaims(token);
-            Object uidObj = claims.get(SecurityClaims.UID);
-            Object verObj = claims.get(SecurityClaims.VER);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+            Object uidObj = jwt.getClaims().get(SecurityClaims.UID);
+            Object verObj = jwt.getClaims().get(SecurityClaims.VER);
             Long uid = uidObj == null ? null : Numbers.toLong(uidObj);
             Long ver = verObj == null ? null : Numbers.toLong(verObj);
             if (uid != null && ver != null) {

@@ -3,7 +3,8 @@ package dev.tagtag.module.auth.controller;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
-import dev.tagtag.common.util.AuthHeaderUtils;
+import dev.tagtag.framework.security.context.AuthContext;
+import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.common.util.Flags;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.auth.dto.LoginRequest;
@@ -20,10 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import dev.tagtag.common.constant.GlobalConstants;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import dev.tagtag.framework.security.JwtService;
-import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
+import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.CaptchaService;
 import dev.tagtag.contract.iam.dto.MenuDTO;
@@ -51,12 +50,13 @@ import dev.tagtag.kernel.annotation.RateLimit;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtService jwtService;
     private final UserApi userApi;
     private final PermissionResolver permissionResolver;
     private final CaptchaService captchaService;
     private final MenuApi menuApi;
     private final RoleApi roleApi;
+
+
 
     /**
      * 用户登录（返回访问令牌与刷新令牌）
@@ -127,52 +127,43 @@ public class AuthController {
 
     /**
      * 获取当前登录用户信息
-     *
-     * @param authorization Authorization头（Bearer Token）
      * @return 用户信息
      */
     @GetMapping("/me")
-    public Result<UserDTO> me(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
-        String token = AuthHeaderUtils.parseBearerToken(authorization);
-        String subject = jwtService.getSubject(token);
-        UserDTO user = userApi.getUserByUsername(subject).getData();
-        if (user != null) {
-            user.setPassword(null);
-        }
+    public Result<UserDTO> me() {
+        Long uid = AuthContext.getCurrentUserId();
+        UserDTO user = uid == null ? null : userApi.getUserById(uid).getData();
+        if (user != null) user.setPassword(null);
         return Result.ok(user);
     }
 
     /**
      * 获取当前用户的权限编码集合
      *
-     * @param authorization Authorization头（Bearer Token）
      * @return 权限码列表
      */
     @GetMapping("/codes")
-    public Result<Set<String>> codes(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
-        String token = AuthHeaderUtils.parseBearerToken(authorization);
-        String subject = jwtService.getSubject(token);
-        UserDTO user = userApi.getUserByUsername(subject).getData();
-        List<Long> roleIds = user == null ? Collections.emptyList() : Objects.requireNonNullElse(user.getRoleIds(), Collections.emptyList());
+    public Result<Set<String>> codes() {
+        UserPrincipal principal = AuthContext.getCurrentPrincipal();
+        List<Long> roleIds = new ArrayList<>(principal.getRoleIds());
         Set<String> perms = permissionResolver.resolvePermissions(roleIds);
         return Result.ok(perms);
     }
 
     /**
      * 获取当前用户可访问的路由记录（按角色分配的目录/菜单进行过滤；按钮不生成路由）
+     *
      * @return 路由记录列表
      */
     @GetMapping("/menu/all")
-    public Result<List<RouteRecordStringComponentDTO>> allMenus(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
-        String token = AuthHeaderUtils.parseBearerToken(authorization);
-        String subject = jwtService.getSubject(token);
-        UserDTO user = userApi.getUserByUsername(subject).getData();
-        List<Long> roleIds = user == null ? Collections.emptyList() : Objects.requireNonNullElse(user.getRoleIds(), Collections.emptyList());
+    public Result<List<RouteRecordStringComponentDTO>> allMenus() {
+        UserPrincipal principal = AuthContext.getCurrentPrincipal();
+        List<Long> roleIds = new ArrayList<>(Objects.requireNonNullElse(principal.getRoleIds(), Collections.emptySet()));
 
         List<Long> assignedMenuIds = roleApi.listMenuIdsByRoleIds(roleIds).getData();
         java.util.Set<Long> idSet = assignedMenuIds == null ? java.util.Collections.emptySet() : new java.util.LinkedHashSet<>(assignedMenuIds);
 
-        List<MenuDTO> fullTree = menuApi.listMenuTree((MenuQueryDTO) null).getData();
+        List<MenuDTO> fullTree = menuApi.listMenuTree(null).getData();
         List<MenuDTO> filteredTree = filterTreeByIds(fullTree, idSet);
 
         List<RouteRecordStringComponentDTO> routes = new ArrayList<>();
@@ -185,8 +176,9 @@ public class AuthController {
 
     /**
      * 依据分配的菜单ID集合过滤菜单树：保留命中节点或其包含命中子节点的祖先；丢弃未分配的分支
+     *
      * @param tree 完整菜单树
-     * @param ids 已分配菜单ID集合（目录/菜单/按钮）
+     * @param ids  已分配菜单ID集合（目录/菜单/按钮）
      * @return 过滤后的树
      */
     private List<MenuDTO> filterTreeByIds(List<MenuDTO> tree, java.util.Set<Long> ids) {
@@ -194,7 +186,7 @@ public class AuthController {
         List<MenuDTO> res = new ArrayList<>();
         for (MenuDTO node : tree) {
             List<MenuDTO> children = filterTreeByIds(node.getChildren(), ids);
-            boolean included = (ids != null && node.getId() != null && ids.contains(node.getId())) || (children != null && !children.isEmpty());
+            boolean included = ids != null && node.getId() != null && ids.contains(node.getId()) || !children.isEmpty();
             if (included) {
                 MenuDTO copy = new MenuDTO();
                 copy.setId(node.getId());
