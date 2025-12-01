@@ -51,15 +51,16 @@ const formSchema = computed((): VbenFormSchema[] => {
           return { src, captchaId };
         },
       },
+      formFieldProps: {
+        validateOnModelUpdate: false,
+        validateOnInput: true,
+      },
       fieldName: 'captcha',
       label: $t('authentication.code'),
       rules: z.object({
         code: z
           .string({ required_error: $t('authentication.codeTip', [5]) })
-          .min(5, { message: $t('authentication.codeTip', [5]) }),
-        captchaId: z
-          .string({ required_error: $t('authentication.codeTip', [5]) })
-          .min(1, { message: $t('authentication.codeTip', [5]) }),
+          .min(5, { message: $t('authentication.codeTip', [5]) })
       }),
     },
   ];

@@ -84,11 +84,14 @@ const formSchema = computed((): VbenFormSchema[] => {
           return { src, captchaId };
         },
       },
+      formFieldProps: {
+        validateOnModelUpdate: false,
+        validateOnInput: true,
+      },
       fieldName: 'captcha',
       label: $t('page.auth.code'),
       rules: z.object({
         code: z.string().min(5, { message: $t('page.auth.codeTip', [5]) }),
-        captchaId: z.string().min(1, { message: $t('page.auth.codeTip', [5]) }),
       }),
     },
     {
