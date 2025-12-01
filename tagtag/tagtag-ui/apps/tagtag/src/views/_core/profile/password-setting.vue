@@ -17,6 +17,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'VbenInputPassword',
       componentProps: {
         placeholder: '请输入旧密码',
+        name: 'old-password',
+        autocomplete: 'current-password',
       },
     },
     {
@@ -26,6 +28,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       componentProps: {
         passwordStrength: true,
         placeholder: '请输入新密码',
+        name: 'new-password',
+        autocomplete: 'new-password',
       },
     },
     {
@@ -35,6 +39,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       componentProps: {
         passwordStrength: true,
         placeholder: '请再次输入新密码',
+        name: 'confirm-password',
+        autocomplete: 'new-password',
       },
       dependencies: {
         rules(values) {

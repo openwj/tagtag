@@ -20,6 +20,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'VbenInput',
       componentProps: {
         placeholder: $t('authentication.usernameTip'),
+        name: 'username',
+        autocomplete: 'username',
       },
       fieldName: 'username',
       label: $t('authentication.username'),
@@ -29,6 +31,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'VbenInputPassword',
       componentProps: {
         placeholder: $t('authentication.password'),
+        name: 'password',
+        autocomplete: 'current-password',
       },
       fieldName: 'password',
       label: $t('authentication.password'),
@@ -38,6 +42,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: markRaw(ImageCaptchaInput),
       componentProps: {
         placeholder: $t('authentication.code'),
+        autocomplete: 'off',
         /**
          * 拉取后端验证码图片
          */

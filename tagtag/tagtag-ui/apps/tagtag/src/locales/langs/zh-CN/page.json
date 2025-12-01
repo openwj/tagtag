@@ -1,5 +1,6 @@
 {
   "auth": {
+    "username": "用户名",
     "login": "登录",
     "register": "注册",
     "codeLogin": "验证码登录",

@@ -24,6 +24,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'VbenInput',
       componentProps: {
         placeholder: $t('page.auth.usernameTip'),
+        name: 'username',
+        autocomplete: 'username',
       },
       fieldName: 'username',
       label: $t('page.auth.username'),
@@ -34,6 +36,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       componentProps: {
         passwordStrength: true,
         placeholder: $t('page.auth.password'),
+        name: 'password',
+        autocomplete: 'new-password',
       },
       fieldName: 'password',
       label: $t('page.auth.password'),
@@ -52,6 +56,8 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'VbenInputPassword',
       componentProps: {
         placeholder: $t('page.auth.confirmPassword'),
+        name: 'confirm-password',
+        autocomplete: 'new-password',
       },
       dependencies: {
         rules(values) {
@@ -72,6 +78,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: markRaw(ImageCaptchaInput),
       componentProps: {
         placeholder: $t('page.auth.code'),
+        autocomplete: 'off',
         fetchImage: async () => {
           const { src, captchaId } = await fetchImageCaptchaApi();
           return { src, captchaId };

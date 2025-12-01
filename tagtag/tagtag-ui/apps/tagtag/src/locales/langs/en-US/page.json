@@ -1,5 +1,6 @@
 {
   "auth": {
+    "username": "Username",
     "login": "Login",
     "register": "Register",
     "codeLogin": "Code Login",
