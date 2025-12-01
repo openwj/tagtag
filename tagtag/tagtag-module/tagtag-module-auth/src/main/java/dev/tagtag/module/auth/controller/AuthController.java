@@ -3,6 +3,7 @@ package dev.tagtag.module.auth.controller;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
+import dev.tagtag.common.util.AuthHeaderUtils;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.auth.dto.LoginRequest;
 import dev.tagtag.contract.auth.dto.RefreshRequest;
@@ -131,7 +132,7 @@ public class AuthController {
      */
     @GetMapping("/me")
     public Result<UserDTO> me(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
-        String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        String token = AuthHeaderUtils.parseBearerToken(authorization);
         String subject = jwtService.getSubject(token);
         UserDTO user = userApi.getUserByUsername(subject).getData();
         if (user != null) {
@@ -148,7 +149,7 @@ public class AuthController {
      */
     @GetMapping("/codes")
     public Result<Set<String>> codes(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
-        String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        String token = AuthHeaderUtils.parseBearerToken(authorization);
         String subject = jwtService.getSubject(token);
         UserDTO user = userApi.getUserByUsername(subject).getData();
         List<Long> roleIds = user == null ? Collections.emptyList() : Objects.requireNonNullElse(user.getRoleIds(), Collections.emptyList());
@@ -162,7 +163,7 @@ public class AuthController {
      */
     @GetMapping("/menu/all")
     public Result<List<RouteRecordStringComponentDTO>> allMenus(@RequestHeader(name = GlobalConstants.HEADER_AUTHORIZATION, required = false) String authorization) {
-        String token = authorization == null ? null : authorization.replace(GlobalConstants.TOKEN_PREFIX, "").trim();
+        String token = AuthHeaderUtils.parseBearerToken(authorization);
         String subject = jwtService.getSubject(token);
         UserDTO user = userApi.getUserByUsername(subject).getData();
         List<Long> roleIds = user == null ? Collections.emptyList() : Objects.requireNonNullElse(user.getRoleIds(), Collections.emptyList());
@@ -174,11 +175,9 @@ public class AuthController {
         List<MenuDTO> filteredTree = filterTreeByIds(fullTree, idSet);
 
         List<RouteRecordStringComponentDTO> routes = new ArrayList<>();
-        if (filteredTree != null) {
-            for (MenuDTO dto : filteredTree) {
-                RouteRecordStringComponentDTO r = toRoute(dto);
-                if (r != null) routes.add(r);
-            }
+        for (MenuDTO dto : filteredTree) {
+            RouteRecordStringComponentDTO r = toRoute(dto);
+            if (r != null) routes.add(r);
         }
         return Result.ok(routes);
     }

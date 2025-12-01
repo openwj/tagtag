@@ -15,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Map;
 import dev.tagtag.kernel.constant.SecurityClaims;
+import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.common.util.AuthHeaderUtils;
 
 /**
  * 令牌版本校验过滤器：当请求携带 Bearer Token 时，校验其 claims 中的 ver 是否为用户当前版本。
@@ -47,9 +49,8 @@ public class TokenVersionFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String auth = request.getHeader("Authorization");
-        if (auth != null && auth.startsWith("Bearer ")) {
-            String token = auth.substring("Bearer ".length()).trim();
+        String token = AuthHeaderUtils.parseBearerToken(request.getHeader(GlobalConstants.HEADER_AUTHORIZATION));
+        if (token != null) {
             if (!jwtService.validateToken(token)) {
                 writeUnauthorized(response);
                 return;
