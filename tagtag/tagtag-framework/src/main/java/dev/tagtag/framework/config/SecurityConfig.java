@@ -20,6 +20,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.kernel.constant.SecurityClaims;
+import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.kernel.constant.Roles;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.*;
 import org.springframework.security.web.SecurityFilterChain;
@@ -132,11 +134,11 @@ public class SecurityConfig {
                 Set<GrantedAuthority> auths = new HashSet<>();
                 Object rolesObj = jwt.getClaims().get(SecurityClaims.ROLES);
                 if (rolesObj instanceof Collection<?> rc) {
-                    for (Object r : rc) if (r != null) auths.add(new SimpleGrantedAuthority("ROLE_" + String.valueOf(r)));
+                    for (Object r : rc) if (r != null) auths.add(new SimpleGrantedAuthority(Roles.PREFIX + String.valueOf(r)));
                 }
                 Object permsObj = jwt.getClaims().get(SecurityClaims.PERMS);
                 if (permsObj instanceof Collection<?> pc) {
-                    for (Object p : pc) if (p != null) auths.add(new SimpleGrantedAuthority("PERM_" + String.valueOf(p)));
+                    for (Object p : pc) if (p != null) auths.add(new SimpleGrantedAuthority(Permissions.PREFIX + String.valueOf(p)));
                 }
                 return auths;
             }

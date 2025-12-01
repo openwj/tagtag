@@ -19,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import dev.tagtag.contract.iam.dto.UserOperationRequest;
 import dev.tagtag.contract.iam.dto.UserPageRequest;
-import org.springframework.security.access.prepost.PreAuthorize;
+import dev.tagtag.framework.security.RequirePerm;
 import java.util.List;
 import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.kernel.constant.Permissions;
@@ -40,7 +40,7 @@ public class UserController {
      * @return 分页结果
      */
     @PostMapping("/page")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_READ + "')")
+    @RequirePerm(Permissions.USER_READ)
     public Result<PageResult<UserDTO>> page(@Valid @RequestBody UserPageRequest req) {
         PageResult<UserDTO> pr = userService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -48,14 +48,14 @@ public class UserController {
 
     /** 获取用户详情 */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_READ + "')")
+    @RequirePerm(Permissions.USER_READ)
     public Result<UserDTO> get(@PathVariable("id") Long id) {
         return Result.ok(userService.getById(id));
     }
 
     /** 创建用户 */
     @PostMapping
-    @PreAuthorize("hasAuthority('" + Permissions.USER_CREATE + "')")
+    @RequirePerm(Permissions.USER_CREATE)
     public Result<Void> create(@Valid @RequestBody UserDTO user) {
         userService.create(user);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
@@ -63,7 +63,7 @@ public class UserController {
 
     /** 更新用户（忽略源对象中的空值） */
     @PutMapping
-    @PreAuthorize("hasAuthority('" + Permissions.USER_UPDATE + "')")
+    @RequirePerm(Permissions.USER_UPDATE)
     public Result<Void> update(@Valid @RequestBody UserDTO user) {
         userService.update(user);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -71,7 +71,7 @@ public class UserController {
 
     /** 删除用户 */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_DELETE + "')")
+    @RequirePerm(Permissions.USER_DELETE)
     public Result<Void> delete(@PathVariable("id") Long id) {
         userService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -79,7 +79,7 @@ public class UserController {
 
     /** 为用户分配角色（覆盖式分配） */
     @PostMapping("/{id}/roles")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_ASSIGN_ROLE + "')")
+    @RequirePerm(Permissions.USER_ASSIGN_ROLE)
     public Result<Void> assignRoles(@PathVariable("id") Long id, @RequestBody List<Long> roleIds) {
         userService.assignRoles(id, roleIds);
         return Result.okMsg(AppMessages.ASSIGN_SUCCESS);
@@ -91,7 +91,7 @@ public class UserController {
      * @param req 请求体，包含 status（0=禁用,1=启用）
      */
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_UPDATE + "')")
+    @RequirePerm(Permissions.USER_UPDATE)
     public Result<Void> updateStatus(@PathVariable("id") Long id, @Valid @RequestBody UserOperationRequest req) {
         userService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -102,7 +102,7 @@ public class UserController {
      * @param req 请求体，包含 ids 与 status
      */
     @PutMapping("/status/batch")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_UPDATE + "')")
+    @RequirePerm(Permissions.USER_UPDATE)
     public Result<Void> batchUpdateStatus(@Valid @RequestBody UserOperationRequest req) {
         userService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -113,7 +113,7 @@ public class UserController {
      * @param req 请求体，包含 ids
      */
     @DeleteMapping("/batch")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_DELETE + "')")
+    @RequirePerm(Permissions.USER_DELETE)
     public Result<Void> batchDelete(@Valid @RequestBody UserOperationRequest req) {
         userService.batchDelete(req.getIds());
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -125,7 +125,7 @@ public class UserController {
      * @param req 请求体，包含 password
      */
     @PutMapping("/{id}/password")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_UPDATE + "')")
+    @RequirePerm(Permissions.USER_UPDATE)
     public Result<Void> resetPassword(@PathVariable("id") Long id, @Valid @RequestBody UserOperationRequest req) {
         userService.resetPassword(id, req.getPassword());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -137,7 +137,7 @@ public class UserController {
      * @return 角色列表
      */
     @GetMapping("/{id}/roles")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_READ + "')")
+    @RequirePerm(Permissions.USER_READ)
     public Result<List<RoleDTO>> listUserRoles(@PathVariable("id") Long id) {
         return Result.ok(userService.listRolesByUserId(id));
     }
@@ -147,7 +147,7 @@ public class UserController {
      * @param req 请求体，包含 userIds 与 roleIds
      */
     @PostMapping("/roles/batch")
-    @PreAuthorize("hasAuthority('" + Permissions.USER_ASSIGN_ROLE + "')")
+    @RequirePerm(Permissions.USER_ASSIGN_ROLE)
     public Result<Void> batchAssignRoles(@Valid @RequestBody UserOperationRequest req) {
         userService.assignRolesBatch(req.getUserIds(), req.getRoleIds());
         return Result.okMsg(AppMessages.ASSIGN_SUCCESS);

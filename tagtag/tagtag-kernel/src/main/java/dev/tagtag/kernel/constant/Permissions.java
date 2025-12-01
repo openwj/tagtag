@@ -1,49 +1,58 @@
 package dev.tagtag.kernel.constant;
 
-/**
- * 权限编码常量集中管理
- */
+/** 权限编码常量集中管理（仅存业务码；前缀统一在一处维护） */
 public final class Permissions {
 
     private Permissions() {}
 
+    public static final String PREFIX = "PERM_";
+
     /** 用户：创建 */
-    public static final String USER_CREATE = "PERM_user:create";
+    public static final String USER_CREATE = "user:create";
     /** 用户：更新 */
-    public static final String USER_UPDATE = "PERM_user:update";
+    public static final String USER_UPDATE = "user:update";
     /** 用户：删除 */
-    public static final String USER_DELETE = "PERM_user:delete";
+    public static final String USER_DELETE = "user:delete";
     /** 用户：分配角色 */
-    public static final String USER_ASSIGN_ROLE = "PERM_user:assignRole";
+    public static final String USER_ASSIGN_ROLE = "user:assignRole";
     /** 用户：读取 */
-    public static final String USER_READ = "PERM_user:read";
+    public static final String USER_READ = "user:read";
 
     /** 角色：创建 */
-    public static final String ROLE_CREATE = "PERM_role:create";
+    public static final String ROLE_CREATE = "role:create";
     /** 角色：更新 */
-    public static final String ROLE_UPDATE = "PERM_role:update";
+    public static final String ROLE_UPDATE = "role:update";
     /** 角色：删除 */
-    public static final String ROLE_DELETE = "PERM_role:delete";
+    public static final String ROLE_DELETE = "role:delete";
     /** 角色：分配菜单 */
-    public static final String ROLE_ASSIGN_MENU = "PERM_role:assignMenu";
+    public static final String ROLE_ASSIGN_MENU = "role:assignMenu";
     /** 角色：读取 */
-    public static final String ROLE_READ = "PERM_role:read";
+    public static final String ROLE_READ = "role:read";
 
     /** 菜单：创建 */
-    public static final String MENU_CREATE = "PERM_menu:create";
+    public static final String MENU_CREATE = "menu:create";
     /** 菜单：更新 */
-    public static final String MENU_UPDATE = "PERM_menu:update";
+    public static final String MENU_UPDATE = "menu:update";
     /** 菜单：删除 */
-    public static final String MENU_DELETE = "PERM_menu:delete";
+    public static final String MENU_DELETE = "menu:delete";
     /** 菜单：读取 */
-    public static final String MENU_READ = "PERM_menu:read";
+    public static final String MENU_READ = "menu:read";
 
     /** 部门：创建 */
-    public static final String DEPT_CREATE = "PERM_dept:create";
+    public static final String DEPT_CREATE = "dept:create";
     /** 部门：更新 */
-    public static final String DEPT_UPDATE = "PERM_dept:update";
+    public static final String DEPT_UPDATE = "dept:update";
     /** 部门：删除 */
-    public static final String DEPT_DELETE = "PERM_dept:delete";
+    public static final String DEPT_DELETE = "dept:delete";
     /** 部门：读取 */
-    public static final String DEPT_READ = "PERM_dept:read";
+    public static final String DEPT_READ = "dept:read";
+
+    /**
+     * 将业务权限码拼接为完整的 GrantedAuthority 字符串
+     * @param code 业务权限码（如 "user:create"）
+     * @return 完整权限（如 "PERM_user:create"）
+     */
+    public static String authority(String code) {
+        return PREFIX + code;
+    }
 }

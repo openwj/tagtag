@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.security.access.prepost.PreAuthorize;
+import dev.tagtag.framework.security.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 
 @RestController
@@ -29,14 +29,14 @@ public class MenuController {
      * @param query 菜单过滤条件
      */
     @GetMapping("/tree")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
+    @RequirePerm(Permissions.MENU_READ)
     public Result<List<MenuDTO>> tree(MenuQueryDTO query) {
         return Result.ok(menuService.listTree(query));
     }
 
     /** 获取菜单详情 */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_READ + "')")
+    @RequirePerm(Permissions.MENU_READ)
     public Result<MenuDTO> get(@PathVariable("id") Long id) {
         return Result.ok(menuService.getById(id));
     }
@@ -44,7 +44,7 @@ public class MenuController {
 
     /** 创建菜单 */
     @PostMapping
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_CREATE + "')")
+    @RequirePerm(Permissions.MENU_CREATE)
     public Result<Long> create(@Valid @RequestBody MenuDTO menu) {
         Long id = menuService.create(menu);
         return Result.ok(id);
@@ -52,7 +52,7 @@ public class MenuController {
 
     /** 更新菜单（忽略源对象中的空值） */
     @PutMapping
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
+    @RequirePerm(Permissions.MENU_UPDATE)
     public Result<Void> update(@Valid @RequestBody MenuDTO menu) {
         menuService.update(menu);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -60,7 +60,7 @@ public class MenuController {
 
     /** 删除菜单 */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_DELETE + "')")
+    @RequirePerm(Permissions.MENU_DELETE)
     public Result<Void> delete(@PathVariable("id") Long id) {
         menuService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -72,7 +72,7 @@ public class MenuController {
      * @param req 包含 status（0=禁用，1=启用）
      */
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
+    @RequirePerm(Permissions.MENU_UPDATE)
     public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody MenuStatusUpdateRequest req) {
         menuService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -83,7 +83,7 @@ public class MenuController {
      * @param req 包含 id 列表与禁用标记
      */
     @PutMapping("/status/batch")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_UPDATE + "')")
+    @RequirePerm(Permissions.MENU_UPDATE)
     public Result<Void> batchUpdateStatus(@RequestBody MenuStatusBatchRequest req) {
         menuService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -94,7 +94,7 @@ public class MenuController {
      * @param req 包含 id 列表
      */
     @DeleteMapping("/batch")
-    @PreAuthorize("hasAuthority('" + Permissions.MENU_DELETE + "')")
+    @RequirePerm(Permissions.MENU_DELETE)
     public Result<Void> batchDelete(@RequestBody MenuBatchDeleteRequest req) {
         menuService.batchDelete(req.getIds());
         return Result.okMsg(AppMessages.DELETE_SUCCESS);

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.security.access.prepost.PreAuthorize;
+import dev.tagtag.framework.security.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 
 @RestController
@@ -27,7 +27,7 @@ public class RoleController {
 
     /** 角色分页查询 */
     @PostMapping("/page")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    @RequirePerm(Permissions.ROLE_READ)
     public Result<PageResult<RoleDTO>> page(@Valid @RequestBody RolePageRequest req) {
         PageResult<RoleDTO> pr = roleService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -35,7 +35,7 @@ public class RoleController {
 
     /** 获取角色详情 */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    @RequirePerm(Permissions.ROLE_READ)
     public Result<RoleDTO> get(@PathVariable("id") Long id) {
         return Result.ok(roleService.getById(id));
     }
@@ -46,7 +46,7 @@ public class RoleController {
      * @return 角色详情
      */
     @GetMapping("/code/{code}")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    @RequirePerm(Permissions.ROLE_READ)
     public Result<RoleDTO> getByCode(@PathVariable("code") String code) {
         return Result.ok(roleService.getByCode(code));
     }
@@ -57,14 +57,14 @@ public class RoleController {
      * @return 角色详情
      */
     @GetMapping("/name/{name}")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    @RequirePerm(Permissions.ROLE_READ)
     public Result<RoleDTO> getByName(@PathVariable("name") String name) {
         return Result.ok(roleService.getByName(name));
     }
 
     /** 创建角色 */
     @PostMapping
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_CREATE + "')")
+    @RequirePerm(Permissions.ROLE_CREATE)
     public Result<Void> create(@Valid @RequestBody RoleDTO role) {
         roleService.create(role);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
@@ -72,7 +72,7 @@ public class RoleController {
 
     /** 更新角色（忽略源对象中的空值） */
     @PutMapping
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
+    @RequirePerm(Permissions.ROLE_UPDATE)
     public Result<Void> update(@Valid @RequestBody RoleDTO role) {
         roleService.update(role);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -80,7 +80,7 @@ public class RoleController {
 
     /** 删除角色 */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_DELETE + "')")
+    @RequirePerm(Permissions.ROLE_DELETE)
     public Result<Void> delete(@PathVariable("id") Long id) {
         roleService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -93,7 +93,7 @@ public class RoleController {
      * @return 操作结果
      */
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
+    @RequirePerm(Permissions.ROLE_UPDATE)
     public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody RoleStatusUpdateRequest req) {
         roleService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -105,7 +105,7 @@ public class RoleController {
      * @return 操作结果
      */
     @PutMapping("/status/batch")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_UPDATE + "')")
+    @RequirePerm(Permissions.ROLE_UPDATE)
     public Result<Void> batchUpdateStatus(@Valid @RequestBody RoleStatusBatchRequest req) {
         roleService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -113,7 +113,7 @@ public class RoleController {
 
     /** 查询所有角色（简单列表） */
     @GetMapping
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    @RequirePerm(Permissions.ROLE_READ)
     public Result<List<RoleDTO>> listAll() {
         return Result.ok(roleService.listAll());
     }
@@ -121,7 +121,7 @@ public class RoleController {
 
     /** 为角色分配菜单（覆盖式） */
     @PostMapping("/{id}/menus")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_ASSIGN_MENU + "')")
+    @RequirePerm(Permissions.ROLE_ASSIGN_MENU)
     public Result<Void> assignMenus(@PathVariable("id") Long roleId, @RequestBody List<Long> menuIds) {
         roleService.assignMenus(roleId, menuIds);
         return Result.okMsg(AppMessages.ASSIGN_SUCCESS);
@@ -133,7 +133,7 @@ public class RoleController {
      * @return 菜单ID列表
      */
     @GetMapping("/{id}/menu-ids")
-    @PreAuthorize("hasAuthority('" + Permissions.ROLE_READ + "')")
+    @RequirePerm(Permissions.ROLE_READ)
     public Result<List<Long>> listMenuIds(@PathVariable("id") Long roleId) {
         return Result.ok(roleService.listMenuIdsByRoleId(roleId));
     }
