@@ -4,6 +4,7 @@ import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.util.AuthHeaderUtils;
+import dev.tagtag.common.util.Flags;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.auth.dto.LoginRequest;
 import dev.tagtag.contract.auth.dto.RefreshRequest;
@@ -235,11 +236,11 @@ public class AuthController {
         RouteMetaDTO meta = new RouteMetaDTO();
         meta.setTitle(dto.getMenuName());
         meta.setIcon(dto.getIcon());
-        meta.setKeepAlive(Boolean.TRUE.equals(dto.getIsKeepalive()));
-        meta.setHide(Boolean.TRUE.equals(dto.getIsHidden()));
+        meta.setKeepAlive(Flags.isTrue(dto.getIsKeepalive()));
+        meta.setHide(Flags.isTrue(dto.getIsHidden()));
         meta.setOrder(dto.getSort() == null ? 0 : dto.getSort());
 
-        if (Boolean.TRUE.equals(dto.getIsExternal())) {
+        if (Flags.isTrue(dto.getIsExternal())) {
             r.setComponent("IFrameView");
             meta.setIframeSrc(dto.getExternalUrl());
         } else if (dto.getComponent() != null && !dto.getComponent().isBlank()) {
