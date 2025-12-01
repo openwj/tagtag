@@ -83,7 +83,7 @@ public class SecurityConfig {
     }
 
     /**
-     * 密码加密器（BCrypt）
+     * 密码加密器（Spring 官方内置 Delegating，默认 {bcrypt}）
      * @return 加密器
      */
     @Bean

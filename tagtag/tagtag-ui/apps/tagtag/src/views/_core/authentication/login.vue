@@ -50,10 +50,11 @@ const formSchema = computed((): VbenFormSchema[] => {
       label: $t('authentication.code'),
       rules: z.object({
         code: z
-          .string()
-          .min(5, { message: $t('authentication.codeTip', [5]) })
-          .optional(),
-        captchaId: z.string().optional(),
+          .string({ required_error: $t('authentication.codeTip', [5]) })
+          .min(5, { message: $t('authentication.codeTip', [5]) }),
+        captchaId: z
+          .string({ required_error: $t('authentication.codeTip', [5]) })
+          .min(1, { message: $t('authentication.codeTip', [5]) }),
       }),
     },
   ];

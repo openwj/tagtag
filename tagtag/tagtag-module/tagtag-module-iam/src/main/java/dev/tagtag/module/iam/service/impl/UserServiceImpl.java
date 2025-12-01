@@ -9,6 +9,7 @@ import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
+import dev.tagtag.module.iam.convert.RoleMapperConvert;
 import dev.tagtag.module.iam.convert.UserMapperConvert;
 import dev.tagtag.module.iam.entity.User;
 import dev.tagtag.module.iam.entity.Role;
@@ -22,7 +23,7 @@ import dev.tagtag.framework.config.PageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,7 +35,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final PageProperties pageProperties;
     private final UserMapperConvert userMapperConvert;
     private final RoleMapper roleMapper;
-    private final dev.tagtag.module.iam.convert.RoleMapperConvert roleMapperConvert;
+    private final RoleMapperConvert roleMapperConvert;
+    private final PasswordEncoder passwordEncoder;
 
     
 
@@ -74,15 +76,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 创建用户（服务端安全编码密码）
-     * @param user 用户DTO，若包含明文密码则在服务端进行BCrypt编码
+     * @param user 用户DTO，若包含明文密码则在服务端进行编码
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void create(UserDTO user) {
         User entity = userMapperConvert.toEntity(user);
-        if (user != null && user.getPassword() != null && !user.getPassword().isBlank()) {
-            String encoded = new BCryptPasswordEncoder().encode(user.getPassword());
+        String raw = entity.getPassword();
+        if (raw != null && !raw.isBlank()) {
+            String encoded = passwordEncoder.encode(raw);
             entity.setPassword(encoded);
             entity.setPasswordUpdatedAt(LocalDateTime.now());
         }
@@ -148,10 +151,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (entity == null) {
             return null;
         }
-        /**
-         * 将实体转换为DTO并补充角色ID
-         * Convert entity to DTO via MapStruct and enrich roleIds
-         */
         UserDTO dto = userMapperConvert.toDTO(entity);
         if (dto != null && dto.getId() != null) {
             List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
@@ -187,13 +186,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.removeBatchByIds(ids);
     }
 
-    /** 重置用户密码（BCrypt 加密并记录更新时间） */
+    /** 重置用户密码（编码并记录更新时间） */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void resetPassword(Long id, String password) {
         if (id == null || password == null || password.isBlank()) return;
-        String encoded = new BCryptPasswordEncoder().encode(password);
+        String encoded = passwordEncoder.encode(password);
         this.lambdaUpdate().eq(User::getId, id)
             .set(User::getPassword, encoded)
             .set(User::getPasswordUpdatedAt, java.time.LocalDateTime.now())
@@ -207,7 +206,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (userId == null) return java.util.Collections.emptyList();
         List<Long> roleIds = baseMapper.selectRoleIdsByUserId(userId);
         if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptyList();
-        List<Role> roles = roleMapper.selectBatchIds(roleIds);
+        List<Role> roles = roleMapper.selectByIds(roleIds);
         return roleMapperConvert.toDTOList(roles);
     }
 

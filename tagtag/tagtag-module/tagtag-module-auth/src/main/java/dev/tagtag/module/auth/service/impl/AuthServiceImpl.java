@@ -155,13 +155,16 @@ public class AuthServiceImpl implements AuthService {
         if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
             throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
         }
+        if (!isStrongPassword(pwd)) {
+            throw BusinessException.of(ErrorCode.UNPROCESSABLE_ENTITY, "密码至少8位，需包含大写、小写、数字和特殊字符");
+        }
         UserDTO exists = userApi.getUserByUsername(uname).getData();
         if (exists != null && exists.getId() != null) {
             throw new BusinessException(ErrorCode.CONFLICT, "用户名已存在");
         }
         UserDTO toCreate = new UserDTO();
         toCreate.setUsername(uname);
-        toCreate.setPassword(passwordEncoder.encode(pwd));
+        toCreate.setPassword(pwd);
         toCreate.setStatus(1);
         userApi.createUser(toCreate);
     }
@@ -257,5 +260,15 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * 校验密码强度：至少8位，包含大写、小写、数字和特殊字符
+     * @param raw 明文密码
+     * @return 是否满足强度
+     */
+    private boolean isStrongPassword(String raw) {
+        if (raw == null) return false;
+        return raw.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$");
     }
 }

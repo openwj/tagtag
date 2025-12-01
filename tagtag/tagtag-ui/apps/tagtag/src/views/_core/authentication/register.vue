@@ -3,6 +3,7 @@ import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
 import { computed, h, markRaw, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { AuthenticationRegister, ImageCaptchaInput, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
@@ -11,58 +12,77 @@ import { notification } from 'ant-design-vue';
 
 import { registerApi } from '#/api/core/auth';
 import { fetchImageCaptchaApi } from '#/api/core/captcha';
-import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Register' });
 
 const loading = ref(false);
-const authStore = useAuthStore();
+const router = useRouter();
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
     {
       component: 'VbenInput',
       componentProps: {
-        placeholder: $t('authentication.usernameTip'),
+        placeholder: $t('page.auth.usernameTip'),
       },
       fieldName: 'username',
-      label: $t('authentication.username'),
-      rules: z.string().min(1, { message: $t('authentication.usernameTip') }),
+      label: $t('page.auth.username'),
+      rules: z.string().min(1, { message: $t('page.auth.usernameTip') }),
     },
     {
       component: 'VbenInputPassword',
       componentProps: {
         passwordStrength: true,
-        placeholder: $t('authentication.password'),
+        placeholder: $t('page.auth.password'),
       },
       fieldName: 'password',
-      label: $t('authentication.password'),
+      label: $t('page.auth.password'),
       renderComponentContent() {
         return {
-          strengthText: () => $t('authentication.passwordStrength'),
+          strengthText: () => $t('page.auth.passwordStrength'),
         };
       },
-      rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
+      rules: z
+        .string({ required_error: $t('page.auth.passwordTip') })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/, {
+          message: $t('page.auth.passwordStrength'),
+        }),
     },
     {
       component: 'VbenInputPassword',
       componentProps: {
-        placeholder: $t('authentication.confirmPassword'),
+        placeholder: $t('page.auth.confirmPassword'),
       },
       dependencies: {
         rules(values) {
           const { password } = values;
           return z
-            .string({ required_error: $t('authentication.passwordTip') })
-            .min(1, { message: $t('authentication.passwordTip') })
+            .string({ required_error: $t('page.auth.passwordTip') })
+            .min(1, { message: $t('page.auth.passwordTip') })
             .refine((value) => value === password, {
-              message: $t('authentication.confirmPasswordTip'),
+              message: $t('page.auth.confirmPasswordTip'),
             });
         },
         triggerFields: ['password'],
       },
       fieldName: 'confirmPassword',
-      label: $t('authentication.confirmPassword'),
+      label: $t('page.auth.confirmPassword'),
+    },
+    {
+      component: markRaw(ImageCaptchaInput),
+      componentProps: {
+        placeholder: $t('page.auth.code'),
+        fetchImage: async () => {
+          const { src, captchaId } = await fetchImageCaptchaApi();
+          return { src, captchaId };
+        },
+      },
+      fieldName: 'captcha',
+      label: $t('page.auth.code'),
+      rules: z.object({
+        code: z.string().min(5, { message: $t('page.auth.codeTip', [5]) }),
+        captchaId: z.string().min(1, { message: $t('page.auth.codeTip', [5]) }),
+      }),
     },
     {
       component: 'VbenCheckbox',
@@ -70,37 +90,19 @@ const formSchema = computed((): VbenFormSchema[] => {
       renderComponentContent: () => ({
         default: () =>
           h('span', [
-            $t('authentication.agree'),
+            $t('page.auth.agree'),
             h(
               'a',
               {
                 class: 'vben-link ml-1 ',
                 href: '',
               },
-              `${$t('authentication.privacyPolicy')} & ${$t('authentication.terms')}`,
+              `${$t('page.auth.privacyPolicy')} & ${$t('page.auth.terms')}`,
             ),
           ]),
       }),
       rules: z.boolean().refine((value) => !!value, {
-        message: $t('authentication.agreeTip'),
-      }),
-    },
-    {
-      component: markRaw(ImageCaptchaInput),
-      componentProps: {
-        placeholder: $t('authentication.code'),
-        fetchImage: async () => {
-          const { src, captchaId } = await fetchImageCaptchaApi();
-          return { src, captchaId };
-        },
-      },
-      fieldName: 'captcha',
-      label: $t('authentication.code'),
-      rules: z.object({
-        code: z.string().min(5, { message: $t('authentication.codeTip', [5]) }),
-        captchaId: z
-          .string()
-          .min(1, { message: $t('authentication.codeTip', [5]) }),
+        message: $t('page.auth.agreeTip'),
       }),
     },
   ];
@@ -114,16 +116,34 @@ async function handleSubmit(value: Recordable<any>) {
   try {
     loading.value = true;
     const { username, password, captcha } = value ?? {};
-    await registerApi({ username, password });
-    await authStore.authLogin({ username, password, captcha });
-  } catch (error: any) {
-    const msg = error?.message || $t('authentication.registerFail');
-    notification.error({
-      message: $t('authentication.register'),
-      description: msg,
-      duration: 3,
+    await registerApi({ username, password, captcha });
+
+    let count = 5;
+    const key = `register-success-${Date.now()}`;
+    const renderDesc = () => $t('page.auth.registerSuccess', [count]);
+
+    notification.success({
+      message: $t('page.auth.register'),
+      description: renderDesc(),
+      duration: 0,
+      key,
     });
-    throw error;
+
+    const timer = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(timer);
+        notification.close(key);
+        router.push({ name: 'Login' });
+      } else {
+        notification.success({
+          message: $t('page.auth.register'),
+          description: renderDesc(),
+          duration: 0,
+          key,
+        });
+      }
+    }, 1000);
   } finally {
     loading.value = false;
   }

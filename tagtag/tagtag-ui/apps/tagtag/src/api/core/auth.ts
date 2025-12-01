@@ -22,6 +22,10 @@ export namespace AuthApi {
   export interface RegisterParams {
     username: string;
     password: string;
+    captcha: {
+      code: string;
+      captchaId: string;
+    };
   }
 }
 

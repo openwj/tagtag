@@ -65,7 +65,6 @@ public class AuthController {
     @RateLimit(key = "auth:login", periodSeconds = 60, permits = 10, message = "登录请求过多，请稍后再试")
     @PostMapping("/login")
     public Result<TokenDTO> login(@Valid @RequestBody LoginRequest req) {
-        // 验证码前置校验（兼容嵌套与扁平两种入参）：优先使用 req.getCaptcha() 的值
         String inCode = req.getCaptcha().getCode();
         String inId = req.getCaptcha().getCaptchaId();
         if (!captchaService.validate(inId, inCode)) {
@@ -111,7 +110,16 @@ public class AuthController {
     @RateLimit(key = "auth:register", periodSeconds = 60, permits = 10, message = "注册请求过多，请稍后再试")
     @PostMapping("/register")
     public Result<Void> register(@Valid @RequestBody RegisterRequest req) {
+        if (req.getCaptcha() == null || req.getCaptcha().getCaptchaId() == null || req.getCaptcha().getCode() == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码不能为空");
+        }
+        String inId = req.getCaptcha().getCaptchaId();
+        String inCode = req.getCaptcha().getCode();
+        if (!captchaService.validate(inId, inCode)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码错误或已过期");
+        }
         authService.register(req.getUsername(), req.getPassword());
+        captchaService.validateAndConsume(inId, inCode);
         return Result.ok();
     }
 
