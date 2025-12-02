@@ -2,6 +2,8 @@ package dev.tagtag.framework.security.context;
 
 import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.kernel.constant.SecurityClaims;
+import dev.tagtag.common.exception.BusinessException;
+import dev.tagtag.common.exception.ErrorCode;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,21 +34,31 @@ public final class AuthContext {
     }
 
     /**
-     * 获取当前用户ID（来自 JWT claims）
-     * @return 用户ID，缺失返回 null
+     * 获取当前用户ID（来自 JWT claims，必需）
+     * 若未认证或缺失 UID 声明，则抛出 UNAUTHORIZED（HTTP 401）。
+     * @return 用户ID
      */
     public static Long getCurrentUserId() {
         Jwt jwt = getCurrentJwt();
-        return claimAsLong(jwt, SecurityClaims.UID);
+        Long uid = claimAsLong(jwt, SecurityClaims.UID);
+        if (uid == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+        }
+        return uid;
     }
 
     /**
-     * 获取当前用户名（来自 JWT claims）
-     * @return 用户名，缺失返回 null
+     * 获取当前用户名（来自 JWT claims，必需）
+     * 若未认证或缺失 UNAME 声明，则抛出 UNAUTHORIZED（HTTP 401）。
+     * @return 用户名
      */
     public static String getCurrentUsername() {
         Jwt jwt = getCurrentJwt();
-        return jwt.getClaim(SecurityClaims.UNAME);
+        String uname = jwt.getClaim(SecurityClaims.UNAME);
+        if (uname == null || uname.isBlank()) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+        }
+        return uname;
     }
 
     /**
@@ -68,12 +80,17 @@ public final class AuthContext {
     }
 
     /**
-     * 获取当前用户轻量主体（不查库）
+     * 获取当前用户轻量主体（不查库，必需）
+     * 若未认证或缺失 UID 声明，则抛出 UNAUTHORIZED（HTTP 401）。
      * @return 轻量主体对象
      */
     public static UserPrincipal getCurrentPrincipal() {
         Jwt jwt = getCurrentJwt();
-        return buildPrincipal(jwt);
+        UserPrincipal p = buildPrincipal(jwt);
+        if (p.getId() == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+        }
+        return p;
     }
 
     /**

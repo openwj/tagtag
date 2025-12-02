@@ -23,6 +23,10 @@ export async function getUserInfoApi() {
     token: data?.token ?? '',
     avatar: data?.avatar ?? '',
     userId: data?.userId ?? 0,
+    email: data?.email ?? '',
+    phone: data?.phone ?? '',
+    gender: data?.gender ?? 0,
+    birthday: data?.birthday ?? '',
   } as UserInfo;
   return userInfo;
 }
