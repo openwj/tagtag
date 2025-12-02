@@ -14,11 +14,12 @@ export async function getUserInfoApi() {
     id: data?.id ?? 0,
     username: data?.username ?? '',
     realName: data?.nickname ?? data?.username ?? '',
+    nickname: data?.nickname ?? '',
     roles: ['user'],
     homePath: '/analytics',
     // password 字段前端不使用
     password: '',
-    desc: data?.desc ?? '',
+    desc: data?.remark ?? data?.desc ?? '',
     token: data?.token ?? '',
     avatar: data?.avatar ?? '',
     userId: data?.userId ?? 0,

@@ -6,7 +6,7 @@
     "codeLogin": "Code Login",
     "qrcodeLogin": "Qr Code Login",
     "forgetPassword": "Forget Password",
-    "profile": "Profile",
+    "profile": { "title": "Profile" },
     "registerSuccess": "Registration successful, redirect in {0}s",
     "registerFail": "Registration failed",
     "usernameTip": "Please enter username",

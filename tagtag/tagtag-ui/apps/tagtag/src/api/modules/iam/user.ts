@@ -146,3 +146,15 @@ export function resetUserPassword(id: number | string, password: string) {
 export function getUserRoles(id: number | string) {
   return requestClient.get(`${Api.BaseApi}/${id}/roles`);
 }
+
+/**
+ * 本人修改密码
+ * @param oldPassword 旧密码
+ * @param newPassword 新密码
+ */
+export function changeMyPassword(oldPassword: string, newPassword: string) {
+  return requestClient.put(`${Api.BaseApi}/me/password`, {
+    oldPassword,
+    newPassword,
+  });
+}

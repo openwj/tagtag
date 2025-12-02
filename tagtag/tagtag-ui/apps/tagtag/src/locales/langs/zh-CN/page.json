@@ -6,7 +6,7 @@
     "codeLogin": "验证码登录",
     "qrcodeLogin": "二维码登录",
     "forgetPassword": "忘记密码",
-    "profile": "个人中心",
+    "profile": { "title": "个人中心" },
     "registerSuccess": "注册成功，{0}s 后跳转登录页",
     "registerFail": "注册失败",
     "usernameTip": "请输入用户名",

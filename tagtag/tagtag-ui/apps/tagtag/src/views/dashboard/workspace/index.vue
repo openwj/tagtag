@@ -94,6 +94,12 @@ const quickNavItems: WorkbenchQuickNavItem[] = [
     url: '/',
   },
   {
+    color: '#6b8afd',
+    icon: 'ion:person-circle-outline',
+    title: '个人中心',
+    url: '/profile',
+  },
+  {
     color: '#bf0c2c',
     icon: 'ion:grid-outline',
     title: '仪表盘',

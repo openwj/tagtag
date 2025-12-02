@@ -2,6 +2,7 @@ package dev.tagtag.module.iam.controller;
 
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
+import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.module.iam.service.UserService;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import dev.tagtag.contract.iam.dto.UserOperationRequest;
+import dev.tagtag.contract.iam.dto.ChangePasswordRequest;
+import dev.tagtag.framework.security.context.AuthContext;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.tagtag.contract.iam.dto.UserPageRequest;
 import dev.tagtag.framework.security.RequirePerm;
 import java.util.List;
@@ -32,6 +36,7 @@ public class UserController {
 
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 用户分页查询接口（请求体包含查询条件与分页参数）
@@ -119,8 +124,7 @@ public class UserController {
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
-    /**
-     * 重置用户密码
+    /** 重置用户密码
      * @param id 用户ID
      * @param req 请求体，包含 password
      */
@@ -128,6 +132,28 @@ public class UserController {
     @RequirePerm(Permissions.USER_UPDATE)
     public Result<Void> resetPassword(@PathVariable("id") Long id, @Valid @RequestBody UserOperationRequest req) {
         userService.resetPassword(id, req.getPassword());
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 本人修改密码（校验旧密码）
+     * @param req 请求体，包含 oldPassword 与 newPassword
+     */
+    @PutMapping("/me/password")
+    public Result<Void> changeMyPassword(@Valid @RequestBody ChangePasswordRequest req) {
+        Long uid = AuthContext.getCurrentUserId();
+        if (uid == null) {
+            return Result.fail(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+        }
+        dev.tagtag.contract.iam.dto.UserDTO me = userService.getById(uid);
+        if (me == null || me.getPassword() == null) {
+            return Result.fail(ErrorCode.NOT_FOUND, "用户不存在或凭证缺失");
+        }
+        boolean matched = passwordEncoder.matches(req.getOldPassword(), me.getPassword());
+        if (!matched) {
+            return Result.fail(ErrorCode.UNAUTHORIZED, "旧密码不正确");
+        }
+        userService.resetPassword(uid, req.getNewPassword());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
