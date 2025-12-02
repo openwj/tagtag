@@ -117,7 +117,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     /** 为角色分配菜单（覆盖式：先删后插） */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"roleMenuCodes"}, allEntries = true)
+    @CacheEvict(cacheNames = {"roleMenuCodes", "roleMenuIds"}, allEntries = true)
     public void assignMenus(Long roleId, List<Long> menuIds) {
         if (roleId == null) return;
         baseMapper.deleteRolePermissions(roleId);

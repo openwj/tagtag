@@ -27,10 +27,11 @@ public final class AuthContext {
      */
     public static Jwt getCurrentJwt() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) throw new AuthenticationCredentialsNotFoundException("Unauthenticated");
+        if (auth == null) throw new BusinessException(ErrorCode.UNAUTHORIZED, "Unauthenticated");
         Object principal = auth.getPrincipal();
         if (principal instanceof Jwt j) return j;
-        throw new AuthenticationCredentialsNotFoundException("Unsupported principal type: " + (principal == null ? "null" : principal.getClass().getName()));
+//        throw new AuthenticationCredentialsNotFoundException("Unsupported principal type: " + (principal == null ? "null" : principal.getClass().getName()));
+        throw new BusinessException(ErrorCode.UNAUTHORIZED, "Unsupported principal type: " + (principal == null ? "null" : principal.getClass().getName()));
     }
 
     /**

@@ -41,7 +41,7 @@ const loading = ref(false);
 const checkedKeys = ref<string[]>([]);
 const expandedKeys = ref<string[]>([]);
 // 控制 Tree 的 checkStrictly 属性
-const checkStrictly = ref(true);
+const checkStrictly = ref(false);
 const storageKeyCheckStrictly = 'permissionTree.checkStrictly';
 const searchText = ref('');
 
@@ -98,6 +98,23 @@ const getAllKeys = (nodes: DataNode[]): string[] => {
   return keys;
 };
 
+/**
+ * 获取所有父节点 key
+ */
+const getAllParentKeys = (nodes: DataNode[]): string[] => {
+  const keys: string[] = [];
+  const traverse = (nodes: DataNode[]) => {
+    nodes.forEach((node) => {
+      if (node.children && node.children.length > 0) {
+        keys.push(String(node.key));
+        traverse(node.children);
+      }
+    });
+  };
+  traverse(nodes);
+  return keys;
+};
+
 // 获取当前树中存在的节点key
 /**
  * 过滤出当前树中有效的选中 key
@@ -121,13 +138,21 @@ const loadMenuTree = async () => {
 
     // 数据加载完成后，重新验证已选中的权限key
     if (Array.isArray(props.value) && props.value.length > 0) {
-      const validKeys = getValidKeys(props.value);
-      if (validKeys.length !== props.value.length) {
-        checkedKeys.value = validKeys;
-        // 通知父组件更新为有效key
-        emit('update:value', validKeys);
-        emit('change', validKeys);
+      let validKeys = getValidKeys(props.value);
+
+      // 如果是联动模式，剔除父节点ID，防止权限扩大（Antd Tree会自动选中子节点）
+      // 注意：只有当checkStrictly为false时才需要这样做
+      if (!checkStrictly.value) {
+        const parentKeys = getAllParentKeys(treeData.value);
+        validKeys = validKeys.filter((k) => !parentKeys.includes(k));
       }
+
+      checkedKeys.value = validKeys;
+      // 默认展开全部，避免用户以为是空的
+      expandAll();
+    } else {
+      // 如果没有选中项，也默认展开全部，方便查看
+      expandAll();
     }
   } catch (error) {
     console.error('加载菜单树失败:', error);
@@ -173,13 +198,24 @@ const handleUnselectAll = () => {
 /**
  * 处理选择变化（适配 antd Tree 返回形态）
  */
-const handleCheck = (checked: any) => {
+const handleCheck = (checked: any, e: any) => {
   // Ant Design Vue Tree组件check事件返回{checked, halfChecked}对象
-  const checkedKeysValue = checked.checked || checked;
-  // 确保返回的是数组类型，并过滤掉空值
-  const validKeys = Array.isArray(checkedKeysValue)
-    ? checkedKeysValue.filter(Boolean)
-    : [];
+  // 当 checkStrictly=false 时，checked 是数组，且 e.halfCheckedKeys 包含半选节点
+  let validKeys: string[] = [];
+
+  if (Array.isArray(checked)) {
+    // 联动模式：包含全选节点和半选节点
+    const halfChecked = e?.halfCheckedKeys || [];
+    validKeys = [...checked, ...halfChecked];
+  } else {
+    // 独立模式：只包含选中的节点
+    validKeys = checked?.checked || [];
+  }
+
+  // 过滤掉空值并转为字符串
+  validKeys = validKeys.filter(Boolean).map(String);
+
+  // 关键修复：必须通过 emit('update:value') 更新父组件的绑定值
   emit('update:value', validKeys);
   emit('change', validKeys);
 };
@@ -188,10 +224,33 @@ const handleCheck = (checked: any) => {
 watch(
   () => props.value,
   (val) => {
-    checkedKeys.value = Array.isArray(val) ? [...val] : [];
+    if (!Array.isArray(val)) {
+      checkedKeys.value = [];
+      return;
+    }
+    let keys = [...val];
+    // 如果树已加载且是联动模式，进行过滤
+    if (treeData.value.length > 0 && !checkStrictly.value) {
+      const parentKeys = getAllParentKeys(treeData.value);
+      // 过滤掉父节点，防止 antd Tree 报 missing follow keys 警告
+      keys = keys.filter((k) => !parentKeys.includes(k));
+    }
+    checkedKeys.value = keys;
   },
   { immediate: true },
 );
+
+// 监听 checkStrictly 变化，切换时处理 checkedKeys
+watch(checkStrictly, (val) => {
+  if (!val) {
+    // 切换到联动模式：剔除父节点
+    const parentKeys = getAllParentKeys(treeData.value);
+    checkedKeys.value = checkedKeys.value.filter((k) => !parentKeys.includes(k));
+  } else {
+    // 切换到独立模式：这里如果需要恢复父节点比较复杂，暂保持现状
+    // 通常用户切换到独立模式是为了精细控制，保持现状是安全的
+  }
+});
 
 /**
  * 过滤树数据（按名称/编码模糊匹配）
@@ -240,8 +299,8 @@ watch(
 </script>
 
 <template>
-  <div class="w-full">
-    <div class="mb-3 flex items-center justify-between">
+  <div class="flex h-full w-full flex-col p-2">
+    <div class="mb-2 flex items-center justify-between shrink-0">
       <span class="text-sm font-medium">权限分配</span>
       <div class="ml-4 flex flex-1 items-center gap-2 justify-end">
         <Input
@@ -286,7 +345,7 @@ watch(
       </div>
     </div>
 
-    <div class="p-1">
+    <div class="flex-1 overflow-y-auto p-1">
       <Spin :spinning="loading">
         <Tree
           v-model:checked-keys="checkedKeys"
@@ -297,7 +356,7 @@ watch(
           :tree-data="treeData"
           :selectable="false"
           check-on-click-node
-          @check.passive="handleCheck"
+          @check="handleCheck"
         >
           <template #title="{ title, menuType, menuCode }">
             <div class="flex items-center gap-2">

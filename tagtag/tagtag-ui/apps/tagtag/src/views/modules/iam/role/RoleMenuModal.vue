@@ -14,7 +14,6 @@ const emit = defineEmits(['success']);
 const roleId = ref<number | string>('');
 const roleName = ref<string>('');
 const checkedMenuIds = ref<string[]>([]);
-const loading = ref(false);
 
 const [Modal, modalApi] = useVbenModal({
   title: '分配权限',
@@ -82,11 +81,12 @@ const [Modal, modalApi] = useVbenModal({
       </Alert>
 
       <div
-        class="max-h-[600px] overflow-y-auto rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-700 dark:bg-gray-800"
+        class="flex h-[600px] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
       >
         <PermissionTree
           v-model:value="checkedMenuIds"
           :role-id="String(roleId)"
+          class="h-full"
         />
       </div>
     </div>
