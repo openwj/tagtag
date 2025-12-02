@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { NotificationItem } from '@vben/layouts';
 
-import { computed, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
@@ -21,59 +21,42 @@ import { openWindow } from '@vben/utils';
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
+import {
+  clearAllMessages,
+  deleteMessage,
+  getMessageList,
+  markAllMessageRead,
+  markMessageRead,
+  type MessageItem,
+} from '#/api/modules/system/message';
 
-const notifications = ref<NotificationItem[]>([
-  {
-    id: 1,
-    avatar: 'https://avatar.vercel.sh/vercel.svg?text=VB',
-    date: '3小时前',
-    isRead: true,
-    message: '描述信息描述信息描述信息',
-    title: '收到了 14 份新周报',
-  },
-  {
-    id: 2,
-    avatar: 'https://avatar.vercel.sh/1',
-    date: '刚刚',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '朱偏右 回复了你',
-  },
-  {
-    id: 3,
-    avatar: 'https://avatar.vercel.sh/1',
-    date: '2024-01-01',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '曲丽丽 评论了你',
-  },
-  {
-    id: 4,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '代办提醒',
-  },
-  {
-    id: 5,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '跳转Workspace示例',
-    link: '/workspace',
-  },
-  {
-    id: 6,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
-    isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '跳转外部链接示例',
-    link: 'https://doc.vben.pro',
-  },
-]);
+const notifications = ref<NotificationItem[]>([]);
+
+// 加载消息列表
+const loadMessages = async () => {
+  try {
+    const list = await getMessageList();
+    notifications.value = list.map((item: MessageItem) => ({
+      id: String(item.id),
+      title: item.title,
+      message: item.message, // 后端content映射为message
+      date: item.date, // 后端createTime映射为date
+      avatar: item.avatar || 'https://avatar.vercel.sh/sys',
+      isRead: item.isRead,
+      link: item.link,
+    }));
+  } catch (error) {
+    console.error('加载消息失败:', error);
+  }
+};
+
+// 初始化加载并轮询
+loadMessages();
+const timer = setInterval(loadMessages, 60000); // 每分钟轮询一次
+
+onUnmounted(() => {
+  clearInterval(timer);
+});
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -129,24 +112,6 @@ async function handleLogout() {
   await authStore.logout(false);
 }
 
-function handleNoticeClear() {
-  notifications.value = [];
-}
-
-function markRead(id: number | string) {
-  const item = notifications.value.find((item) => item.id === id);
-  if (item) {
-    item.isRead = true;
-  }
-}
-
-function remove(id: number | string) {
-  notifications.value = notifications.value.filter((item) => item.id !== id);
-}
-
-function handleMakeAll() {
-  notifications.value.forEach((item) => (item.isRead = true));
-}
 watch(
   () => ({
     enable: preferences.app.watermark,
@@ -185,10 +150,31 @@ watch(
       <Notification
         :dot="showDot"
         :notifications="notifications"
-        @clear="handleNoticeClear"
-        @read="(item) => item.id && markRead(item.id)"
-        @remove="(item) => item.id && remove(item.id)"
-        @make-all="handleMakeAll"
+        @clear="async () => {
+          await clearAllMessages();
+          notifications = [];
+        }"
+        @make-all-read="async () => {
+          await markAllMessageRead();
+          notifications.forEach((item) => (item.isRead = true));
+        }"
+        @read="async (item: any) => {
+          if (!item.isRead) {
+            await markMessageRead(item.id);
+            item.isRead = true;
+          }
+          if (item.link) {
+            if (item.link.startsWith('http')) {
+              window.open(item.link, '_blank');
+            } else {
+              router.push(item.link);
+            }
+          }
+        }"
+        @view-all="() => {
+          // 跳转到完整的消息中心页面
+          router.push('/system/message/list');
+        }"
       />
     </template>
     <template #extra>

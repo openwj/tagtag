@@ -20,4 +20,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-contract-system</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
 </project>
