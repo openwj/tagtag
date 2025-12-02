@@ -27,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -203,9 +204,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional(readOnly = true)
     public List<RoleDTO> listRolesByUserId(Long userId) {
-        if (userId == null) return java.util.Collections.emptyList();
+        if (userId == null) return Collections.emptyList();
         List<Long> roleIds = baseMapper.selectRoleIdsByUserId(userId);
-        if (roleIds == null || roleIds.isEmpty()) return java.util.Collections.emptyList();
+        if (roleIds == null || roleIds.isEmpty()) return Collections.emptyList();
         List<Role> roles = roleMapper.selectByIds(roleIds);
         return roleMapperConvert.toDTOList(roles);
     }

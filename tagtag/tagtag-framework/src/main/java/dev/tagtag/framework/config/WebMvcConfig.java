@@ -23,5 +23,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addConverterFactory(new StringToEnumConverterFactory());
     }
 
-    // 不再注册参数解析器
 }

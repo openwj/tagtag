@@ -169,6 +169,11 @@
                 <artifactId>tagtag-contract-system</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>dev.tagtag</groupId>
+                <artifactId>tagtag-contract-storage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>dev.tagtag</groupId>
@@ -185,6 +190,11 @@
             <dependency>
                 <groupId>dev.tagtag</groupId>
                 <artifactId>tagtag-module-system</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.tagtag</groupId>
+                <artifactId>tagtag-module-storage</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -166,7 +167,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
     public void batchUpdateStatus(List<Long> ids, int status) {
         if (ids == null || ids.isEmpty()) return;
-        java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
+        LinkedHashSet<Long> uniq = new LinkedHashSet<>(ids);
         this.lambdaUpdate()
                 .in(Menu::getId, uniq)
                 .set(Menu::getStatus, status)
@@ -182,7 +183,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
     public void batchDelete(List<Long> ids) {
         if (ids == null || ids.isEmpty()) return;
-        java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
+        LinkedHashSet<Long> uniq = new LinkedHashSet<>(ids);
         boolean existChildren = this.lambdaQuery().in(Menu::getParentId, uniq).exists();
         if (existChildren) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "选中的菜单中存在子菜单，无法批量删除");

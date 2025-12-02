@@ -49,13 +49,13 @@ public class GlobalExceptionHandler {
                     .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                     .collect(Collectors.toList());
             msg = String.join("; ", errors);
-            if (msg == null || msg.isBlank()) msg = "参数校验失败";
+            if (msg.isBlank()) msg = "参数校验失败";
         } else if (ex instanceof BindException be) {
             errors = be.getBindingResult().getFieldErrors().stream()
                     .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                     .collect(Collectors.toList());
             msg = String.join("; ", errors);
-            if (msg == null || msg.isBlank()) msg = "参数绑定失败";
+            if (msg.isBlank()) msg = "参数绑定失败";
         } else {
             msg = "参数错误";
         }
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
                 })
                 .collect(Collectors.toList());
         String msg = String.join("; ", errors);
-        if (msg == null || msg.isBlank()) msg = "参数约束违反";
+        if (msg.isBlank()) msg = "参数约束违反";
         Result<Void> body = Result.fail(ErrorCode.UNPROCESSABLE_ENTITY, msg, errors);
         return ResponseEntity.status(ErrorCode.UNPROCESSABLE_ENTITY.getCode()).body(body);
     }

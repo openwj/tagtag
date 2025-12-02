@@ -4,7 +4,6 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.iam.api.RoleApi;
-import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.module.iam.service.RoleService;
@@ -13,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -68,12 +69,12 @@ public class RoleApiImpl implements RoleApi {
     @Override
     public Result<List<Long>> listMenuIdsByRoleIds(List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) return Result.ok(List.of());
-        java.util.Set<Long> set = new java.util.LinkedHashSet<>();
+        Set<Long> set = new LinkedHashSet<>();
         for (Long roleId : roleIds) {
             if (roleId == null) continue;
             List<Long> ids = roleService.listMenuIdsByRoleId(roleId);
             if (ids != null && !ids.isEmpty()) set.addAll(ids);
         }
-        return Result.ok(new java.util.ArrayList<>(set));
+        return Result.ok(new ArrayList<>(set));
     }
 }

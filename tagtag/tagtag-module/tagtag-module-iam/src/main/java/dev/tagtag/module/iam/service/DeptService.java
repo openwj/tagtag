@@ -67,5 +67,5 @@ public interface DeptService {
      * @param ids 部门ID列表
      * @param status 状态（0=禁用，1=启用）
      */
-    void batchUpdateStatus(java.util.List<Long> ids, int status);
+    void batchUpdateStatus(List<Long> ids, int status);
 }

@@ -47,6 +47,11 @@ public final class Permissions {
     /** 部门：读取 */
     public static final String DEPT_READ = "dept:read";
 
+    /** 文件：读取 */
+    public static final String FILE_READ = "file:read";
+    /** 文件：下载 */
+    public static final String FILE_DOWNLOAD = "file:download";
+
     /**
      * 将业务权限码拼接为完整的 GrantedAuthority 字符串
      * @param code 业务权限码（如 "user:create"）

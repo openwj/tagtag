@@ -6,6 +6,8 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.framework.config.PageProperties;
 import java.util.Collection;
 import java.util.function.BiFunction;
+
+import lombok.Getter;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -123,8 +125,17 @@ public class Pages {
      * Page 与 ORDER BY 组合对象
      * @param <T> 数据类型
      */
+    @Getter
     public static final class PageOrder<T> {
+        /**
+         * -- GETTER --
+         * 获取 Page 对象
+         */
         private final Page<T> page;
+        /**
+         * -- GETTER --
+         * 获取 ORDER BY 片段
+         */
         private final String orderBySql;
 
         /**
@@ -137,10 +148,6 @@ public class Pages {
             this.orderBySql = orderBySql;
         }
 
-        /** 获取 Page 对象 */
-        public Page<T> getPage() { return page; }
-        /** 获取 ORDER BY 片段 */
-        public String getOrderBySql() { return orderBySql; }
     }
 
     /**

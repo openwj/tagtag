@@ -18,6 +18,7 @@
         <module>tagtag-module-auth</module>
         <module>tagtag-module-iam</module>
         <module>tagtag-module-system</module>
+        <module>tagtag-module-storage</module>
     </modules>
 
     <properties>

@@ -39,6 +39,10 @@
             <artifactId>tagtag-module-system</artifactId>
         </dependency>
         <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-module-storage</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
         </dependency>

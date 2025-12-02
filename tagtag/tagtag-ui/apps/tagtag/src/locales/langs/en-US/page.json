@@ -31,4 +31,8 @@
     "analytics": "Analytics",
     "workspace": "Workspace"
   }
+  ,
+  "file": {
+    "title": "File Manager"
+  }
 }

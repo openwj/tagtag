@@ -29,3 +29,8 @@ management:
 mybatis-plus:
   global-config:
     banner: false
+
+# 存储配置
+storage:
+  local:
+    base-path: uploads

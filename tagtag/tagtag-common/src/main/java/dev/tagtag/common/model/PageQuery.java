@@ -60,11 +60,7 @@ public class PageQuery {
         return this.sortFields != null && !this.sortFields.isEmpty();
     }
 
-    /**
-     * 解析排序字段与方向（支持 "field asc|desc"）
-     *
-     * @return 当前对象（便于链式调用）
-     */
+
     /**
      * 判断是否已设置排序字段（多字段支持）
      * @return 是否存在排序字段

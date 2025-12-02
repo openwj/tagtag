@@ -19,6 +19,7 @@
         <module>tagtag-contract-auth</module>
         <module>tagtag-contract-iam</module>
         <module>tagtag-contract-system</module>
+        <module>tagtag-contract-storage</module>
     </modules>
 
     <properties>

@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 
 @Service
 @Slf4j
@@ -234,9 +235,9 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = "deptTree", allEntries = true)
-    public void batchUpdateStatus(java.util.List<Long> ids, int status) {
+    public void batchUpdateStatus(List<Long> ids, int status) {
         if (ids == null || ids.isEmpty()) return;
-        java.util.LinkedHashSet<Long> uniq = new java.util.LinkedHashSet<>(ids);
+        LinkedHashSet<Long> uniq = new LinkedHashSet<>(ids);
         this.lambdaUpdate().in(Dept::getId, uniq).set(Dept::getStatus, status).update();
     }
 

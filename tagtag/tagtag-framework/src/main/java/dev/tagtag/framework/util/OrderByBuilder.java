@@ -1,7 +1,10 @@
 package dev.tagtag.framework.util;
 
-import dev.tagtag.common.model.SortField;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import dev.tagtag.common.model.ColumnResolver;
@@ -29,7 +32,7 @@ public final class OrderByBuilder {
                 propToCol.put(ti.getKeyProperty().toLowerCase(Locale.ROOT), prefix + ti.getKeyColumn());
             }
             if (ti.getFieldList() != null) {
-                for (com.baomidou.mybatisplus.core.metadata.TableFieldInfo f : ti.getFieldList()) {
+                for (TableFieldInfo f : ti.getFieldList()) {
                     if (f.getProperty() != null && f.getColumn() != null) {
                         propToCol.put(f.getProperty().toLowerCase(Locale.ROOT), prefix + f.getColumn());
                     }
@@ -40,14 +43,5 @@ public final class OrderByBuilder {
             if (property == null) return null;
             return propToCol.get(property.trim().toLowerCase(Locale.ROOT));
         };
-    }
-
-
-    /** 简单列名安全校验（字母/数字/下划线/点） */
-    private static boolean isSafeColumn(String column) {
-        if (column == null) return false;
-        String c = column.trim();
-        if (c.isEmpty()) return false;
-        return c.matches("[A-Za-z0-9_\\.]+");
     }
 }
