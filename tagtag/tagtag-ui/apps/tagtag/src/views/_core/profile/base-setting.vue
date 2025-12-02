@@ -5,12 +5,14 @@ import type { UploadChangeParam } from 'ant-design-vue';
 import { computed, onMounted, ref } from 'vue';
 
 import { ProfileBaseSetting } from '@vben/common-ui';
+import { Icon } from '@iconify/vue';
 
 import { getUserInfoApi } from '#/api';
 import { editUser } from '#/api/modules/iam/user';
 import { useUserStore } from '@vben/stores';
 import Upload from 'ant-design-vue/es/upload';
 import { preferences } from '@vben/preferences';
+import { message } from 'ant-design-vue';
 
 const profileBaseSettingRef = ref();
 const userStore = useUserStore();
@@ -36,6 +38,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       fieldName: 'username',
       component: 'Input',
       label: '用户名',
+      componentProps: { disabled: true }, // 用户名通常不可修改
     },
     {
       fieldName: 'email',
@@ -101,6 +104,10 @@ async function handleSubmit(values: Record<string, any>) {
   const uid = userStore.userInfo?.id;
   if (!uid) return;
   await editUser({ id: uid, avatar: avatarUrl.value, ...values });
+  // 更新 store 中的用户信息，以便界面即时刷新
+  // 注意：这里假设 editUser 成功后，我们需要手动更新 store 或重新拉取用户信息
+  // 简单起见，我们可以触发一个全局的用户信息刷新，或者直接修改 store
+  message.success('更新成功');
 }
 
 /**
@@ -110,36 +117,91 @@ async function handleSubmit(values: Record<string, any>) {
 async function handleAvatarChange(info: UploadChangeParam) {
   const raw = info?.file?.originFileObj as File | undefined;
   if (!raw) return;
-  const res = await (await import('#/api/modules/storage/file')).uploadFile(raw);
-  // 约定返回结构含 url 字段
-  const url = res?.url ?? res?.data?.url ?? '';
-  if (url) {
-    avatarUrl.value = url;
+  try {
+    const res = await (await import('#/api/modules/storage/file')).uploadFile(raw);
+    const url = res?.url ?? res?.data?.url ?? '';
+    if (url) {
+      avatarUrl.value = url;
+      message.success('头像上传成功');
+    } else {
+      message.error('上传失败');
+    }
+  } catch (e) {
+    message.error('上传失败');
   }
 }
 </script>
 <template>
-  <div class="mb-6">
-    <div class="mb-2 text-sm text-muted-foreground">用户头像</div>
-    <div class="flex items-center gap-4">
-      <img v-if="displayedAvatar" :src="displayedAvatar" class="size-20 rounded-full object-cover" />
-      <div v-else class="size-20 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
-        无头像
+  <div class="bg-card border-border rounded-lg border p-6">
+    <div class="mb-6 border-b pb-4">
+      <div class="text-lg font-semibold">{{$t('page.auth.profile.baseSettingTitle')}}</div>
+      <div class="text-muted-foreground mt-1 text-sm">
+        管理您的个人资料信息
       </div>
-      <Upload
-        list-type="picture-card"
-        :max-count="1"
-        accept="image/*"
-        :show-upload-list="false"
-        @change="handleAvatarChange"
-      >
-        上传头像
-      </Upload>
+    </div>
+
+    <div class="flex flex-col-reverse gap-10 md:flex-row">
+      <!-- 左侧：表单区域 -->
+      <div class="flex-1">
+        <ProfileBaseSetting
+          ref="profileBaseSettingRef"
+          :form-schema="formSchema"
+          @submit="handleSubmit"
+        />
+      </div>
+
+      <!-- 右侧：头像区域 -->
+      <div class="flex w-full flex-col items-center gap-6 md:w-72 md:border-l md:pl-10">
+        <div class="text-muted-foreground text-sm font-medium self-start md:self-center">{{$t('page.auth.profile.avatar')}}</div>
+
+        <div class="group relative size-32 overflow-hidden rounded-full border-4 border-background shadow-md transition-all hover:shadow-xl">
+          <img
+            v-if="displayedAvatar"
+            :src="displayedAvatar"
+            class="h-full w-full object-cover"
+            alt="Avatar"
+          />
+          <div v-else class="bg-muted flex h-full w-full items-center justify-center text-muted-foreground">
+            <Icon icon="lucide:user" class="size-16" />
+          </div>
+
+          <!-- 悬浮遮罩层 -->
+          <div class="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <Upload
+              :max-count="1"
+              accept="image/*"
+              :show-upload-list="false"
+              @change="handleAvatarChange"
+              class="flex h-full w-full items-center justify-center"
+            >
+              <div class="flex flex-col items-center text-white">
+                <Icon icon="lucide:camera" class="mb-1 size-6" />
+                <span class="text-xs">更换</span>
+              </div>
+            </Upload>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <div class="text-sm text-muted-foreground">
+            支持 jpg、png、jpeg 格式
+            <br />
+            文件大小不超过 2MB
+          </div>
+
+          <!-- 移动端的备用上传按钮 -->
+          <div class="mt-4 md:hidden">
+            <Upload
+              :max-count="1"
+              accept="image/*"
+              :show-upload-list="false"
+              @change="handleAvatarChange"
+            >
+              <button class="btn btn-sm btn-outline">{{$t('page.auth.profile.uploadAvatar')}}</button>
+            </Upload>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <ProfileBaseSetting
-    ref="profileBaseSettingRef"
-    :form-schema="formSchema"
-    @submit="handleSubmit"
-  />
 </template>

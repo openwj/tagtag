@@ -6,7 +6,16 @@
     "codeLogin": "Code Login",
     "qrcodeLogin": "Qr Code Login",
     "forgetPassword": "Forget Password",
-    "profile": { "title": "Profile" },
+    "profile": {
+      "title": "Profile",
+      "baseSettingTitle": "Basic Info",
+      "avatar": "Avatar",
+      "noAvatar": "No Avatar",
+      "securityTitle": "Security",
+      "passwordUpdated": "Password Updated",
+      "passwordUpdatedDesc": "Please keep your new password safe and update other devices."
+      ,"uploadAvatar": "Upload Avatar"
+    },
     "registerSuccess": "Registration successful, redirect in {0}s",
     "registerFail": "Registration failed",
     "usernameTip": "Please enter username",

@@ -6,7 +6,16 @@
     "codeLogin": "验证码登录",
     "qrcodeLogin": "二维码登录",
     "forgetPassword": "忘记密码",
-    "profile": { "title": "个人中心" },
+    "profile": {
+      "title": "个人中心",
+      "baseSettingTitle": "基础信息",
+      "avatar": "用户头像",
+      "noAvatar": "无头像",
+      "securityTitle": "安全设置",
+      "passwordUpdated": "密码已更新",
+      "passwordUpdatedDesc": "请妥善保管您的新密码，建议同时更新其他设备的登录信息。"
+      ,"uploadAvatar": "上传头像"
+    },
     "registerSuccess": "注册成功，{0}s 后跳转登录页",
     "registerFail": "注册失败",
     "usernameTip": "请输入用户名",

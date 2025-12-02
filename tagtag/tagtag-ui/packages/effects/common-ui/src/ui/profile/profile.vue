@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Props } from './types';
 
+import { computed } from 'vue';
+
 import { preferences } from '@vben-core/preferences';
 import {
   Card,
@@ -17,15 +19,24 @@ defineOptions({
   name: 'ProfileUI',
 });
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   title: '关于项目',
   tabs: () => [],
 });
 
 const tabsValue = defineModel<string>('modelValue');
+
+/**
+ * 生成页面描述文案（角色与用户名）
+ */
+const description = computed(() => {
+  const roles = props.userInfo?.roles?.join(' / ') || '';
+  const username = props.userInfo?.username || '';
+  return roles ? `${roles} · ${username}` : username;
+});
 </script>
 <template>
-  <Page auto-content-height>
+  <Page auto-content-height :title="props.title" :description="description">
     <div class="flex h-full w-full">
       <Card class="w-1/6 flex-none">
         <div class="mt-4 flex h-40 flex-col items-center justify-center gap-4">
@@ -47,7 +58,7 @@ const tabsValue = defineModel<string>('modelValue');
               v-for="tab in tabs"
               :key="tab.value"
               :value="tab.value"
-              class="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground h-12 justify-start"
+              class="data-[state=active]:bg-primary/90 data-[state=active]:text-primary-foreground h-12 justify-start hover:bg-primary/10"
             >
               {{ tab.label }}
             </TabsTrigger>
