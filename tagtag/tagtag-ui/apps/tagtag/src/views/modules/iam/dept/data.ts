@@ -3,22 +3,38 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 export const columns: VxeGridProps['columns'] = [
   { field: 'id', title: 'ID', visible: false },
-  { field: 'name', title: '部门名称', treeNode: true, width: 220 },
-  { field: 'code', title: '部门编码', width: 140 },
+  {
+    field: 'name',
+    title: '部门名称',
+    treeNode: true,
+    width: 220,
+    slots: { default: 'name' },
+  },
+  {
+    field: 'code',
+    title: '部门编码',
+    width: 140,
+    slots: { default: 'code' },
+  },
   { field: 'leader', title: '负责人', width: 120 },
   { field: 'phone', title: '联系电话', width: 140 },
   { field: 'email', title: '邮箱', width: 180 },
   { field: 'sort', title: '排序', width: 80 },
   { field: 'status', title: '状态', slots: { default: 'status' }, width: 90 },
-  { field: 'createTime', title: '创建时间', width: 160 },
-  { field: 'updateTime', title: '更新时间', width: 160 },
-  { field: 'remark', title: '备注' },
+  {
+    field: 'createTime',
+    title: '创建时间',
+    width: 180,
+    slots: { default: 'createTime' },
+  },
+  { field: 'updateTime', title: '更新时间', width: 160, visible: false },
+  { field: 'remark', title: '备注', showOverflow: 'tooltip' },
   {
     field: 'action',
     fixed: 'right',
     slots: { default: 'action' },
     title: '操作',
-    width: 120,
+    width: 150,
   },
 ];
 

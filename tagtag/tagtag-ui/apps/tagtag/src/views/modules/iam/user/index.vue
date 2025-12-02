@@ -540,10 +540,45 @@ function handleClearDept() {
               />
             </div>
           </template>
+
+          <template #gender="{ row }">
+            <Tag v-if="row.gender === 1" color="blue" :bordered="false">
+              <span class="icon-[lucide--user] mr-1 align-text-bottom"></span>男
+            </Tag>
+            <Tag v-else-if="row.gender === 2" color="pink" :bordered="false">
+              <span class="icon-[lucide--user-check] mr-1 align-text-bottom"></span>女
+            </Tag>
+            <Tag v-else color="default" :bordered="false">
+              <span class="icon-[lucide--help-circle] mr-1 align-text-bottom"></span>未知
+            </Tag>
+          </template>
+
+          <template #deptName="{ row }">
+            <Tag v-if="row.deptName" color="purple" :bordered="false">
+              {{ row.deptName }}
+            </Tag>
+            <span v-else class="text-gray-400">-</span>
+          </template>
+
+          <template #lastLoginTime="{ row }">
+            <span class="text-gray-500">{{
+              row.lastLoginTime?.replace('T', ' ') || '-'
+            }}</span>
+          </template>
+
+          <template #createTime="{ row }">
+            <span class="text-gray-500">{{
+              row.createTime?.replace('T', ' ')
+            }}</span>
+          </template>
+
           <template #userCell="{ row }">
             <div class="flex items-center gap-2">
-              <Avatar size="small">
-                {{ (row.username || '?').slice(0, 1).toUpperCase() }}
+              <Avatar
+                size="small"
+                class="bg-primary/10 text-primary border-primary/20 border"
+              >
+                {{ (row.nickname || row.username || '?').slice(0, 1).toUpperCase() }}
               </Avatar>
               <div class="flex flex-col leading-tight">
                 <span class="text-sm font-medium">{{ row.username }}</span>

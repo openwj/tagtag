@@ -4,7 +4,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { ref } from 'vue';
 
-import { Page, useVbenDrawer } from '@vben/common-ui';
+import { Page, useVbenDrawer, useVbenModal } from '@vben/common-ui';
 
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   Modal,
   Popconfirm,
   Switch,
+  Tag,
   Tooltip,
 } from 'ant-design-vue';
 
@@ -29,6 +30,7 @@ import {
 
 import { columns, searchFormSchema } from './data';
 import FormDrawer from './FormDrawer.vue';
+import RoleMenuModal from './RoleMenuModal.vue';
 
 const formOptions: VbenFormProps = {
   collapsed: true,
@@ -218,6 +220,10 @@ const [VFormDrawer, VFormDrawerApi] = useVbenDrawer({
   connectedComponent: FormDrawer,
 });
 
+const [VRoleMenuModal, RoleMenuModalApi] = useVbenModal({
+  connectedComponent: RoleMenuModal,
+});
+
 const handleAdd = () => {
   // 处理新增
   VFormDrawerApi.setData({
@@ -249,6 +255,11 @@ const handleEdit = (row: Record<string, any>) => {
     values: { ...row, isUpdate: true },
   });
   VFormDrawerApi.open();
+};
+
+const handleAuth = (row: Record<string, any>) => {
+  RoleMenuModalApi.setData({ ...row });
+  RoleMenuModalApi.open();
 };
 
 const handleSuccess = () => {
@@ -337,32 +348,40 @@ const handleSuccess = () => {
       </template>
       <template #name="{ row }">
         <div class="flex items-center gap-2">
-          <span class="icon-[lucide--user-circle] text-blue-500"></span>
-          <span>{{ row.name }}</span>
+          <span class="icon-[lucide--user-circle] text-primary text-lg"></span>
+          <span class="font-medium text-gray-800 dark:text-gray-200">{{
+            row.name
+          }}</span>
         </div>
       </template>
 
+      <template #code="{ row }">
+        <Tag
+          :color="row.roleType === 1 ? 'red' : 'blue'"
+          class="font-mono"
+          :bordered="false"
+        >
+          {{ row.code }}
+        </Tag>
+      </template>
+
       <template #roleType="{ row }">
-        <Button v-if="row.roleType === 1" type="primary" size="small">
-          <template #icon>
-            <span class="icon-[lucide--shield] mr-1"></span>
-          </template>
+        <Tag v-if="row.roleType === 1" color="error">
+          <span class="icon-[lucide--shield] mr-1 align-text-bottom"></span>
           系统角色
-        </Button>
+        </Tag>
 
-        <Button v-else-if="row.roleType === 2" type="default" size="small">
-          <template #icon>
-            <span class="icon-[lucide--briefcase] mr-1"></span>
-          </template>
+        <Tag v-else-if="row.roleType === 2" color="processing">
+          <span class="icon-[lucide--briefcase] mr-1 align-text-bottom"></span>
           业务角色
-        </Button>
+        </Tag>
 
-        <Button v-else size="small">
-          <template #icon>
-            <span class="icon-[lucide--help-circle] mr-1"></span>
-          </template>
+        <Tag v-else color="default">
+          <span
+            class="icon-[lucide--help-circle] mr-1 align-text-bottom"
+          ></span>
           未知
-        </Button>
+        </Tag>
       </template>
 
       <template #status="{ row }">
@@ -379,8 +398,32 @@ const handleSuccess = () => {
           "
         />
       </template>
+
+      <template #createTime="{ row }">
+        <span class="text-gray-500">{{ row.createTime?.replace('T', ' ') }}</span>
+      </template>
+
       <template #action="{ row }">
         <div class="flex items-center justify-center gap-0.5">
+          <Tooltip title="分配权限">
+            <Button
+              class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+              ghost
+              shape="circle"
+              size="small"
+              type="primary"
+              v-access:code="'role:assignMenu'"
+              @click="handleAuth(row)"
+              aria-label="分配权限"
+            >
+              <template #icon>
+                <div class="icon-[lucide--shield-check] text-xs"></div>
+              </template>
+            </Button>
+          </Tooltip>
+
+          <Divider type="vertical" class="mx-1 h-4" />
+
           <Tooltip title="编辑角色">
             <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
@@ -430,5 +473,6 @@ const handleSuccess = () => {
     </Grid>
 
     <VFormDrawer @success="handleSuccess" />
+    <VRoleMenuModal @success="handleSuccess" />
   </Page>
 </template>

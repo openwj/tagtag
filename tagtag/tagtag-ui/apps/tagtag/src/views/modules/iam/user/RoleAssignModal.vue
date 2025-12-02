@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 // import { SearchOutlined } from '@ant-design/icons-vue';
 import { useVbenModal } from '@vben/common-ui';
 
-import { Alert, Spin, Transfer } from 'ant-design-vue';
+import { Alert, Spin, Tag, Transfer } from 'ant-design-vue';
 
 interface Props {
   user?: null | Record<string, any>;
@@ -175,26 +175,43 @@ defineExpose({
   >
     <!-- 用户信息显示 -->
     <div v-if="!isBatch && user" class="mb-4">
-      <div class="mb-2 text-sm text-gray-600">为用户分配角色：</div>
-
-      <Alert type="info">
+      <Alert type="info" show-icon>
+        <template #message>
+          <span class="font-medium">正在为用户 "{{ user.username }}" 分配角色</span>
+        </template>
         <template #description>
-          <div><strong>用户名：</strong>{{ user.username }}</div>
-          <div><strong>姓名：</strong>{{ user.nickname }}</div>
-          <div><strong>部门：</strong>{{ user.deptName }}</div>
+          <div class="mt-2 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+            <div class="flex items-center gap-2">
+              <span class="text-gray-500">姓名：</span>
+              <span>{{ user.nickname }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-gray-500">部门：</span>
+              <Tag v-if="user.deptName" color="purple" :bordered="false">{{
+                user.deptName
+              }}</Tag>
+              <span v-else class="text-gray-400">-</span>
+            </div>
+          </div>
         </template>
       </Alert>
     </div>
 
     <!-- 批量用户提示 -->
     <div v-if="isBatch" class="mb-4">
-      <div class="mb-2 text-sm text-gray-600">批量分配角色：</div>
-      <div class="rounded bg-blue-50 p-3">
-        <div><strong>选中用户数量：</strong>{{ userCount }} 个</div>
-        <div class="mt-1 text-xs text-gray-500">
-          将为所有选中的用户分配相同的角色
-        </div>
-      </div>
+      <Alert type="warning" show-icon>
+        <template #message>
+          <span class="font-medium">批量分配模式</span>
+        </template>
+        <template #description>
+          <div class="mt-1">
+            已选中 <span class="font-bold text-primary">{{ userCount }}</span> 个用户，
+            <span class="text-xs text-gray-500">
+              所有选中用户的角色将被重置为以下选择的角色。
+            </span>
+          </div>
+        </template>
+      </Alert>
     </div>
 
     <!-- 内置搜索由 Transfer 提供 -->

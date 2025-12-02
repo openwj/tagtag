@@ -243,12 +243,12 @@ watch(
   <div class="w-full">
     <div class="mb-3 flex items-center justify-between">
       <span class="text-sm font-medium">权限分配</span>
-      <div class="flex w-3/4 items-center gap-2">
+      <div class="ml-4 flex flex-1 items-center gap-2 justify-end">
         <Input
           v-model:value="searchText"
           size="small"
           placeholder="搜索菜单/编码"
-          class="flex-1"
+          class="max-w-xs"
         />
         <Tooltip :title="checkStrictly ? '父子独立' : '父子联动'">
           <Button size="small" @click="toggleCheckStrictly">
@@ -286,7 +286,7 @@ watch(
       </div>
     </div>
 
-    <div class="rounded-md border p-4">
+    <div class="p-1">
       <Spin :spinning="loading">
         <Tree
           v-model:checked-keys="checkedKeys"
@@ -302,10 +302,28 @@ watch(
           <template #title="{ title, menuType, menuCode }">
             <div class="flex items-center gap-2">
               <span>{{ title }}</span>
-              <Tag v-if="menuType === 0" color="blue">目录</Tag>
-              <Tag v-else-if="menuType === 1" color="green">菜单</Tag>
-              <Tag v-else-if="menuType === 2" color="orange">按钮</Tag>
-              <span class="text-xs text-gray-500">{{ menuCode }}</span>
+              <Tag
+                v-if="menuType === 0"
+                color="processing"
+                :bordered="false"
+                class="m-0"
+                >目录</Tag
+              >
+              <Tag
+                v-else-if="menuType === 1"
+                color="success"
+                :bordered="false"
+                class="m-0"
+                >菜单</Tag
+              >
+              <Tag
+                v-else-if="menuType === 2"
+                color="warning"
+                :bordered="false"
+                class="m-0"
+                >按钮</Tag
+              >
+              <span class="text-xs text-gray-400">{{ menuCode }}</span>
             </div>
           </template>
         </Tree>

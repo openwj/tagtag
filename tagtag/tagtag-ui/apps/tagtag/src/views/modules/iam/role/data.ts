@@ -13,7 +13,13 @@ export const columns: VxeGridProps['columns'] = [
     slots: { default: 'name' },
     sortable: true,
   },
-  { field: 'code', title: '角色编码', sortable: true },
+  {
+    field: 'code',
+    title: '角色编码',
+    sortable: true,
+    slots: { default: 'code' },
+    minWidth: 120,
+  },
   {
     field: 'roleType',
     title: '角色类型',
@@ -27,13 +33,20 @@ export const columns: VxeGridProps['columns'] = [
     slots: { default: 'status' },
     sortable: true,
   },
+  {
+    field: 'createTime',
+    title: '创建时间',
+    sortable: true,
+    slots: { default: 'createTime' },
+    width: 160,
+  },
   { field: 'remark', title: '描述', showOverflow: 'tooltip' },
   {
     field: 'action',
     fixed: 'right',
     slots: { default: 'action' },
     title: '操作',
-    width: 120,
+    width: 150,
   },
 ];
 

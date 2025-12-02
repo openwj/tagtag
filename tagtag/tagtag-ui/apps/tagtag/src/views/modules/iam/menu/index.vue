@@ -476,25 +476,35 @@ const handleCollapseAllMenus = async () => {
         />
       </template>
       <template #type="{ row }">
-        <Tag color="orange" v-if="row.menuType === 0">
-          <span class="icon-[lucide--folder] mr-1"></span>
+        <Tag color="processing" v-if="row.menuType === 0" :bordered="false">
+          <span class="icon-[lucide--folder] mr-1 align-text-bottom"></span>
           目录
         </Tag>
-        <Tag color="blue" v-else-if="row.menuType === 1">
-          <span class="icon-[lucide--file-text] mr-1"></span>
+        <Tag color="success" v-else-if="row.menuType === 1" :bordered="false">
+          <span class="icon-[lucide--file-text] mr-1 align-text-bottom"></span>
           菜单
         </Tag>
-        <Tag color="green" v-else-if="row.menuType === 2">
-          <span class="icon-[lucide--zap] mr-1"></span>
+        <Tag color="warning" v-else-if="row.menuType === 2" :bordered="false">
+          <span class="icon-[lucide--zap] mr-1 align-text-bottom"></span>
           按钮
         </Tag>
       </template>
       <template #external="{ row }">
-        <Tag color="red" v-if="row.isExternal === 1" class="flex items-center">
+        <Tag
+          color="red"
+          v-if="row.isExternal === 1"
+          :bordered="false"
+          class="flex w-max items-center"
+        >
           <span class="icon-[lucide--external-link] mr-1"></span>
           外链
         </Tag>
-        <Tag color="default" v-else class="flex items-center">
+        <Tag
+          color="default"
+          v-else
+          :bordered="false"
+          class="flex w-max items-center"
+        >
           <span class="icon-[lucide--home] mr-1"></span>
           内部
         </Tag>

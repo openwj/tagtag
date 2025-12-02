@@ -319,29 +319,38 @@ defineExpose({ clearSelection });
           <!-- 自定义节点标题，支持搜索高亮 -->
           <template #title="nodeData">
             <!-- 从节点数据中获取部门名称 -->
-            <span
-              v-if="
-                searchValue &&
-                nodeData.title &&
-                nodeData.title.toLowerCase().includes(searchValue.toLowerCase())
-              "
-            >
-              <template
-                v-for="(part, index) in nodeData.title.split(
-                  new RegExp(`(${searchValue})`, 'gi'),
-                )"
-                :key="index"
+            <div class="flex items-center gap-1.5">
+              <span
+                class="icon-[lucide--building-2] text-blue-500"
+                v-if="!nodeData.children || nodeData.children.length === 0"
+              ></span>
+              <span class="icon-[lucide--folder] text-yellow-500" v-else></span>
+              <span
+                v-if="
+                  searchValue &&
+                  nodeData.title &&
+                  nodeData.title
+                    .toLowerCase()
+                    .includes(searchValue.toLowerCase())
+                "
               >
-                <span
-                  v-if="part.toLowerCase() === searchValue.toLowerCase()"
-                  class="rounded bg-yellow-200 px-1 text-yellow-800"
+                <template
+                  v-for="(part, index) in nodeData.title.split(
+                    new RegExp(`(${searchValue})`, 'gi'),
+                  )"
+                  :key="index"
                 >
-                  {{ part }}
-                </span>
-                <span v-else>{{ part }}</span>
-              </template>
-            </span>
-            <span v-else>{{ nodeData.title || '未知部门' }}</span>
+                  <span
+                    v-if="part.toLowerCase() === searchValue.toLowerCase()"
+                    class="rounded bg-yellow-200 px-1 text-yellow-800"
+                  >
+                    {{ part }}
+                  </span>
+                  <span v-else>{{ part }}</span>
+                </template>
+              </span>
+              <span v-else>{{ nodeData.title || '未知部门' }}</span>
+            </div>
           </template>
         </Tree>
       </Spin>
