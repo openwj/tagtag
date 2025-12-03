@@ -1,11 +1,16 @@
+-- 系统管理目录 
+INSERT INTO iam_menu (parent_id, menu_name, menu_code, path, component, icon, sort, status, menu_type, is_hidden, is_external, external_url, remark, create_time) 
+SELECT 0, '系统管理', 'system', '/system', NULL, 'lucide:settings', 90, 1, 0, 0, 0, NULL, '系统管理目录', CURRENT_TIMESTAMP 
+WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='system'); 
 
 -- 文件管理页面（挂载到系统管理目录，system）
 -- 先尝试查找 system 的 ID，如果不存在（如 system 模块未初始化），则暂时挂载到根目录或创建一个 system
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, path, component, icon, sort, status, menu_type, is_hidden, is_external, external_url, remark, is_keepalive, create_time, create_by, update_by)
 SELECT 
-    IFNULL((SELECT id FROM iam_menu WHERE menu_code='system'), 0), 
+    (SELECT id FROM iam_menu WHERE menu_code='system'), 
     '文件管理', 'system:file', '/system/file', 'modules/storage/file/index', 'lucide:folder', 60, 1, 1, 0, 0, NULL, '文件管理页面', 0, CURRENT_TIMESTAMP, 0, 0
-WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='system:file');
+WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='system:file')
+  AND EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='system');
 
 -- 文件管理按钮权限（挂载到 system:file）
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, remark, is_keepalive, create_time, create_by, update_by)

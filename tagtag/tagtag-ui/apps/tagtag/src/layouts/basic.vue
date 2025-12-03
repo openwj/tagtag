@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { NotificationItem } from '@vben/layouts';
 
+import type { MessageItem } from '#/api/modules/system/message';
+
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -18,17 +20,15 @@ import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
-import { $t } from '#/locales';
-import { useAuthStore } from '#/store';
-import LoginForm from '#/views/_core/authentication/login.vue';
 import {
   clearAllMessages,
-  deleteMessage,
   getMessageList,
   markAllMessageRead,
   markMessageRead,
-  type MessageItem,
 } from '#/api/modules/system/message';
+import { $t } from '#/locales';
+import { useAuthStore } from '#/store';
+import LoginForm from '#/views/_core/authentication/login.vue';
 
 const notifications = ref<NotificationItem[]>([]);
 
@@ -52,7 +52,7 @@ const loadMessages = async () => {
 
 // 初始化加载并轮询
 loadMessages();
-const timer = setInterval(loadMessages, 60000); // 每分钟轮询一次
+const timer = setInterval(loadMessages, 60_000); // 每分钟轮询一次
 
 onUnmounted(() => {
   clearInterval(timer);
@@ -75,33 +75,33 @@ const menus = computed(() => [
     icon: 'lucide:user',
     text: $t('page.auth.profile.title'),
   },
-  {
-    handler: () => {
-      openWindow(VBEN_DOC_URL, {
-        target: '_blank',
-      });
-    },
-    icon: BookOpenText,
-    text: $t('ui.widgets.document'),
-  },
-  {
-    handler: () => {
-      openWindow(VBEN_GITHUB_URL, {
-        target: '_blank',
-      });
-    },
-    icon: SvgGithubIcon,
-    text: 'GitHub',
-  },
-  {
-    handler: () => {
-      openWindow(`${VBEN_GITHUB_URL}/issues`, {
-        target: '_blank',
-      });
-    },
-    icon: CircleHelp,
-    text: $t('ui.widgets.qa'),
-  },
+  // {
+  //   handler: () => {
+  //     openWindow(VBEN_DOC_URL, {
+  //       target: '_blank',
+  //     });
+  //   },
+  //   icon: BookOpenText,
+  //   text: $t('ui.widgets.document'),
+  // },
+  // {
+  //   handler: () => {
+  //     openWindow(VBEN_GITHUB_URL, {
+  //       target: '_blank',
+  //     });
+  //   },
+  //   icon: SvgGithubIcon,
+  //   text: 'GitHub',
+  // },
+  // {
+  //   handler: () => {
+  //     openWindow(`${VBEN_GITHUB_URL}/issues`, {
+  //       target: '_blank',
+  //     });
+  //   },
+  //   icon: CircleHelp,
+  //   text: $t('ui.widgets.qa'),
+  // },
 ]);
 
 const avatar = computed(() => {
@@ -150,31 +150,39 @@ watch(
       <Notification
         :dot="showDot"
         :notifications="notifications"
-        @clear="async () => {
-          await clearAllMessages();
-          notifications = [];
-        }"
-        @make-all-read="async () => {
-          await markAllMessageRead();
-          notifications.forEach((item) => (item.isRead = true));
-        }"
-        @read="async (item: any) => {
-          if (!item.isRead) {
-            await markMessageRead(item.id);
-            item.isRead = true;
+        @clear="
+          async () => {
+            await clearAllMessages();
+            notifications = [];
           }
-          if (item.link) {
-            if (item.link.startsWith('http')) {
-              window.open(item.link, '_blank');
-            } else {
-              router.push(item.link);
+        "
+        @make-all-read="
+          async () => {
+            await markAllMessageRead();
+            notifications.forEach((item) => (item.isRead = true));
+          }
+        "
+        @read="
+          async (item: any) => {
+            if (!item.isRead) {
+              await markMessageRead(item.id);
+              item.isRead = true;
+            }
+            if (item.link) {
+              if (item.link.startsWith('http')) {
+                globalThis.window.open(item.link, '_blank');
+              } else {
+                router.push(item.link);
+              }
             }
           }
-        }"
-        @view-all="() => {
-          // 跳转到完整的消息中心页面
-          router.push('/system/message/list');
-        }"
+        "
+        @view-all="
+          () => {
+            // 跳转到完整的消息中心页面
+            router.push('/system/message/list');
+          }
+        "
       />
     </template>
     <template #extra>

@@ -81,7 +81,7 @@ const [Modal, modalApi] = useVbenModal({
       </Alert>
 
       <div
-        class="flex h-[600px] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+        class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
       >
         <PermissionTree
           v-model:value="checkedMenuIds"

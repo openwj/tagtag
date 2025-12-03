@@ -26,7 +26,6 @@ import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.CaptchaService;
 import dev.tagtag.contract.iam.dto.MenuDTO;
-import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import dev.tagtag.contract.iam.api.MenuApi;
 import dev.tagtag.contract.iam.api.RoleApi;
 import dev.tagtag.contract.auth.dto.RouteRecordStringComponentDTO;
