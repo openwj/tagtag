@@ -13,3 +13,36 @@ CREATE TABLE IF NOT EXISTS sys_message (
     update_by BIGINT DEFAULT 0 COMMENT '更新人',
     deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统消息表';
+
+-- 字典类型表
+CREATE TABLE IF NOT EXISTS sys_dict_type (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    name VARCHAR(100) DEFAULT '' COMMENT '字典名称',
+    type VARCHAR(100) DEFAULT '' COMMENT '字典类型',
+    status TINYINT(1) DEFAULT 1 COMMENT '状态（1正常 0停用）',
+    remark VARCHAR(500) DEFAULT '' COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    create_by BIGINT DEFAULT 0 COMMENT '创建人',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    update_by BIGINT DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字典类型表';
+
+-- 字典数据表
+CREATE TABLE IF NOT EXISTS sys_dict_data (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键',
+    dict_sort INT DEFAULT 0 COMMENT '字典排序',
+    dict_label VARCHAR(100) DEFAULT '' COMMENT '字典标签',
+    dict_value VARCHAR(100) DEFAULT '' COMMENT '字典键值',
+    dict_type VARCHAR(100) DEFAULT '' COMMENT '字典类型',
+    css_class VARCHAR(100) DEFAULT NULL COMMENT '样式属性',
+    list_class VARCHAR(100) DEFAULT NULL COMMENT '回显样式',
+    is_default CHAR(1) DEFAULT 'N' COMMENT '是否默认（Y是 N否）',
+    status TINYINT(1) DEFAULT 1 COMMENT '状态（1正常 0停用）',
+    remark VARCHAR(500) DEFAULT '' COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    create_by BIGINT DEFAULT 0 COMMENT '创建人',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    update_by BIGINT DEFAULT 0 COMMENT '更新人',
+    deleted TINYINT(1) DEFAULT 0 COMMENT '逻辑删除'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='字典数据表';
