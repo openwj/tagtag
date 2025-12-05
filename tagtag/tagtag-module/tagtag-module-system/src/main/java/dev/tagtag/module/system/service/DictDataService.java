@@ -48,4 +48,10 @@ public interface DictDataService {
      * @param id ID
      */
     void delete(Long id);
+
+    /**
+     * 批量删除字典数据
+     * @param ids ID列表
+     */
+    void deleteBatch(List<Long> ids);
 }

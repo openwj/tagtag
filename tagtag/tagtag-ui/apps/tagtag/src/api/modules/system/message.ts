@@ -53,7 +53,10 @@ export function getMessagePage(query: Partial<MessageItem>, page: PageQuery) {
  * @param query 查询条件
  * @param page 分页参数
  */
-export function getAllMessagePage(query: Partial<MessageItem>, page: PageQuery) {
+export function getAllMessagePage(
+  query: Partial<MessageItem>,
+  page: PageQuery,
+) {
   return requestClient.post<PageResult<MessageItem>>(`${Api.Base}/page-all`, {
     query,
     page,

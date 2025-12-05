@@ -59,11 +59,34 @@ public class DictDataController {
     }
 
     /**
+     * 批量删除字典数据（DELETE）
+     * @param ids 待删除的字典数据 ID 列表
+     * @return 空
+     */
+    @DeleteMapping
+    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
+        dictDataService.deleteBatch(ids);
+        return Result.ok();
+    }
+
+    /**
      * 字典数据分页请求体
      */
     @lombok.Data
     public static class DictDataPageRequest {
         private DictItemQueryDTO query;
         private PageQuery page;
+    }
+
+    /**
+     * 批量删除字典数据（POST 兼容接口）
+     * 兼容部分网关/代理不支持 DELETE 携带请求体的场景
+     * @param ids 待删除的字典数据 ID 列表
+     * @return 空
+     */
+    @PostMapping("/batch-delete")
+    public Result<Void> batchDeleteByPost(@RequestBody List<Long> ids) {
+        dictDataService.deleteBatch(ids);
+        return Result.ok();
     }
 }

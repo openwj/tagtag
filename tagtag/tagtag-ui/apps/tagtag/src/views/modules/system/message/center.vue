@@ -3,6 +3,8 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeGridProps } from '#/adapter/vxe-table';
 import type { MessageItem } from '#/api/modules/system/message';
 
+import { useRouter } from 'vue-router';
+
 import { Page } from '@vben/common-ui';
 
 import {
@@ -15,8 +17,6 @@ import {
   Tag,
   Tooltip,
 } from 'ant-design-vue';
-
-import { useRouter } from 'vue-router';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {

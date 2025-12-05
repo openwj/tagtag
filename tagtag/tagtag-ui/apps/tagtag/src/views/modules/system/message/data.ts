@@ -1,7 +1,3 @@
-import { h } from 'vue';
-
-import { Tag } from 'ant-design-vue';
-
 import type { VxeGridProps } from '#/adapter/vxe-table';
 
 /**

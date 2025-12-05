@@ -219,7 +219,10 @@ const handleView = (row: MessageItem) => {
       </template>
 
       <template #type="{ row }">
-        <Tag :color="MessageTypeMap[row.type]?.color || 'default'" :bordered="false">
+        <Tag
+          :color="MessageTypeMap[row.type]?.color || 'default'"
+          :bordered="false"
+        >
           {{ MessageTypeMap[row.type]?.text || row.type }}
         </Tag>
       </template>
@@ -242,11 +245,7 @@ const handleView = (row: MessageItem) => {
             @confirm="handleDelete(row.id)"
           >
             <Tooltip title="删除">
-              <Button
-                type="link"
-                size="small"
-                danger
-              >
+              <Button type="link" size="small" danger>
                 <span class="icon-[lucide--trash-2] text-lg"></span>
               </Button>
             </Tooltip>

@@ -15,5 +15,5 @@ public class DictTypeDTO {
     private String code;
     private String name;
     private Integer status;
+    private String remark;
 }
-

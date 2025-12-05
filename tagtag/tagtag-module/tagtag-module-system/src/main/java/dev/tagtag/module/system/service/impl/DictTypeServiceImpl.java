@@ -11,6 +11,8 @@ import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.system.entity.DictType;
+import dev.tagtag.module.system.entity.DictData;
+import dev.tagtag.module.system.mapper.DictDataMapper;
 import dev.tagtag.module.system.mapper.DictTypeMapper;
 import dev.tagtag.module.system.service.DictTypeService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class DictTypeServiceImpl extends ServiceImpl<DictTypeMapper, DictType> implements DictTypeService {
 
     private final PageProperties pageProperties;
+    private final DictDataMapper dictDataMapper;
 
     @Override
     public PageResult<DictTypeDTO> page(DictTypeQueryDTO query, PageQuery pageQuery) {
@@ -85,7 +88,28 @@ public class DictTypeServiceImpl extends ServiceImpl<DictTypeMapper, DictType> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        this.removeById(id);
+        DictType dictType = super.getById(id);
+        if (dictType != null) {
+            dictDataMapper.delete(new LambdaQueryWrapper<DictData>()
+                    .eq(DictData::getDictType, dictType.getType()));
+            this.removeById(id);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    /**
+     * 批量删除字典类型（级联清理字典数据）
+     * @param ids 字典类型 ID 列表
+     */
+    public void deleteBatch(List<Long> ids) {
+        List<DictType> list = this.listByIds(ids);
+        if (!list.isEmpty()) {
+            List<String> types = list.stream().map(DictType::getType).collect(Collectors.toList());
+            dictDataMapper.delete(new LambdaQueryWrapper<DictData>()
+                    .in(DictData::getDictType, types));
+            this.removeByIds(ids);
+        }
     }
 
     @Override

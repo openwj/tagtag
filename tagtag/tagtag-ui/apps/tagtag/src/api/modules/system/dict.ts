@@ -78,6 +78,10 @@ export function deleteDictType(id: string) {
   return requestClient.delete(`${Api.Type}/${id}`);
 }
 
+export function deleteBatchDictType(ids: string[]) {
+  return requestClient.delete(Api.Type, { data: ids });
+}
+
 export function refreshDictCache() {
   return requestClient.post(`${Api.Type}/refresh`);
 }
@@ -107,4 +111,8 @@ export function updateDictData(data: Partial<DictData>) {
 
 export function deleteDictData(id: string) {
   return requestClient.delete(`${Api.Data}/${id}`);
+}
+
+export function deleteBatchDictData(ids: string[]) {
+  return requestClient.delete(Api.Data, { data: ids });
 }

@@ -58,6 +58,29 @@ public class DictTypeController {
         return Result.ok();
     }
 
+    /**
+     * 批量删除字典类型（DELETE）
+     * @param ids 待删除的字典类型 ID 列表
+     * @return 空
+     */
+    @DeleteMapping
+    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
+        dictTypeService.deleteBatch(ids);
+        return Result.ok();
+    }
+
+    /**
+     * 批量删除字典类型（POST 兼容接口）
+     * 兼容部分网关/代理不支持 DELETE 携带请求体的场景
+     * @param ids 待删除的字典类型 ID 列表
+     * @return 空
+     */
+    @PostMapping("/batch-delete")
+    public Result<Void> batchDeleteByPost(@RequestBody List<Long> ids) {
+        dictTypeService.deleteBatch(ids);
+        return Result.ok();
+    }
+
     @PostMapping("/refresh")
     public Result<Void> refreshCache() {
         dictTypeService.refreshCache();

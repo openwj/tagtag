@@ -29,16 +29,25 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
     private final PageProperties pageProperties;
 
     @Override
+    /**
+     * 字典数据分页查询
+     * 根据类型、标签、状态进行筛选，状态枚举转换为整型编码
+     * @param query 查询条件（允许为 null）
+     * @param pageQuery 分页参数
+     * @return 分页结果
+     */
     public PageResult<DictItemDTO> page(DictItemQueryDTO query, PageQuery pageQuery) {
         LambdaQueryWrapper<DictData> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.hasText(query.getTypeCode())) {
-            wrapper.eq(DictData::getDictType, query.getTypeCode());
-        }
-        if (StringUtils.hasText(query.getItemName())) {
-            wrapper.like(DictData::getDictLabel, query.getItemName());
-        }
-        if (query.getStatus() != null) {
-            wrapper.eq(DictData::getStatus, query.getStatus());
+        if (query != null) {
+            if (StringUtils.hasText(query.getTypeCode())) {
+                wrapper.eq(DictData::getDictType, query.getTypeCode());
+            }
+            if (StringUtils.hasText(query.getItemName())) {
+                wrapper.like(DictData::getDictLabel, query.getItemName());
+            }
+            if (query.getStatus() != null) {
+                wrapper.eq(DictData::getStatus, query.getStatus().getCode());
+            }
         }
         wrapper.orderByAsc(DictData::getDictSort);
 
@@ -95,6 +104,16 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         this.removeById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    /**
+     * 批量删除字典数据
+     * @param ids 字典数据 ID 列表
+     */
+    public void deleteBatch(List<Long> ids) {
+        this.removeByIds(ids);
     }
 
     private DictItemDTO toDTO(DictData entity) {

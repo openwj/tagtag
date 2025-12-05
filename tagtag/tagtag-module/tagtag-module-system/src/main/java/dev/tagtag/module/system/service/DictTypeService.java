@@ -47,6 +47,12 @@ public interface DictTypeService {
      * @param id ID
      */
     void delete(Long id);
+
+    /**
+     * 批量删除字典类型
+     * @param ids ID列表
+     */
+    void deleteBatch(List<Long> ids);
     
     /**
      * 刷新缓存

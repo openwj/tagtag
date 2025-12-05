@@ -3,7 +3,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 export const typeColumns: VxeGridProps['columns'] = [
   { type: 'checkbox', width: 50 },
-  { field: 'name', title: '字典名称', minWidth: 150 },
+  { field: 'name', title: '字典名称', minWidth: 150, slots: { default: 'name' } },
   { field: 'code', title: '字典类型', minWidth: 150 },
   { field: 'status', title: '状态', width: 100, slots: { default: 'status' } },
   { field: 'remark', title: '备注', minWidth: 150 },
