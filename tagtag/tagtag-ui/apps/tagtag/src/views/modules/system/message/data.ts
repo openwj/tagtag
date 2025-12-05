@@ -97,7 +97,6 @@ export const searchFormSchema = [
     fieldName: 'isRead',
     label: '状态',
     component: 'Select',
-    defaultValue: false,
     componentProps: {
       options: [
         { label: '全部', value: undefined },
