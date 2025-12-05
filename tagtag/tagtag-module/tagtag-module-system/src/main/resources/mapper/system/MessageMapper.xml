@@ -39,6 +39,12 @@
                 <if test="q.receiverName != null and q.receiverName != ''">
                     AND r.nickname LIKE CONCAT('%', #{q.receiverName}, '%')
                 </if>
+                <if test="q.receiverId != null">
+                    AND m.receiver_id = #{q.receiverId}
+                </if>
+                <if test="q.senderId != null">
+                    AND m.sender_id = #{q.senderId}
+                </if>
             </if>
         </where>
         ORDER BY m.create_time DESC

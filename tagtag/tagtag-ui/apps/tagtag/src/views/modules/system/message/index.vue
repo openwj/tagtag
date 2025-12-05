@@ -23,6 +23,8 @@ import {
   deleteMessage,
   deleteMessageBatch,
   getAllMessagePage,
+  markMessageReadBatch,
+  markMessageUnreadBatch,
 } from '#/api/modules/system/message';
 
 import { columns, MessageTypeMap, searchFormSchema } from './data';
@@ -161,6 +163,46 @@ const handleView = (row: MessageItem) => {
                 >
                   <span class="icon-[lucide--trash-2] mr-1"></span>
                   删除
+                </Menu.Item>
+                <Menu.Item
+                  key="batch-read"
+                  @click="
+                    async () => {
+                      const rows = getSelectedRows();
+                      if (rows.length === 0) {
+                        message.warning('请勾选要操作的消息');
+                        return;
+                      }
+                      const ids = rows.map((r: any) => r.id);
+                      await markMessageReadBatch(ids);
+                      message.success('已标记为已读');
+                      gridApi.grid?.clearCheckboxRow();
+                      gridApi.reload();
+                    }
+                  "
+                >
+                  <span class="icon-[lucide--check-circle] mr-1"></span>
+                  标记已读
+                </Menu.Item>
+                <Menu.Item
+                  key="batch-unread"
+                  @click="
+                    async () => {
+                      const rows = getSelectedRows();
+                      if (rows.length === 0) {
+                        message.warning('请勾选要操作的消息');
+                        return;
+                      }
+                      const ids = rows.map((r: any) => r.id);
+                      await markMessageUnreadBatch(ids);
+                      message.success('已标记为未读');
+                      gridApi.grid?.clearCheckboxRow();
+                      gridApi.reload();
+                    }
+                  "
+                >
+                  <span class="icon-[lucide--circle] mr-1"></span>
+                  标记未读
                 </Menu.Item>
               </Menu>
             </template>

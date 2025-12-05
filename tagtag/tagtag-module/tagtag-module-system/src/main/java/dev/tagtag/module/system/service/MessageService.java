@@ -9,9 +9,10 @@ public interface MessageService {
     /**
      * 获取用户消息列表
      * @param userId 用户ID
+     * @param isRead 是否已读（可选）
      * @return 消息列表
      */
-    List<MessageDTO> listByUserId(Long userId);
+    List<MessageDTO> listByUserId(Long userId, Boolean isRead);
 
     /**
      * 分页获取用户消息列表
@@ -47,6 +48,18 @@ public interface MessageService {
      * @param ids 消息ID列表
      */
     void markReadBatch(List<Long> ids);
+
+    /**
+     * 标记未读
+     * @param id 消息ID
+     */
+    void markUnread(Long id);
+
+    /**
+     * 批量标记未读
+     * @param ids 消息ID列表
+     */
+    void markUnreadBatch(List<Long> ids);
 
     /**
      * 全部已读

@@ -2,6 +2,7 @@ package dev.tagtag.module.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
@@ -30,10 +31,13 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     private final PageProperties pageProperties;
 
     @Override
-    public List<MessageDTO> listByUserId(Long userId) {
+    public List<MessageDTO> listByUserId(Long userId, Boolean isRead) {
         // 构造一个临时的 Page 对象，pageSize 设置大一点或者不分页（MyBatis Plus 分页插件如果不传 page 参数就是列表查询）
         // 这里为了复用 Mapper XML 里的关联查询逻辑，我们直接构造一个 MessageDTO 作为查询条件
-        MessageDTO query = MessageDTO.builder().receiverId(userId).build();
+        MessageDTO query = MessageDTO.builder()
+                .receiverId(userId)
+                .isRead(isRead)
+                .build();
         
         // 注意：MessageMapper.selectPageDTO 是分页查询，如果只是想查列表，可以传一个不限制条数的 Page 对象，或者单独写一个 listDTO 的 Mapper 方法
         // 这里简单起见，使用分页查询接口，但取较大页大小，或者直接调用 baseMapper.selectListDTO(query) 如果有的话
@@ -42,7 +46,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         
         // 由于 Mapper 目前只有 selectPageDTO，我们暂时用分页模拟列表，或者在 Mapper 增加 selectListDTO
         // 鉴于需要返回 List<MessageDTO>，且数据量可能不大，暂时用分页查第一页大数量
-        IPage<MessageDTO> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 1000);
+        IPage<MessageDTO> page = new Page<>(1, 1000);
         return baseMapper.selectPageDTO(page, query).getRecords();
     }
 
@@ -97,6 +101,27 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void markUnread(Long id) {
+        this.lambdaUpdate()
+            .eq(Message::getId, id)
+            .set(Message::getIsRead, 0)
+            .update();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void markUnreadBatch(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        this.lambdaUpdate()
+            .in(Message::getId, ids)
+            .set(Message::getIsRead, 0)
+            .update();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void markAllRead(Long userId) {
         this.lambdaUpdate()
             .eq(Message::getReceiverId, userId)
@@ -143,17 +168,5 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         entity.setDeleted(0);
         entity.setCreateTime(LocalDateTime.now());
         this.save(entity);
-    }
-
-    private MessageDTO toDTO(Message entity) {
-        MessageDTO dto = new MessageDTO();
-        BeanUtils.copyProperties(entity, dto);
-        dto.setIsRead(entity.getIsRead() != null && entity.getIsRead() == 1);
-        if (entity.getCreateTime() != null) {
-            dto.setCreateTime(DF.format(entity.getCreateTime()));
-        }
-        // 模拟头像，实际可以根据 senderId 查询用户头像
-        dto.setAvatar("https://avatar.vercel.sh/" + (entity.getSenderId() == null ? "sys" : entity.getSenderId()));
-        return dto;
     }
 }

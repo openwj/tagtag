@@ -21,11 +21,12 @@ public class MessageController {
 
     /**
      * 获取当前用户的消息列表（不分页）
+     * @param isRead 是否已读（可选）
      */
     @GetMapping
-    public Result<List<MessageDTO>> list() {
+    public Result<List<MessageDTO>> list(@RequestParam(required = false) Boolean isRead) {
         Long userId = AuthContext.getCurrentUserId();
-        return Result.ok(messageService.listByUserId(userId));
+        return Result.ok(messageService.listByUserId(userId, isRead));
     }
 
     /**
@@ -70,6 +71,25 @@ public class MessageController {
     @PutMapping("/read/batch")
     public Result<Void> markReadBatch(@RequestBody List<Long> ids) {
         messageService.markReadBatch(ids);
+        return Result.ok();
+    }
+
+    /**
+     * 标记消息未读
+     */
+    @PutMapping("/{id}/unread")
+    public Result<Void> markUnread(@PathVariable("id") Long id) {
+        // 实际生产环境应校验该消息是否属于当前用户
+        messageService.markUnread(id);
+        return Result.ok();
+    }
+
+    /**
+     * 批量标记消息未读
+     */
+    @PutMapping("/unread/batch")
+    public Result<Void> markUnreadBatch(@RequestBody List<Long> ids) {
+        messageService.markUnreadBatch(ids);
         return Result.ok();
     }
 

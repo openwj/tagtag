@@ -31,8 +31,8 @@ enum Api {
 /**
  * 获取消息列表（不分页）
  */
-export function getMessageList() {
-  return requestClient.get<MessageItem[]>(Api.Base);
+export function getMessageList(params?: { isRead?: boolean }) {
+  return requestClient.get<MessageItem[]>(Api.Base, { params });
 }
 
 /**
@@ -79,6 +79,20 @@ export function markMessageRead(id: number | string) {
  */
 export function markMessageReadBatch(ids: (number | string)[]) {
   return requestClient.put(`${Api.Base}/read/batch`, ids);
+}
+
+/**
+ * 标记未读
+ */
+export function markMessageUnread(id: number | string) {
+  return requestClient.put(`${Api.Base}/${id}/unread`);
+}
+
+/**
+ * 批量标记未读
+ */
+export function markMessageUnreadBatch(ids: (number | string)[]) {
+  return requestClient.put(`${Api.Base}/unread/batch`, ids);
 }
 
 /**

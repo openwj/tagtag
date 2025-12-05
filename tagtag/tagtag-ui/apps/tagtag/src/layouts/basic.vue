@@ -32,12 +32,13 @@ const notifications = ref<NotificationItem[]>([]);
 // 加载消息列表
 const loadMessages = async () => {
   try {
-    const list = await getMessageList();
+    // 只获取未读消息
+    const list = await getMessageList({ isRead: false });
     notifications.value = list.map((item: MessageItem) => ({
       id: String(item.id),
       title: item.title,
-      message: item.message, // 后端content映射为message
-      date: item.date, // 后端createTime映射为date
+      message: item.content,
+      date: item.createTime,
       avatar: item.avatar || 'https://avatar.vercel.sh/sys',
       isRead: item.isRead,
       link: item.link || `/message/detail/${item.id}`,
@@ -129,14 +130,15 @@ watch(
         @make-all-read="
           async () => {
             await markAllMessageRead();
-            notifications.forEach((item) => (item.isRead = true));
+            notifications = [];
           }
         "
         @read="
           async (item: any) => {
             if (!item.isRead) {
               await markMessageRead(item.id);
-              item.isRead = true;
+              // 移除已读消息
+              notifications = notifications.filter((n) => n.id !== item.id);
             }
             if (item.link) {
               if (item.link.startsWith('http')) {
