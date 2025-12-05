@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MenuService {
 
-    /** 权限分页查询（支持排序白名单） */
+    /** 权限分页查询 */
     PageResult<MenuDTO> page(MenuQueryDTO query, PageQuery pageQuery);
 
     /** 获取权限详情 */

@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface RoleService {
 
-    /** 角色分页查询（支持排序白名单） */
+    /** 角色分页查询 */
     PageResult<RoleDTO> page(RoleQueryDTO query, PageQuery pageQuery);
 
     /** 获取角色详情 */

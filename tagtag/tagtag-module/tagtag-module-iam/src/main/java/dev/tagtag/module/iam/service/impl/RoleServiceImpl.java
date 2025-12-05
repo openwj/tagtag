@@ -1,12 +1,10 @@
 package dev.tagtag.module.iam.service.impl;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
-import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.module.iam.convert.RoleMapperConvert;
@@ -19,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
-import dev.tagtag.common.enums.StatusEnum;
 
 import java.util.List;
 import java.util.Set;
@@ -33,7 +30,6 @@ import java.util.LinkedHashSet;
 @RequiredArgsConstructor
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
     
-    private final PageProperties pageProperties;
     private final RoleMapperConvert roleMapperConvert;
 
     
@@ -42,10 +38,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional(readOnly = true)
     public PageResult<RoleDTO> page(RoleQueryDTO query, PageQuery pageQuery) {
-        IPage<Role> page = Pages.selectPage(pageQuery, pageProperties, Role.class, pageProperties.getRole(),
-                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<RoleDTO> dtoPage = page.convert(roleMapperConvert::toDTO);
-        return PageResults.of(dtoPage);
+        var page = baseMapper.selectPage(Pages.toPage(pageQuery), query);
+        return PageResults.of(page.convert(roleMapperConvert::toDTO));
     }
 
     /** 获取角色详情 */

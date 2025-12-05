@@ -1,13 +1,11 @@
 package dev.tagtag.module.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.system.dto.MessageDTO;
-import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.system.entity.Message;
@@ -25,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> implements MessageService {
 
-    private final PageProperties pageProperties;
 
     @Override
     public List<MessageDTO> listByUserId(Long userId, Boolean isRead) {
@@ -35,34 +32,19 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
                 .receiverId(userId)
                 .isRead(isRead)
                 .build();
-        
-        // 注意：MessageMapper.selectPageDTO 是分页查询，如果只是想查列表，可以传一个不限制条数的 Page 对象，或者单独写一个 listDTO 的 Mapper 方法
-        // 这里简单起见，使用分页查询接口，但取较大页大小，或者直接调用 baseMapper.selectListDTO(query) 如果有的话
-        // 为了避免修改 Mapper 接口过多，这里先用 selectPageDTO，传入较大 pageSize
-        // 更好的做法是在 Mapper 增加 selectListDTO 方法
-        
-        // 由于 Mapper 目前只有 selectPageDTO，我们暂时用分页模拟列表，或者在 Mapper 增加 selectListDTO
-        // 鉴于需要返回 List<MessageDTO>，且数据量可能不大，暂时用分页查第一页大数量
         IPage<MessageDTO> page = new Page<>(1, 1000);
         return baseMapper.selectPageDTO(page, query).getRecords();
     }
 
     @Override
     public PageResult<MessageDTO> pageByUserId(Long userId, PageQuery pageQuery) {
-        // 复用 selectPageDTO，构造查询条件
         MessageDTO query = MessageDTO.builder().receiverId(userId).build();
-        
-        IPage<MessageDTO> page = Pages.selectPage(pageQuery, pageProperties, MessageDTO.class, null,
-                (p, orderBy) -> baseMapper.selectPageDTO(p, query));
-        
-        return PageResults.of(page);
+        return PageResults.of(baseMapper.selectPageDTO(Pages.toPage(pageQuery), query));
     }
 
     @Override
     public PageResult<MessageDTO> page(MessageDTO query, PageQuery pageQuery) {
-        IPage<MessageDTO> page = Pages.selectPage(pageQuery, pageProperties, MessageDTO.class, null,
-                (p, orderBy) -> baseMapper.selectPageDTO(p, query));
-        return PageResults.of(page);
+        return PageResults.of(baseMapper.selectPageDTO(Pages.toPage(pageQuery), query));
     }
 
     @Override

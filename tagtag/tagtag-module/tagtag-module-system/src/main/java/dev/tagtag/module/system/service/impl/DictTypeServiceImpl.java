@@ -1,13 +1,11 @@
 package dev.tagtag.module.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.system.dto.DictTypeDTO;
 import dev.tagtag.contract.system.dto.DictTypeQueryDTO;
-import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.system.entity.DictType;
@@ -28,7 +26,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DictTypeServiceImpl extends ServiceImpl<DictTypeMapper, DictType> implements DictTypeService {
 
-    private final PageProperties pageProperties;
     private final DictDataMapper dictDataMapper;
 
     @Override
@@ -45,9 +42,7 @@ public class DictTypeServiceImpl extends ServiceImpl<DictTypeMapper, DictType> i
         }
         wrapper.orderByDesc(DictType::getCreateTime);
 
-        IPage<DictType> page = Pages.selectPage(pageQuery, pageProperties, DictType.class, null,
-                (p, orderBy) -> this.page(p, wrapper));
-
+        var page = this.page(Pages.toPage(pageQuery), wrapper);
         return PageResults.of(page.convert(this::toDTO));
     }
 

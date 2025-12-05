@@ -16,10 +16,10 @@ public interface RoleMapper extends BaseMapper<Role> {
      * 角色分页查询（由 MyBatis XML 构建 WHERE/ORDER BY）
      * @param page 分页对象
      * @param q 查询条件
-     * @param orderList 排序字段列表
+     * 固定排序由 XML 定义（create_time DESC, id DESC），不接受前端传入
      * @return 分页结果
      */
-    IPage<Role> selectPage(IPage<Role> page, @Param("q") RoleQueryDTO q, @Param("orderBySql") String orderBySql);
+    IPage<Role> selectPage(IPage<Role> page, @Param("q") RoleQueryDTO q);
 
     /** 根据角色ID查询权限ID列表 */
     List<Long> selectPermissionIdsByRoleId(@Param("roleId") Long roleId);

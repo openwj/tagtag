@@ -1,14 +1,10 @@
 package dev.tagtag.module.iam.service.impl;
 
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
-import dev.tagtag.common.util.StringUtils;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
-import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.module.iam.convert.DeptMapperConvert;
@@ -33,13 +29,13 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import dev.tagtag.common.util.StringUtils;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements DeptService {
 
-    private final PageProperties pageProperties;
     private final DeptMapperConvert deptMapperConvert;
     private final UserMapper userMapper;
 
@@ -50,10 +46,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     @Override
     @Transactional(readOnly = true)
     public PageResult<DeptDTO> page(DeptQueryDTO query, PageQuery pageQuery) {
-        IPage<Dept> page = Pages.selectPage(pageQuery, pageProperties, Dept.class, pageProperties.getDept(),
-                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<DeptDTO> dtoPage = page.convert(deptMapperConvert::toDTO);
-        return PageResults.of(dtoPage);
+        var page = baseMapper.selectPage(Pages.toPage(pageQuery), query);
+        return PageResults.of(page.convert(deptMapperConvert::toDTO));
     }
 
     /**

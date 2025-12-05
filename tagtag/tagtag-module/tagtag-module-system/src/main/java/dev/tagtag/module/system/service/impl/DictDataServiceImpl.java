@@ -7,7 +7,6 @@ import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.system.dto.DictItemDTO;
 import dev.tagtag.contract.system.dto.DictItemQueryDTO;
-import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.system.entity.DictData;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> implements DictDataService {
 
-    private final PageProperties pageProperties;
 
     @Override
     /**
@@ -51,9 +49,7 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
         }
         wrapper.orderByAsc(DictData::getDictSort);
 
-        IPage<DictData> page = Pages.selectPage(pageQuery, pageProperties, DictData.class, null,
-                (p, orderBy) -> this.page(p, wrapper));
-
+        IPage<DictData> page = this.page(Pages.toPage(pageQuery), wrapper);
         return PageResults.of(page.convert(this::toDTO));
     }
 

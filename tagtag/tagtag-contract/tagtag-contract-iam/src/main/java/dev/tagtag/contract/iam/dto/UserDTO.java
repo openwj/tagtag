@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.List;
 
 @Data
@@ -31,7 +32,9 @@ public class UserDTO {
     private String remark;
     private String employeeNo;
     private String position;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate entryDate;
     private LocalDateTime lastLoginTime;
     private String lastLoginIp;

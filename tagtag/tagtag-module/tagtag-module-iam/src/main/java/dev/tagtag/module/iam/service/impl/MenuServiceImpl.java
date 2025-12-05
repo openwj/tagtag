@@ -1,12 +1,9 @@
 package dev.tagtag.module.iam.service.impl;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
-import dev.tagtag.framework.config.PageProperties;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import dev.tagtag.module.iam.convert.MenuMapperConvert;
@@ -30,7 +27,6 @@ import java.util.LinkedHashSet;
 @RequiredArgsConstructor
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-    private final PageProperties pageProperties;
     private final MenuMapperConvert menuMapperConvert;
 
     
@@ -39,10 +35,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     @Transactional(readOnly = true)
     public PageResult<MenuDTO> page(MenuQueryDTO query, PageQuery pageQuery) {
-        IPage<Menu> page = Pages.selectPage(pageQuery, pageProperties, Menu.class, pageProperties.getMenu(),
-                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<MenuDTO> dtoPage = page.convert(menuMapperConvert::toDTO);
-        return PageResults.of(dtoPage);
+        var page = baseMapper.selectPage(Pages.toPage(pageQuery), query);
+        return PageResults.of(page.convert(menuMapperConvert::toDTO));
     }
 
     /** 获取菜单详情 */

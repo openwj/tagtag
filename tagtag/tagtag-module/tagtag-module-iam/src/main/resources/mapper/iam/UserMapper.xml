@@ -2,11 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dev.tagtag.module.iam.mapper.UserMapper">
 
-    <!--
-      用户分页查询（MyBatis Plus 分页拦截器生效，参数名需为 page）
-      - q: UserQueryDTO 查询条件
-      - orderList: List<SortField> 排序字段（字段名将按白名单映射到列）
-    -->
+    <!-- 用户分页查询（MyBatis Plus 分页拦截器生效，参数名需为 page） -->
     <select id="selectPage" resultType="dev.tagtag.module.iam.entity.vo.UserVO">
         SELECT
             u.id,
@@ -75,12 +71,7 @@
             </if>
         </where>
 
-        <if test="orderBySql != null and orderBySql != ''">
-            ${orderBySql}
-        </if>
-        <if test="orderBySql == null or orderBySql == ''">
-            ORDER BY u.id ASC
-        </if>
+        ORDER BY u.create_time DESC, u.id DESC
     </select>
 
 

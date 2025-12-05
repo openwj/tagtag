@@ -1,7 +1,7 @@
 package dev.tagtag.module.iam.service.impl;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.framework.util.PageResults;
@@ -12,14 +12,13 @@ import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.module.iam.convert.RoleMapperConvert;
 import dev.tagtag.module.iam.convert.UserMapperConvert;
 import dev.tagtag.module.iam.entity.User;
-import dev.tagtag.module.iam.entity.Role;
 import dev.tagtag.module.iam.entity.vo.UserVO;
+import dev.tagtag.module.iam.entity.Role;
 import dev.tagtag.module.iam.mapper.UserMapper;
 import dev.tagtag.module.iam.mapper.RoleMapper;
 import dev.tagtag.module.iam.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import dev.tagtag.framework.config.PageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,7 +32,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    private final PageProperties pageProperties;
     private final UserMapperConvert userMapperConvert;
     private final RoleMapper roleMapper;
     private final RoleMapperConvert roleMapperConvert;
@@ -44,21 +42,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 用户分页查询（XML 构建 WHERE/ORDER BY，服务层保持轻薄）
      * @param query 查询条件
-     * @param pageQuery 分页与排序（包含 sortFields）
+     * @param pageQuery 分页参数
      * @return 用户分页结果
      */
     @Override
     @Transactional(readOnly = true)
     public PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery) {
-        IPage<User> page = Pages.selectPage(pageQuery, pageProperties, User.class, pageProperties.getUser(),
-                (p, orderBy) -> baseMapper.selectPage(p, query, orderBy));
-        IPage<UserDTO> dtoPage = page.convert(e -> {
-            if (e instanceof UserVO vo) {
-                return userMapperConvert.toDTO(vo);
-            }
-            return userMapperConvert.toDTO(e);
-        });
-        return PageResults.of(dtoPage);
+        IPage<UserVO> page = baseMapper.selectPage(Pages.toPage(pageQuery), query);
+        return PageResults.of(page.convert(userMapperConvert::toDTO));
     }
 
     /** 获取用户详情 */

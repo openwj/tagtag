@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface UserService {
 
-    /** 用户分页查询（支持排序白名单） */
+    /** 用户分页查询 */
     PageResult<UserDTO> page(UserQueryDTO query, PageQuery pageQuery);
 
     /** 获取用户详情 */

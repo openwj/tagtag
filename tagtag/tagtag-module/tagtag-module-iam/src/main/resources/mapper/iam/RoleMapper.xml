@@ -31,12 +31,7 @@
             </if>
         </where>
 
-        <if test="orderBySql != null and orderBySql != ''">
-            ${orderBySql}
-        </if>
-        <if test="orderBySql == null or orderBySql == ''">
-            ORDER BY id ASC
-        </if>
+        ORDER BY create_time DESC, id DESC
     </select>
 
     <!-- 查询角色的权限ID列表 -->

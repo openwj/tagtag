@@ -21,12 +21,8 @@ tagtag-parent
 │  │  │   └─IdNamePair.java                      ← 通用 id-name 键值对结构
 │  │  │
 │  │  └─util/
-│  │      ├─DateUtils.java                       ← 日期时间工具
-│  │      ├─JsonUtils.java                       ← JSON序列化/反序列化封装（Jackson）
 │  │      ├─BeanUtils.java                       ← Bean属性拷贝工具
-│  │      ├─StringUtils.java                     ← 字符串工具
-│  │      ├─CollectionUtils.java                 ← 集合工具
-│  │      └─RequestUtils.java                    ← HTTP请求信息获取工具（IP、UA等）
+│  │      └─StringUtils.java                     ← 字符串工具（保留 hasText）
 │  │
 │  └─pom.xml                                      ← 模块POM
 │
@@ -39,7 +35,7 @@ tagtag-parent
 │  │  │   ├─AsyncConfig.java                     ← 异步线程池配置
 │  │  │   ├─SecurityConfig.java                  ← Spring Security 核心配置
 │  │  │   ├─SwaggerConfig.java                   ← Swagger / Knife4j API 文档配置
-│  │  │   └─WebMvcConfig.java                    ← MVC 拦截器 & 静态资源映射
+│  │  │   └─CorsConfig.java                      ← 跨域配置
 │  │  │
 │  │  ├─aspect/
 │  │  │   ├─OperationLogAspect.java              ← 操作日志切面

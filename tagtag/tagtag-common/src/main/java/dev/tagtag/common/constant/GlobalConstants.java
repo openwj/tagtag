@@ -69,45 +69,4 @@ public class GlobalConstants {
         return Math.min(pageSize, MAX_PAGE_SIZE);
     }
 
-    /**
-     * 为令牌添加 Bearer 前缀（已包含则原样返回）
-     * @param token 令牌字符串
-     * @return 带前缀的令牌
-     */
-    public static String ensureBearerPrefix(String token) {
-        Objects.requireNonNull(token, "token");
-        String t = token.trim();
-        if (t.isEmpty()) {
-            return t;
-        }
-        return t.startsWith(TOKEN_PREFIX) ? t : TOKEN_PREFIX + t;
-    }
-
-    /**
-     * 生成请求唯一标识（UUID）
-     * @return 请求ID
-     */
-    public static String generateRequestId() {
-        return UUID.randomUUID().toString();
-    }
-
-    /**
-     * 按项目默认格式格式化日期（yyyy-MM-dd）
-     * @param date 日期
-     * @return 格式化字符串
-     */
-    public static String formatDate(LocalDate date) {
-        Objects.requireNonNull(date, "date");
-        return DATE_FORMATTER.format(date);
-    }
-
-    /**
-     * 按项目默认格式格式化日期时间（yyyy-MM-dd HH:mm:ss）
-     * @param dateTime 日期时间
-     * @return 格式化字符串
-     */
-    public static String formatDateTime(LocalDateTime dateTime) {
-        Objects.requireNonNull(dateTime, "dateTime");
-        return DATETIME_FORMATTER.format(dateTime);
-    }
 }
