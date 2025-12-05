@@ -348,7 +348,7 @@ const handleSuccess = () => {
       </template>
       <template #name="{ row }">
         <div class="flex items-center gap-2">
-          <span class="icon-[lucide--user-circle] text-primary text-lg"></span>
+          <span class="icon-[lucide--user-circle] text-lg text-primary"></span>
           <span class="font-medium text-gray-800 dark:text-gray-200">{{
             row.name
           }}</span>
@@ -400,7 +400,9 @@ const handleSuccess = () => {
       </template>
 
       <template #createTime="{ row }">
-        <span class="text-gray-500">{{ row.createTime?.replace('T', ' ') }}</span>
+        <span class="text-gray-500">
+          {{ row.createTime?.replace('T', ' ') }}
+        </span>
       </template>
 
       <template #action="{ row }">

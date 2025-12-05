@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.tagtag.module.system.mapper.MessageMapper">
+
+    <select id="selectPageDTO" resultType="dev.tagtag.contract.system.dto.MessageDTO">
+        SELECT
+            m.id,
+            m.title,
+            m.content,
+            m.type,
+            m.sender_id AS senderId,
+            IFNULL(s.nickname, '系统') AS senderName,
+            m.receiver_id AS receiverId,
+            r.nickname AS receiverName,
+            m.is_read AS isRead,
+            DATE_FORMAT(m.create_time, '%Y-%m-%d %H:%i:%s') AS createTime,
+            CONCAT('https://avatar.vercel.sh/', IFNULL(m.sender_id, 'sys')) AS avatar
+        FROM sys_message m
+        LEFT JOIN iam_user s ON m.sender_id = s.id
+        LEFT JOIN iam_user r ON m.receiver_id = r.id
+        <where>
+            m.deleted = 0
+            <if test="q != null">
+                <if test="q.title != null and q.title != ''">
+                    AND m.title LIKE CONCAT('%', #{q.title}, '%')
+                </if>
+                <if test="q.content != null and q.content != ''">
+                    AND m.content LIKE CONCAT('%', #{q.content}, '%')
+                </if>
+                <if test="q.isRead != null">
+                    AND m.is_read = #{q.isRead}
+                </if>
+                <if test="q.type != null and q.type != ''">
+                    AND m.type = #{q.type}
+                </if>
+                <if test="q.senderName != null and q.senderName != ''">
+                    AND s.nickname LIKE CONCAT('%', #{q.senderName}, '%')
+                </if>
+                <if test="q.receiverName != null and q.receiverName != ''">
+                    AND r.nickname LIKE CONCAT('%', #{q.receiverName}, '%')
+                </if>
+            </if>
+        </where>
+        ORDER BY m.create_time DESC
+    </select>
+
+    <select id="selectDTOById" resultType="dev.tagtag.contract.system.dto.MessageDTO">
+        SELECT
+            m.id,
+            m.title,
+            m.content,
+            m.type,
+            m.sender_id AS senderId,
+            IFNULL(s.nickname, '系统') AS senderName,
+            m.receiver_id AS receiverId,
+            r.nickname AS receiverName,
+            m.is_read AS isRead,
+            DATE_FORMAT(m.create_time, '%Y-%m-%d %H:%i:%s') AS createTime,
+            CONCAT('https://avatar.vercel.sh/', IFNULL(m.sender_id, 'sys')) AS avatar
+        FROM sys_message m
+        LEFT JOIN iam_user s ON m.sender_id = s.id
+        LEFT JOIN iam_user r ON m.receiver_id = r.id
+        WHERE m.id = #{id} AND m.deleted = 0
+    </select>
+
+</mapper>

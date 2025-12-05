@@ -6,6 +6,7 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.system.dto.MessageDTO;
 import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.module.system.service.MessageService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,12 +38,38 @@ public class MessageController {
     }
 
     /**
+     * 分页获取所有消息列表（管理员）
+     */
+    @PostMapping("/page-all")
+    public Result<PageResult<MessageDTO>> pageAll(@RequestBody MessagePageRequest req) {
+        return Result.ok(messageService.page(req.getQuery(), req.getPage()));
+    }
+
+    /**
+     * 获取消息详情
+     */
+    @GetMapping("/{id}")
+    public Result<MessageDTO> get(@PathVariable("id") Long id) {
+        // 实际生产环境应校验该消息是否属于当前用户
+        return Result.ok(messageService.getById(id));
+    }
+
+    /**
      * 标记消息已读
      */
     @PutMapping("/{id}/read")
     public Result<Void> markRead(@PathVariable("id") Long id) {
         // 实际生产环境应校验该消息是否属于当前用户
         messageService.markRead(id);
+        return Result.ok();
+    }
+
+    /**
+     * 批量标记消息已读
+     */
+    @PutMapping("/read/batch")
+    public Result<Void> markReadBatch(@RequestBody List<Long> ids) {
+        messageService.markReadBatch(ids);
         return Result.ok();
     }
 
@@ -63,6 +90,15 @@ public class MessageController {
     public Result<Void> delete(@PathVariable("id") Long id) {
         // 实际生产环境应校验该消息是否属于当前用户
         messageService.delete(id);
+        return Result.ok();
+    }
+
+    /**
+     * 批量删除消息
+     */
+    @DeleteMapping("/batch")
+    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
+        messageService.deleteBatch(ids);
         return Result.ok();
     }
 
@@ -88,5 +124,11 @@ public class MessageController {
         }
         messageService.send(message);
         return Result.ok();
+    }
+
+    @Data
+    public static class MessagePageRequest {
+        private MessageDTO query;
+        private PageQuery page;
     }
 }

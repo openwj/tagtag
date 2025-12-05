@@ -242,13 +242,15 @@ watch(
 
 // 监听 checkStrictly 变化，切换时处理 checkedKeys
 watch(checkStrictly, (val) => {
-  if (!val) {
-    // 切换到联动模式：剔除父节点
-    const parentKeys = getAllParentKeys(treeData.value);
-    checkedKeys.value = checkedKeys.value.filter((k) => !parentKeys.includes(k));
-  } else {
+  if (val) {
     // 切换到独立模式：这里如果需要恢复父节点比较复杂，暂保持现状
     // 通常用户切换到独立模式是为了精细控制，保持现状是安全的
+  } else {
+    // 切换到联动模式：剔除父节点
+    const parentKeys = getAllParentKeys(treeData.value);
+    checkedKeys.value = checkedKeys.value.filter(
+      (k) => !parentKeys.includes(k),
+    );
   }
 });
 
@@ -300,9 +302,9 @@ watch(
 
 <template>
   <div class="flex h-full w-full flex-col p-2">
-    <div class="mb-2 flex items-center justify-between shrink-0">
+    <div class="mb-2 flex shrink-0 items-center justify-between">
       <span class="text-sm font-medium">权限分配</span>
-      <div class="ml-4 flex flex-1 items-center gap-2 justify-end">
+      <div class="ml-4 flex flex-1 items-center justify-end gap-2">
         <Input
           v-model:value="searchText"
           size="small"
@@ -366,22 +368,25 @@ watch(
                 color="processing"
                 :bordered="false"
                 class="m-0"
-                >目录</Tag
               >
+                目录
+              </Tag>
               <Tag
                 v-else-if="menuType === 1"
                 color="success"
                 :bordered="false"
                 class="m-0"
-                >菜单</Tag
               >
+                菜单
+              </Tag>
               <Tag
                 v-else-if="menuType === 2"
                 color="warning"
                 :bordered="false"
                 class="m-0"
-                >按钮</Tag
               >
+                按钮
+              </Tag>
               <span class="text-xs text-gray-400">{{ menuCode }}</span>
             </div>
           </template>

@@ -3,10 +3,27 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { ref } from 'vue';
+
 import { Page } from '@vben/common-ui';
+
+import {
+  Button,
+  Dropdown,
+  Menu,
+  message,
+  Modal,
+  Popconfirm,
+  Upload,
+} from 'ant-design-vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { Button, Dropdown, Menu, message, Modal, Popconfirm, Upload } from 'ant-design-vue';
-import { batchDeleteFiles, deleteFile, getFilePage, uploadFile, getDownloadToken } from '#/api/modules/storage/file';
+import {
+  batchDeleteFiles,
+  deleteFile,
+  getDownloadToken,
+  getFilePage,
+  uploadFile,
+} from '#/api/modules/storage/file';
 
 const uploadLoading = ref(false);
 
@@ -57,7 +74,14 @@ const gridOptions: VxeGridProps = {
     enabled: true,
     pageSize: 10,
     pageSizes: [10, 20, 50, 100],
-    layouts: ['PrevPage', 'JumpNumber', 'NextPage', 'FullJump', 'Sizes', 'Total'],
+    layouts: [
+      'PrevPage',
+      'JumpNumber',
+      'NextPage',
+      'FullJump',
+      'Sizes',
+      'Total',
+    ],
     perfect: true,
   },
   proxyConfig: {
@@ -96,7 +120,7 @@ const handleUpload = async (file: File) => {
 /**
  * 删除单个文件
  */
-const handleDelete = async (id: string | number) => {
+const handleDelete = async (id: number | string) => {
   await deleteFile(id);
   message.success({ content: '删除成功', duration: 2 });
   gridApi.reload();
@@ -120,20 +144,17 @@ const handleBatchDelete = async () => {
     onOk: async () => {
       const ids = selectedRows.map((row: any) => row.id);
       await batchDeleteFiles(ids);
-      message.success({ content: `成功删除 ${selectedRows.length} 个文件`, duration: 2 });
+      message.success({
+        content: `成功删除 ${selectedRows.length} 个文件`,
+        duration: 2,
+      });
       gridApi.grid.clearCheckboxRow();
       gridApi.reload();
     },
   });
 };
 
-/**
- * 判断是否为图片类型
- */
-const isImage = (row: any) => {
-  const m = (row.mimeType || '').toLowerCase();
-  return m.startsWith('image/');
-};
+
 
 /**
  * 预览文件（新窗口打开）
@@ -164,10 +185,13 @@ const download = async (row: any) => {
       <template #toolbar-tools>
         <div class="flex items-center gap-3">
           <Upload
-            :maxCount="1"
-            :showUploadList="false"
-            :beforeUpload="() => false"
-            @change="(e:any) => e?.file?.originFileObj && handleUpload(e.file.originFileObj)"
+            :max-count="1"
+            :show-upload-list="false"
+            :before-upload="() => false"
+            @change="
+              (e: any) =>
+                e?.file?.originFileObj && handleUpload(e.file.originFileObj)
+            "
           >
             <Button type="primary" :loading="uploadLoading">
               <template #icon>
@@ -213,7 +237,12 @@ const download = async (row: any) => {
               <div class="icon-[lucide--download] text-blue-500"></div>
             </template>
           </Button>
-          <Popconfirm cancel-text="取消" ok-text="确定" title="确定删除此文件?" @confirm="handleDelete(row.id)">
+          <Popconfirm
+            cancel-text="取消"
+            ok-text="确定"
+            title="确定删除此文件?"
+            @confirm="handleDelete(row.id)"
+          >
             <Button
               class="flex h-7 w-7 items-center justify-center p-0"
               danger
@@ -232,4 +261,3 @@ const download = async (row: any) => {
     </Grid>
   </Page>
 </template>
-

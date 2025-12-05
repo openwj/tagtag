@@ -22,10 +22,31 @@ public interface MessageService {
     PageResult<MessageDTO> pageByUserId(Long userId, PageQuery pageQuery);
 
     /**
+     * 分页获取所有消息列表（管理员）
+     * @param query 查询条件
+     * @param pageQuery 分页参数
+     * @return 分页消息列表
+     */
+    PageResult<MessageDTO> page(MessageDTO query, PageQuery pageQuery);
+
+    /**
+     * 获取消息详情
+     * @param id 消息ID
+     * @return 消息详情
+     */
+    MessageDTO getById(Long id);
+
+    /**
      * 标记已读
      * @param id 消息ID
      */
     void markRead(Long id);
+
+    /**
+     * 批量标记已读
+     * @param ids 消息ID列表
+     */
+    void markReadBatch(List<Long> ids);
 
     /**
      * 全部已读
@@ -38,6 +59,12 @@ public interface MessageService {
      * @param id 消息ID
      */
     void delete(Long id);
+
+    /**
+     * 批量删除消息
+     * @param ids 消息ID列表
+     */
+    void deleteBatch(List<Long> ids);
 
     /**
      * 清空所有消息

@@ -44,7 +44,7 @@ function defineApplicationConfig(userConfigPromise?: DefineApplicationOptions) {
       nitroMockOptions: {},
       print: !isBuild,
       printInfoMap: {
-        'Tagtag Docs': 'https://doc.vben.pro',
+        'Tagtag Docs': 'https://tagtag.cn',
       },
       pwa: true,
       pwaOptions: getDefaultPwaOptions(appTitle),

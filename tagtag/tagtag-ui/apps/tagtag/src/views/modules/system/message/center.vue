@@ -3,8 +3,6 @@ import type { VbenFormProps } from '#/adapter/form';
 import type { VxeGridProps } from '#/adapter/vxe-table';
 import type { MessageItem } from '#/api/modules/system/message';
 
-import { useRouter } from 'vue-router';
-
 import { Page } from '@vben/common-ui';
 
 import {
@@ -18,11 +16,17 @@ import {
   Tooltip,
 } from 'ant-design-vue';
 
+import { useRouter } from 'vue-router';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
+  clearAllMessages,
   deleteMessage,
   deleteMessageBatch,
-  getAllMessagePage,
+  getMessagePage,
+  markAllMessageRead,
+  markMessageRead,
+  markMessageReadBatch,
 } from '#/api/modules/system/message';
 
 import { columns, MessageTypeMap, searchFormSchema } from './data';
@@ -81,8 +85,7 @@ const gridOptions: VxeGridProps = {
           query.startDate = formValues.dateRange[0];
           query.endDate = formValues.dateRange[1];
         }
-        // 管理员视角：查看所有用户的消息
-        const { list, total } = await getAllMessagePage(query, page);
+        const { list, total } = await getMessagePage(query, page);
         return { list, total };
       },
     },
@@ -104,6 +107,31 @@ const getSelectedRows = () => {
   return gridApi.grid?.getCheckboxRecords() || [];
 };
 
+// 标记已读
+const handleRead = async (row: MessageItem) => {
+  if (row.isRead) return;
+  try {
+    await markMessageRead(row.id);
+    row.isRead = true;
+    message.success('已标记为已读');
+    // 刷新当前行样式
+    gridApi.reload();
+  } catch {
+    message.error('操作失败');
+  }
+};
+
+// 全部已读
+const handleReadAll = async () => {
+  try {
+    await markAllMessageRead();
+    message.success('全部已读');
+    gridApi.reload();
+  } catch {
+    message.error('操作失败');
+  }
+};
+
 // 删除消息
 const handleDelete = async (id: number | string) => {
   try {
@@ -115,25 +143,75 @@ const handleDelete = async (id: number | string) => {
   }
 };
 
+// 清空消息
+const handleClear = async () => {
+  try {
+    await clearAllMessages();
+    message.success('清空成功');
+    gridApi.reload();
+  } catch {
+    message.error('清空失败');
+  }
+};
+
 /**
  * 查看详情
  */
 const handleView = (row: MessageItem) => {
-  // 管理员查看详情可能不需要标记已读，或者跳转到专门的管理详情页
-  // 暂时复用详情页，但需要注意权限控制
   router.push({ name: 'MessageCenterDetail', params: { id: row.id } });
 };
 </script>
 
 <template>
   <Page auto-content-height>
-    <Grid table-title="消息管理">
+    <Grid table-title="我的消息">
       <template #toolbar-tools>
         <div class="flex items-center gap-2">
+          <Button type="primary" @click="handleReadAll">全部已读</Button>
+          <Popconfirm
+            title="确定清空所有消息?"
+            ok-text="确定"
+            cancel-text="取消"
+            @confirm="handleClear"
+          >
+            <Button danger>清空消息</Button>
+          </Popconfirm>
           <Dropdown.Button class="px-2">
             批量操作
             <template #overlay>
               <Menu>
+                <Menu.Item
+                  key="batch-read"
+                  v-access:code="'message:read'"
+                  @click="
+                    () =>
+                      Modal.confirm({
+                        title: '批量标记已读',
+                        content: '确定对选中的消息标记为已读吗？',
+                        okText: '确定',
+                        cancelText: '取消',
+                        async onOk() {
+                          const rows = getSelectedRows();
+                          if (rows.length === 0) {
+                            message.warning('请勾选要操作的消息');
+                            return;
+                          }
+                          const ids = rows
+                            .filter((r: any) => !r.isRead)
+                            .map((r: any) => r.id);
+                          if (ids.length > 0) {
+                            await markMessageReadBatch(ids);
+                          }
+                          message.success('批量标记已读成功');
+                          gridApi.grid?.clearCheckboxRow();
+                          gridApi.reload();
+                        },
+                      })
+                  "
+                >
+                  <span class="icon-[lucide--check] mr-1"></span>
+                  标记已读
+                </Menu.Item>
                 <Menu.Item
                   key="batch-delete"
                   v-access:code="'message:delete'"
@@ -173,11 +251,15 @@ const handleView = (row: MessageItem) => {
           <Button type="link" size="small" @click="handleView(row)">
             {{ row.title }}
           </Button>
+          <Tag v-if="!row.isRead" color="red">未读</Tag>
         </div>
       </template>
 
       <template #type="{ row }">
-        <Tag :color="MessageTypeMap[row.type]?.color || 'default'" :bordered="false">
+        <Tag
+          :color="MessageTypeMap[row.type]?.color || 'default'"
+          :bordered="false"
+        >
           {{ MessageTypeMap[row.type]?.text || row.type }}
         </Tag>
       </template>
@@ -193,6 +275,11 @@ const handleView = (row: MessageItem) => {
               <span class="icon-[lucide--eye] text-lg"></span>
             </Button>
           </Tooltip>
+          <Tooltip v-if="!row.isRead" title="标记已读">
+            <Button type="link" size="small" @click="handleRead(row)">
+              <span class="icon-[lucide--check] text-lg"></span>
+            </Button>
+          </Tooltip>
           <Popconfirm
             title="确定删除此消息?"
             ok-text="确定"
@@ -200,11 +287,7 @@ const handleView = (row: MessageItem) => {
             @confirm="handleDelete(row.id)"
           >
             <Tooltip title="删除">
-              <Button
-                type="link"
-                size="small"
-                danger
-              >
+              <Button type="link" size="small" danger>
                 <span class="icon-[lucide--trash-2] text-lg"></span>
               </Button>
             </Tooltip>

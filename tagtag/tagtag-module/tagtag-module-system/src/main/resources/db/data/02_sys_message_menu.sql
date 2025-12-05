@@ -3,10 +3,11 @@ INSERT INTO iam_menu (parent_id, menu_name, menu_code, path, component, icon, so
 SELECT 0, '系统管理', 'system', '/system', NULL, 'lucide:settings', 90, 1, 0, 0, 0, NULL, '系统管理目录', CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='system');
 
--- 消息中心页面 (挂载到系统管理下)
+-- 消息管理页面
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, path, component, icon, sort, status, menu_type, is_hidden, is_external, external_url, remark, create_time)
-SELECT (SELECT id FROM iam_menu WHERE menu_code='system'), '消息中心', 'message:list', '/system/message/list', 'modules/system/message/index', 'lucide:bell', 10, 1, 1, 0, 0, NULL, '消息中心页面', CURRENT_TIMESTAMP
-WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='message:list');
+SELECT (SELECT id FROM iam_menu WHERE menu_code='system'), '消息管理', 'message:list', '/system/message', 'modules/system/message/index', 'lucide:message-square', 80, 1, 1, 0, 0, NULL, '消息管理页面', CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='message:list')
+  AND EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='system');
 
 -- 消息按钮权限
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, remark, is_keepalive, create_time, create_by, update_by)

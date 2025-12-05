@@ -7,9 +7,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
-import { VBEN_DOC_URL, VBEN_GITHUB_URL } from '@vben/constants';
 import { useWatermark } from '@vben/hooks';
-import { BookOpenText, CircleHelp, SvgGithubIcon } from '@vben/icons';
 import {
   BasicLayout,
   LockScreen,
@@ -18,7 +16,6 @@ import {
 } from '@vben/layouts';
 import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
-import { openWindow } from '@vben/utils';
 
 import {
   clearAllMessages,
@@ -43,7 +40,7 @@ const loadMessages = async () => {
       date: item.date, // 后端createTime映射为date
       avatar: item.avatar || 'https://avatar.vercel.sh/sys',
       isRead: item.isRead,
-      link: item.link,
+      link: item.link || `/message/detail/${item.id}`,
     }));
   } catch (error) {
     console.error('加载消息失败:', error);
@@ -75,33 +72,6 @@ const menus = computed(() => [
     icon: 'lucide:user',
     text: $t('page.auth.profile.title'),
   },
-  // {
-  //   handler: () => {
-  //     openWindow(VBEN_DOC_URL, {
-  //       target: '_blank',
-  //     });
-  //   },
-  //   icon: BookOpenText,
-  //   text: $t('ui.widgets.document'),
-  // },
-  // {
-  //   handler: () => {
-  //     openWindow(VBEN_GITHUB_URL, {
-  //       target: '_blank',
-  //     });
-  //   },
-  //   icon: SvgGithubIcon,
-  //   text: 'GitHub',
-  // },
-  // {
-  //   handler: () => {
-  //     openWindow(`${VBEN_GITHUB_URL}/issues`, {
-  //       target: '_blank',
-  //     });
-  //   },
-  //   icon: CircleHelp,
-  //   text: $t('ui.widgets.qa'),
-  // },
 ]);
 
 const avatar = computed(() => {
@@ -170,7 +140,7 @@ watch(
             }
             if (item.link) {
               if (item.link.startsWith('http')) {
-                globalThis.window.open(item.link, '_blank');
+                window.open(item.link, '_blank');
               } else {
                 router.push(item.link);
               }
@@ -180,7 +150,7 @@ watch(
         @view-all="
           () => {
             // 跳转到完整的消息中心页面
-            router.push('/system/message/list');
+            router.push('/message/center');
           }
         "
       />

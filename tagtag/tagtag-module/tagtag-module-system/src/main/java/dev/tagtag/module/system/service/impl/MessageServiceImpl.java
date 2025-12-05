@@ -31,36 +31,47 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
 
     @Override
     public List<MessageDTO> listByUserId(Long userId) {
-        LambdaQueryWrapper<Message> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Message::getReceiverId, userId)
-               .eq(Message::getDeleted, 0)
-               .orderByDesc(Message::getCreateTime);
+        // 构造一个临时的 Page 对象，pageSize 设置大一点或者不分页（MyBatis Plus 分页插件如果不传 page 参数就是列表查询）
+        // 这里为了复用 Mapper XML 里的关联查询逻辑，我们直接构造一个 MessageDTO 作为查询条件
+        MessageDTO query = MessageDTO.builder().receiverId(userId).build();
         
-        List<Message> list = this.list(wrapper);
+        // 注意：MessageMapper.selectPageDTO 是分页查询，如果只是想查列表，可以传一个不限制条数的 Page 对象，或者单独写一个 listDTO 的 Mapper 方法
+        // 这里简单起见，使用分页查询接口，但取较大页大小，或者直接调用 baseMapper.selectListDTO(query) 如果有的话
+        // 为了避免修改 Mapper 接口过多，这里先用 selectPageDTO，传入较大 pageSize
+        // 更好的做法是在 Mapper 增加 selectListDTO 方法
         
-        return list.stream().map(this::toDTO).collect(Collectors.toList());
+        // 由于 Mapper 目前只有 selectPageDTO，我们暂时用分页模拟列表，或者在 Mapper 增加 selectListDTO
+        // 鉴于需要返回 List<MessageDTO>，且数据量可能不大，暂时用分页查第一页大数量
+        IPage<MessageDTO> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 1000);
+        return baseMapper.selectPageDTO(page, query).getRecords();
     }
 
     @Override
     public PageResult<MessageDTO> pageByUserId(Long userId, PageQuery pageQuery) {
-        LambdaQueryWrapper<Message> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Message::getReceiverId, userId)
-               .eq(Message::getDeleted, 0);
-
-        IPage<Message> page = Pages.selectPage(pageQuery, pageProperties, Message.class, null,
-                (p, orderBy) -> {
-                    // 默认排序
-                    if (orderBy == null || orderBy.isEmpty()) {
-                        wrapper.orderByDesc(Message::getCreateTime);
-                    } else {
-                        // 这里可以解析 orderBySql 添加到 wrapper，简单起见直接使用默认倒序
-                        wrapper.orderByDesc(Message::getCreateTime);
-                    }
-                    return this.page(p, wrapper);
-                });
+        // 复用 selectPageDTO，构造查询条件
+        MessageDTO query = MessageDTO.builder().receiverId(userId).build();
         
-        IPage<MessageDTO> dtoPage = page.convert(this::toDTO);
-        return PageResults.of(dtoPage);
+        IPage<MessageDTO> page = Pages.selectPage(pageQuery, pageProperties, MessageDTO.class, null,
+                (p, orderBy) -> baseMapper.selectPageDTO(p, query));
+        
+        return PageResults.of(page);
+    }
+
+    @Override
+    public PageResult<MessageDTO> page(MessageDTO query, PageQuery pageQuery) {
+        IPage<MessageDTO> page = Pages.selectPage(pageQuery, pageProperties, MessageDTO.class, null,
+                (p, orderBy) -> baseMapper.selectPageDTO(p, query));
+        return PageResults.of(page);
+    }
+
+    @Override
+    public MessageDTO getById(Long id) {
+        // 使用自定义的关联查询方法，确保 senderName 等字段有值
+        MessageDTO dto = baseMapper.selectDTOById(id);
+        if (dto != null) {
+            // 可以在这里做一些额外的数据处理
+        }
+        return dto;
     }
 
     @Override
@@ -68,6 +79,18 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     public void markRead(Long id) {
         this.lambdaUpdate()
             .eq(Message::getId, id)
+            .set(Message::getIsRead, 1)
+            .update();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void markReadBatch(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        this.lambdaUpdate()
+            .in(Message::getId, ids)
             .set(Message::getIsRead, 1)
             .update();
     }
@@ -86,6 +109,18 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     public void delete(Long id) {
         this.lambdaUpdate()
             .eq(Message::getId, id)
+            .set(Message::getDeleted, 1)
+            .update();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteBatch(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        this.lambdaUpdate()
+            .in(Message::getId, ids)
             .set(Message::getDeleted, 1)
             .update();
     }

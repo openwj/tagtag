@@ -22,7 +22,7 @@ const [Modal, modalApi] = useVbenModal({
     try {
       modalApi.setState({ confirmLoading: true });
       // 转换ID类型为数字
-      const menuIds = checkedMenuIds.value.map((id) => Number(id));
+      const menuIds = checkedMenuIds.value.map(Number);
       await assignRoleMenus(roleId.value, menuIds);
       message.success('权限分配成功');
       modalApi.close();
