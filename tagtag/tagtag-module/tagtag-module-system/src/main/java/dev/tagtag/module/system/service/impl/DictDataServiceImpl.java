@@ -46,7 +46,7 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
                 wrapper.like(DictData::getDictLabel, query.getItemName());
             }
             if (query.getStatus() != null) {
-                wrapper.eq(DictData::getStatus, query.getStatus().getCode());
+                wrapper.eq(DictData::getStatus, query.getStatus());
             }
         }
         wrapper.orderByAsc(DictData::getDictSort);

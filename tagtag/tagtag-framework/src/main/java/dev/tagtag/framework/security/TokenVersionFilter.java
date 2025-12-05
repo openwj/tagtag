@@ -3,7 +3,6 @@ package dev.tagtag.framework.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
-import dev.tagtag.common.util.Numbers;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,8 +50,8 @@ public class TokenVersionFilter extends OncePerRequestFilter {
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
             Object uidObj = jwt.getClaims().get(SecurityClaims.UID);
             Object verObj = jwt.getClaims().get(SecurityClaims.VER);
-            Long uid = uidObj == null ? null : Numbers.toLong(uidObj);
-            Long ver = verObj == null ? null : Numbers.toLong(verObj);
+            Long uid = uidObj == null ? null : Long.valueOf(uidObj.toString());
+            Long ver = verObj == null ? null : Long.valueOf(verObj.toString());
             if (uid != null && ver != null) {
                 if (!tokenVersionService.isTokenVersionValid(uid, ver)) {
                     writeUnauthorized(response);

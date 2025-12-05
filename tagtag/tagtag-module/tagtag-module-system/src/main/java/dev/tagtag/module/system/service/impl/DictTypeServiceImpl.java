@@ -41,7 +41,7 @@ public class DictTypeServiceImpl extends ServiceImpl<DictTypeMapper, DictType> i
             wrapper.like(DictType::getType, query.getCode());
         }
         if (query.getStatus() != null) {
-            wrapper.eq(DictType::getStatus, query.getStatus().getCode());
+            wrapper.eq(DictType::getStatus, query.getStatus());
         }
         wrapper.orderByDesc(DictType::getCreateTime);
 

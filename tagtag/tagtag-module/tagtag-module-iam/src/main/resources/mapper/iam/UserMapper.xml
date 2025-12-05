@@ -43,10 +43,10 @@
                     AND u.nickname LIKE CONCAT('%', #{q.nickname}, '%')
                 </if>
                 <if test="q.status != null">
-                    AND u.status = #{q.status.code}
+                    AND u.status = #{q.status}
                 </if>
                 <if test="q.gender != null">
-                    AND u.gender = #{q.gender.code}
+                    AND u.gender = #{q.gender}
                 </if>
                 <if test="q.email != null and q.email != ''">
                     AND u.email LIKE CONCAT('%', #{q.email}, '%')

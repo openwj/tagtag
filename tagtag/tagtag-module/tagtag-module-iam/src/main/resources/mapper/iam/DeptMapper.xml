@@ -19,7 +19,7 @@
                     AND name LIKE CONCAT('%', #{q.name}, '%')
                 </if>
                 <if test="q.status != null">
-                    AND status = #{q.status.code}
+                    AND status = #{q.status}
                 </if>
                 <if test="q.parentId != null">
                     AND parent_id = #{q.parentId}
