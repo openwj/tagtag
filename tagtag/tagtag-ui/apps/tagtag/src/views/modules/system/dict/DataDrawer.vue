@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+
 import { useVbenDrawer } from '@vben/common-ui';
-import { useVbenForm } from '#/adapter/form';
+
 import { message } from 'ant-design-vue';
+
+import { useVbenForm } from '#/adapter/form';
 import { saveDictData, updateDictData } from '#/api/modules/system/dict';
 
 const emit = defineEmits(['success']);
@@ -71,13 +74,11 @@ const [Drawer, drawerApi] = useVbenDrawer({
       await formApi.validate();
       const values = await formApi.getValues();
       drawerApi.setState({ confirmLoading: true });
-      
-      if (isUpdate.value) {
-        await updateDictData({ ...values, id: recordId.value });
-      } else {
-        await saveDictData(values);
-      }
-      
+
+      await (isUpdate.value
+        ? updateDictData({ ...values, id: recordId.value })
+        : saveDictData(values));
+
       message.success(isUpdate.value ? '修改成功' : '新增成功');
       emit('success');
       drawerApi.close();
@@ -90,11 +91,15 @@ const [Drawer, drawerApi] = useVbenDrawer({
    */
   onOpenChange: (isOpen) => {
     if (isOpen) {
-      const { isUpdate: update, record, dictType } = drawerApi.getData<any>() || {};
+      const {
+        isUpdate: update,
+        record,
+        dictType,
+      } = drawerApi.getData<any>() || {};
       isUpdate.value = !!update;
       recordId.value = record?.id;
       currentDictType.value = dictType;
-      
+
       if (update && record) {
         formApi.setValues(record);
       } else {

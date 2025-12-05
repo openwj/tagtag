@@ -3,12 +3,17 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 export const typeColumns: VxeGridProps['columns'] = [
   { type: 'checkbox', width: 50 },
-  { field: 'name', title: '字典名称', minWidth: 150, slots: { default: 'name' } },
+  {
+    field: 'name',
+    title: '字典名称',
+    minWidth: 150,
+    slots: { default: 'name' },
+  },
   { field: 'code', title: '字典类型', minWidth: 150 },
   { field: 'status', title: '状态', width: 100, slots: { default: 'status' } },
   { field: 'remark', title: '备注', minWidth: 150 },
   { field: 'createTime', title: '创建时间', width: 160 },
-  { title: '操作', width: 200, slots: { default: 'action' }, fixed: 'right' },
+  { title: '操作', width: 80, slots: { default: 'action' }, fixed: 'right' },
 ];
 
 export const typeSearchFormSchema: VbenFormProps['schema'] = [
@@ -43,7 +48,7 @@ export const dataColumns: VxeGridProps['columns'] = [
   { field: 'status', title: '状态', width: 100, slots: { default: 'status' } },
   { field: 'remark', title: '备注', minWidth: 150 },
   { field: 'createTime', title: '创建时间', width: 160 },
-  { title: '操作', width: 150, slots: { default: 'action' }, fixed: 'right' },
+  { title: '操作', width: 80, slots: { default: 'action' }, fixed: 'right' },
 ];
 
 export const dataSearchFormSchema: VbenFormProps['schema'] = [

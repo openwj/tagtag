@@ -150,7 +150,7 @@ const dataGridOptions: VxeGridProps = {
     ajax: {
       query: async ({ page }, formValues) => {
         const mergedQuery = currentDictType.value
-          ? { ...(formValues || {}), typeCode: currentDictType.value.code }
+          ? { ...formValues, typeCode: currentDictType.value.code }
           : formValues || {};
         const { list, total } = await getDictDataPage(mergedQuery, page);
         return { list, total };
@@ -183,6 +183,8 @@ const [DataGrid, dataGridApi] = useVbenVxeGrid({
   formOptions: {
     schema: dataSearchFormSchema,
     actionWrapperClass: 'col-span-1',
+    // 是否可展开
+    showCollapseButton: false,
   },
   gridOptions: dataGridOptions,
 });
