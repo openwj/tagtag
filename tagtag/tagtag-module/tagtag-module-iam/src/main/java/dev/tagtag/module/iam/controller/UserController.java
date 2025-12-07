@@ -74,6 +74,23 @@ public class UserController {
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
+    @PutMapping("/me")
+    /**
+     * 本人更新基础信息（头像/昵称/邮箱/电话/性别/生日/备注）
+     * 从会话中获取当前用户ID，仅更新非空字段；返回最新用户信息避免前端再拉取。
+     */
+    public Result<UserDTO> updateMe(@Valid @RequestBody UserDTO user) {
+        Long uid = AuthContext.getCurrentUserId();
+        if (uid == null) {
+            return Result.fail(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+        }
+        user.setId(uid);
+        userService.update(user);
+        UserDTO fresh = userService.getById(uid);
+        if (fresh != null) fresh.setPassword(null);
+        return Result.ok(fresh);
+    }
+
     /** 删除用户 */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.USER_DELETE)

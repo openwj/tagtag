@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { VbenFormSchema } from '#/adapter/form';
-import type { UploadChangeParam } from 'ant-design-vue';
 
 import { computed, onMounted, ref } from 'vue';
 
@@ -8,7 +7,7 @@ import { ProfileBaseSetting } from '@vben/common-ui';
 import { Icon } from '@iconify/vue';
 
 import { getUserInfoApi } from '#/api';
-import { editUser } from '#/api/modules/iam/user';
+import { updateMe } from '#/api/modules/iam/user';
 import { useUserStore } from '@vben/stores';
 import Upload from 'ant-design-vue/es/upload';
 import { preferences } from '@vben/preferences';
@@ -18,6 +17,7 @@ const profileBaseSettingRef = ref();
 const userStore = useUserStore();
 
 const avatarUrl = ref<string>('');
+const uploadingAvatar = ref<boolean>(false);
 const displayedAvatar = computed(() => {
   return (
     avatarUrl.value ||
@@ -98,27 +98,40 @@ onMounted(async () => {
 
 /**
  * 提交基本设置并保存到后端
- * @param values 表单值（昵称/用户名/角色/个人简介等）
+ * @param values 表单值
  */
 async function handleSubmit(values: Record<string, any>) {
-  const uid = userStore.userInfo?.id;
-  if (!uid) return;
-  await editUser({ id: uid, avatar: avatarUrl.value, ...values });
-  // 更新 store 中的用户信息，以便界面即时刷新
-  // 注意：这里假设 editUser 成功后，我们需要手动更新 store 或重新拉取用户信息
-  // 简单起见，我们可以触发一个全局的用户信息刷新，或者直接修改 store
-  message.success('更新成功');
+  const uid = userStore.userInfo?.id ?? userStore.userInfo?.userId;
+  if (!uid) {
+    message.error('用户ID缺失，无法更新');
+    return;
+  }
+  try {
+    const res: any = await updateMe({ id: Number(uid), avatar: avatarUrl.value, ...values });
+    const fresh = res?.data ?? res; // 兼容返回结构
+    if (fresh) {
+      userStore.setUserInfo(fresh);
+    } else {
+      const reload = await getUserInfoApi();
+      userStore.setUserInfo(reload);
+    }
+    message.success('更新成功');
+  } catch (e) {
+    message.error('更新失败');
+  }
 }
 
 /**
- * 头像上传变更事件处理（Ant Upload）
- * @param info Upload 变更参数
+ * 头像文件选择前置处理：阻止组件自动上传，并手动走一次上传
+ * @param file 选择的头像文件
+ * @returns false 阻止 Upload 组件内部上传流程
  */
-async function handleAvatarChange(info: UploadChangeParam) {
-  const raw = info?.file?.originFileObj as File | undefined;
-  if (!raw) return;
+async function handleAvatarBeforeUpload(file: File) {
+  if (uploadingAvatar.value) return false;
+  uploadingAvatar.value = true;
   try {
-    const res = await (await import('#/api/modules/storage/file')).uploadFile(raw);
+    const { uploadFile } = await import('#/api/modules/storage/file');
+    const res = await uploadFile(file);
     const url = res?.url ?? res?.data?.url ?? '';
     if (url) {
       avatarUrl.value = url;
@@ -128,7 +141,10 @@ async function handleAvatarChange(info: UploadChangeParam) {
     }
   } catch (e) {
     message.error('上传失败');
+  } finally {
+    uploadingAvatar.value = false;
   }
+  return false;
 }
 </script>
 <template>
@@ -171,7 +187,7 @@ async function handleAvatarChange(info: UploadChangeParam) {
               :max-count="1"
               accept="image/*"
               :show-upload-list="false"
-              @change="handleAvatarChange"
+              :before-upload="handleAvatarBeforeUpload"
               class="flex h-full w-full items-center justify-center"
             >
               <div class="flex flex-col items-center text-white">
@@ -195,7 +211,7 @@ async function handleAvatarChange(info: UploadChangeParam) {
               :max-count="1"
               accept="image/*"
               :show-upload-list="false"
-              @change="handleAvatarChange"
+              :before-upload="handleAvatarBeforeUpload"
             >
               <button class="btn btn-sm btn-outline">{{$t('page.auth.profile.uploadAvatar')}}</button>
             </Upload>

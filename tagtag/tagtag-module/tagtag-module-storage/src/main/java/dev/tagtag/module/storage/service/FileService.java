@@ -81,7 +81,9 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
         // 计算校验和
         String checksum = calcSha256(file.getBytes());
 
+        String publicId = UUID.randomUUID().toString();
         FileResource fr = new FileResource()
+                .setPublicId(publicId)
                 .setName(fname)
                 .setOriginalName(originalName)
                 .setExt(ext)
@@ -90,12 +92,10 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
                 .setStorageType("local")
                 .setPath(target.toString())
                 .setChecksum(checksum)
+                .setUrl("/api/storage/files/" + publicId + "/download")
                 .setStatus(1)
                 .setDeleted(0);
         this.save(fr);
-        fr.setPublicId(UUID.randomUUID().toString());
-        fr.setUrl("/api/storage/files/" + fr.getPublicId() + "/download");
-        this.updateById(fr);
         return fr;
     }
 
@@ -117,7 +117,9 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
 
         String checksum = calcSha256(content);
 
+        String publicId = UUID.randomUUID().toString();
         FileResource fr = new FileResource()
+                .setPublicId(publicId)
                 .setName(fname)
                 .setOriginalName(filename)
                 .setExt(ext)
@@ -126,12 +128,10 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
                 .setStorageType("local")
                 .setPath(target.toString())
                 .setChecksum(checksum)
+                .setUrl("/api/storage/files/" + publicId + "/download")
                 .setStatus(1)
                 .setDeleted(0);
         this.save(fr);
-        fr.setPublicId(UUID.randomUUID().toString());
-        fr.setUrl("/api/storage/files/" + fr.getPublicId() + "/download");
-        this.updateById(fr);
         return fr;
     }
 

@@ -36,11 +36,7 @@ export async function getFilePage(
  * @param file 文件对象
  */
 export async function uploadFile(file: File) {
-  const form = new FormData();
-  form.append('file', file);
-  return requestClient.post(`${Api.BaseApi}/upload`, form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  return requestClient.upload(`${Api.BaseApi}/upload`, { file });
 }
 
 /**
@@ -78,3 +74,11 @@ export async function getDownloadToken(publicId: string) {
   return requestClient.post(`${Api.BaseApi}/${publicId}/download-token`);
 }
 
+/**
+ * 通过 publicId 授权下载文件为 Blob
+ * @param publicId 文件公共ID
+ * @returns 文件二进制流（Blob）
+ */
+export async function downloadByPublicId(publicId: string) {
+  return requestClient.download(`${Api.BaseApi}/${publicId}/download`);
+}

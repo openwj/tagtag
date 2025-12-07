@@ -6,15 +6,8 @@ import { ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
-import {
-  Button,
-  Dropdown,
-  Menu,
-  message,
-  Modal,
-  Popconfirm,
-  Upload,
-} from 'ant-design-vue';
+import { Button, Dropdown, Menu, message, Modal, Popconfirm } from 'ant-design-vue';
+import Upload from 'ant-design-vue/es/upload';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -22,10 +15,13 @@ import {
   deleteFile,
   getDownloadToken,
   getFilePage,
+  downloadByPublicId,
   uploadFile,
 } from '#/api/modules/storage/file';
 
 const uploadLoading = ref(false);
+// 上传大小上限（与后端 spring.servlet.multipart 保持一致）
+const MAX_UPLOAD_SIZE = 50 * 1024 * 1024;
 
 const searchFormSchema: VbenFormProps['schema'] = [
   {
@@ -105,6 +101,7 @@ const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
 
 /**
  * 处理上传文件
+ * @param file 原始文件对象
  */
 const handleUpload = async (file: File) => {
   uploadLoading.value = true;
@@ -112,6 +109,37 @@ const handleUpload = async (file: File) => {
     await uploadFile(file);
     message.success({ content: '上传成功', duration: 2 });
     gridApi.reload();
+  } catch (e) {
+    message.error({ content: '上传失败', duration: 3 });
+  } finally {
+    uploadLoading.value = false;
+  }
+};
+
+/**
+ * 自定义上传逻辑：避免 Upload 多次触发导致重复请求
+ * @param options Upload 自定义请求参数
+ */
+const onCustomUpload = async (options: any) => {
+  const file = options?.file as File | undefined;
+  if (!file) {
+    options?.onError?.(new Error('未选择文件'));
+    return;
+  }
+  if (file.size > MAX_UPLOAD_SIZE) {
+    message.error({ content: '文件大小超过 50MB 限制', duration: 3 });
+    options?.onError?.(new Error('文件大小超过限制'));
+    return;
+  }
+  uploadLoading.value = true;
+  try {
+    await uploadFile(file);
+    message.success({ content: '上传成功', duration: 2 });
+    gridApi.reload();
+    options?.onSuccess?.({}, file);
+  } catch (e) {
+    message.error({ content: '上传失败', duration: 3 });
+    options?.onError?.(e);
   } finally {
     uploadLoading.value = false;
   }
@@ -157,10 +185,18 @@ const handleBatchDelete = async () => {
 /**
  * 预览文件（新窗口打开）
  */
-const preview = (row: any) => {
-  const url = row.url;
-  if (!url) return;
-  window.open(url, '_blank');
+const preview = async (row: any) => {
+  const publicId = row.publicId;
+  if (!publicId) return;
+  try {
+    const blob = await downloadByPublicId(publicId);
+    const objectUrl = URL.createObjectURL(blob as Blob);
+    window.open(objectUrl, '_blank');
+    // 可选：稍后释放对象URL
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  } catch (e) {
+    message.error({ content: '预览失败', duration: 3 });
+  }
 };
 
 /**
@@ -169,11 +205,19 @@ const preview = (row: any) => {
 const download = async (row: any) => {
   const publicId = row.publicId;
   if (!publicId) return;
-  const { url } = await getDownloadToken(publicId);
-  if (!url) return;
-  const a = document.createElement('a');
-  a.href = url as string;
-  a.click();
+  try {
+    const blob = await downloadByPublicId(publicId);
+    const objectUrl = URL.createObjectURL(blob as Blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = (row.originalName || row.name || 'file') as string;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  } catch (e) {
+    message.error({ content: '下载失败', duration: 3 });
+  }
 };
 </script>
 
@@ -185,11 +229,7 @@ const download = async (row: any) => {
           <Upload
             :max-count="1"
             :show-upload-list="false"
-            :before-upload="() => false"
-            @change="
-              (e: any) =>
-                e?.file?.originFileObj && handleUpload(e.file.originFileObj)
-            "
+            :custom-request="onCustomUpload"
           >
             <Button type="primary" :loading="uploadLoading">
               <template #icon>

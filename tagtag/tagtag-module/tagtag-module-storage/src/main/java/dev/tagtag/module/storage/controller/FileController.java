@@ -54,7 +54,7 @@ public class FileController {
      * @param file 文件
      * @return 上传结果
      */
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Result<FileUploadResult> upload(@RequestPart("file") MultipartFile file) throws Exception {
         FileResource fr = fileService.uploadLocal(file);
         FileUploadResult res = new FileUploadResult()

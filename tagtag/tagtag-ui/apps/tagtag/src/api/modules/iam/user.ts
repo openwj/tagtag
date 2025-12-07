@@ -72,6 +72,14 @@ export function editUser(data: UserApiParams.UserForm) {
 }
 
 /**
+ * 本人更新基础信息
+ * @param data 用户表单数据（包含 id，用于后端确认）
+ */
+export function updateMe(data: UserApiParams.UserForm) {
+  return requestClient.put(`${Api.BaseApi}/me`, data);
+}
+
+/**
  * 删除用户
  * @param id 用户ID
  */

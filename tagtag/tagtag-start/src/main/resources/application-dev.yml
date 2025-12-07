@@ -32,6 +32,10 @@ spring:
           min-idle: 1
   cache:
     type: redis
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 
 mybatis-plus:
