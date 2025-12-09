@@ -33,6 +33,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         response.setStatus(ErrorCode.FORBIDDEN.getCode());
         response.setContentType("application/json;charset=UTF-8");
-        objectMapper.writeValue(response.getWriter(), Result.fail(ErrorCode.FORBIDDEN, accessDeniedException.getMessage()));
+        objectMapper.writeValue(response.getWriter(), Result.forbidden(accessDeniedException.getMessage()));
     }
 }

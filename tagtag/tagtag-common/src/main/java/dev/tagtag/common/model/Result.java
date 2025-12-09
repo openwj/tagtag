@@ -99,6 +99,45 @@ public class Result<T> {
     }
 
     /**
+     * 创建失败结果（仅说明，默认 BAD_REQUEST）
+     * @param message 失败说明
+     * @return 失败结果
+     */
+    public static <T> Result<T> fail(String message) {
+        return Result.<T>builder()
+                .code(ErrorCode.BAD_REQUEST.getCode())
+                .message(message)
+                .timestamp(System.currentTimeMillis())
+                .build();
+    }
+
+    /**
+     * 创建禁止访问失败结果（403）
+     * @param message 失败说明
+     * @return 失败结果
+     */
+    public static <T> Result<T> forbidden(String message) {
+        return Result.<T>builder()
+                .code(ErrorCode.FORBIDDEN.getCode())
+                .message(message)
+                .timestamp(System.currentTimeMillis())
+                .build();
+    }
+
+    /**
+     * 创建未认证失败结果（401）
+     * @param message 失败说明
+     * @return 失败结果
+     */
+    public static <T> Result<T> unauthorized(String message) {
+        return Result.<T>builder()
+                .code(ErrorCode.UNAUTHORIZED.getCode())
+                .message(message)
+                .timestamp(System.currentTimeMillis())
+                .build();
+    }
+
+    /**
      * 判断是否成功（code == SUCCESS）
      * @return 是否成功
      */

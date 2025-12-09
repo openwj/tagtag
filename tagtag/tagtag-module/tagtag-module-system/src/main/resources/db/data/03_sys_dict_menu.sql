@@ -19,6 +19,12 @@ SELECT (SELECT id FROM iam_menu WHERE menu_code='dict:list'), '删除字典类�
 WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dict:type:delete')
   AND EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dict:list');
 
+-- 字典类型读取权限（补齐后端业务码：dictType:read）
+INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, remark, is_keepalive, create_time, create_by, update_by)
+SELECT (SELECT id FROM iam_menu WHERE menu_code='dict:list'), '字典类型读取', 'dictType:read', 2, 1, 5, '按钮权限', 0, CURRENT_TIMESTAMP, 0, 0
+WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dictType:read')
+  AND EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dict:list');
+
 -- 字典数据按钮权限
 INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, remark, is_keepalive, create_time, create_by, update_by)
 SELECT (SELECT id FROM iam_menu WHERE menu_code='dict:list'), '新增字典数据', 'dict:data:add', 2, 1, 40, '按钮权限', 0, CURRENT_TIMESTAMP, 0, 0
@@ -35,10 +41,24 @@ SELECT (SELECT id FROM iam_menu WHERE menu_code='dict:list'), '删除字典数�
 WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dict:data:delete')
   AND EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dict:list');
 
+-- 字典数据读取权限（补齐后端业务码：dictData:read）
+INSERT INTO iam_menu (parent_id, menu_name, menu_code, menu_type, status, sort, remark, is_keepalive, create_time, create_by, update_by)
+SELECT (SELECT id FROM iam_menu WHERE menu_code='dict:list'), '字典数据读取', 'dictData:read', 2, 1, 6, '按钮权限', 0, CURRENT_TIMESTAMP, 0, 0
+WHERE NOT EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dictData:read')
+  AND EXISTS (SELECT 1 FROM iam_menu WHERE menu_code='dict:list');
+
 -- 赋予 ADMIN 角色权限
 INSERT INTO iam_role_menu (role_id, menu_id)
 SELECT r.id, m.id
 FROM iam_role r
 JOIN iam_menu m ON m.menu_code IN ('dict:list', 'dict:type:add', 'dict:type:edit', 'dict:type:delete', 'dict:data:add', 'dict:data:edit', 'dict:data:delete')
+WHERE r.code='ADMIN'
+  AND NOT EXISTS (SELECT 1 FROM iam_role_menu rm WHERE rm.role_id = r.id AND rm.menu_id = m.id);
+
+-- 追加将读取业务权限授权给 ADMIN 角色
+INSERT INTO iam_role_menu (role_id, menu_id)
+SELECT r.id, m.id
+FROM iam_role r
+JOIN iam_menu m ON m.menu_code IN ('dictType:read', 'dictData:read')
 WHERE r.code='ADMIN'
   AND NOT EXISTS (SELECT 1 FROM iam_role_menu rm WHERE rm.role_id = r.id AND rm.menu_id = m.id);

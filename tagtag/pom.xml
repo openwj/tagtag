@@ -57,17 +57,11 @@
                 <scope>import</scope>
             </dependency>
 
-            
-
-
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus.version}</version>
             </dependency>
-
-            
-
 
             <!-- MyBatis Plus -->
             <dependency>
@@ -86,7 +80,6 @@
                 <version>${dynamic-datasource.version}</version>
             </dependency>
 
-
             <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -95,14 +88,12 @@
                 <scope>provided</scope>
             </dependency>
 
-
             <!-- MySQL驱动 -->
             <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>
             </dependency>
-
 
             <!-- 内部模块依赖 -->
             <dependency>

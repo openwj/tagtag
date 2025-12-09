@@ -82,7 +82,7 @@ public class UserController {
     public Result<UserDTO> updateMe(@Valid @RequestBody UserDTO user) {
         Long uid = AuthContext.getCurrentUserId();
         if (uid == null) {
-            return Result.fail(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+            return Result.unauthorized("未登录或会话已过期");
         }
         user.setId(uid);
         userService.update(user);
@@ -160,7 +160,7 @@ public class UserController {
     public Result<Void> changeMyPassword(@Valid @RequestBody ChangePasswordRequest req) {
         Long uid = AuthContext.getCurrentUserId();
         if (uid == null) {
-            return Result.fail(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+            return Result.unauthorized("未登录或会话已过期");
         }
         dev.tagtag.contract.iam.dto.UserDTO me = userService.getById(uid);
         if (me == null || me.getPassword() == null) {
@@ -168,7 +168,7 @@ public class UserController {
         }
         boolean matched = passwordEncoder.matches(req.getOldPassword(), me.getPassword());
         if (!matched) {
-            return Result.fail(ErrorCode.UNAUTHORIZED, "旧密码不正确");
+            return Result.unauthorized("旧密码不正确");
         }
         userService.resetPassword(uid, req.getNewPassword());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);

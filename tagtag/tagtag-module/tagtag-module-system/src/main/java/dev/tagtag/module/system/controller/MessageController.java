@@ -26,7 +26,6 @@ public class MessageController {
      * @param isRead 是否已读（可选）
      */
     @GetMapping
-    @RequirePerm(Permissions.MESSAGE_READ)
     public Result<List<MessageDTO>> list(@RequestParam(required = false) Boolean isRead) {
         Long userId = AuthContext.getCurrentUserId();
         return Result.ok(messageService.listByUserId(userId, isRead));
@@ -36,7 +35,6 @@ public class MessageController {
      * 分页获取当前用户的消息列表
      */
     @PostMapping("/page")
-    @RequirePerm(Permissions.MESSAGE_READ)
     public Result<PageResult<MessageDTO>> page(@RequestBody PageQuery pageQuery) {
         Long userId = AuthContext.getCurrentUserId();
         return Result.ok(messageService.pageByUserId(userId, pageQuery));
@@ -53,13 +51,19 @@ public class MessageController {
     }
 
     /**
-     * 获取消息详情
+     * 获取消息详情（仅允许查看当前用户自己的消息）
+     * @param id 消息ID
+     * @return 消息详情
      */
     @GetMapping("/{id}")
-    @RequirePerm(Permissions.MESSAGE_READ)
-    public Result<MessageDTO> get(@PathVariable("id") Long id) {
-        // 实际生产环境应校验该消息是否属于当前用户
-        return Result.ok(messageService.getById(id));
+    public Result<MessageDTO> get(@PathVariable Long id) {
+        Long userId = AuthContext.getCurrentUserId();
+        MessageDTO dto = messageService.getById(id);
+        if (dto == null) return Result.ok(null);
+        if (dto.getReceiverId() == null || !dto.getReceiverId().equals(userId)) {
+            return Result.forbidden("无权限查看该消息");
+        }
+        return Result.ok(dto);
     }
 
     /**
@@ -67,7 +71,7 @@ public class MessageController {
      */
     @PutMapping("/{id}/read")
     @RequirePerm(Permissions.MESSAGE_UPDATE)
-    public Result<Void> markRead(@PathVariable("id") Long id) {
+    public Result<Void> markRead(@PathVariable Long id) {
         // 实际生产环境应校验该消息是否属于当前用户
         messageService.markRead(id);
         return Result.ok();
@@ -88,7 +92,7 @@ public class MessageController {
      */
     @PutMapping("/{id}/unread")
     @RequirePerm(Permissions.MESSAGE_UPDATE)
-    public Result<Void> markUnread(@PathVariable("id") Long id) {
+    public Result<Void> markUnread(@PathVariable Long id) {
         // 实际生产环境应校验该消息是否属于当前用户
         messageService.markUnread(id);
         return Result.ok();
@@ -120,7 +124,7 @@ public class MessageController {
      */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.MESSAGE_DELETE)
-    public Result<Void> delete(@PathVariable("id") Long id) {
+    public Result<Void> delete(@PathVariable Long id) {
         // 实际生产环境应校验该消息是否属于当前用户
         messageService.delete(id);
         return Result.ok();

@@ -33,6 +33,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         response.setStatus(ErrorCode.UNAUTHORIZED.getCode());
         response.setContentType("application/json;charset=UTF-8");
-        objectMapper.writeValue(response.getWriter(), Result.fail(ErrorCode.UNAUTHORIZED, authException.getMessage()));
+        objectMapper.writeValue(response.getWriter(), Result.unauthorized(authException.getMessage()));
     }
 }

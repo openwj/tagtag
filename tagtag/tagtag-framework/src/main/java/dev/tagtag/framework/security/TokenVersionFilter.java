@@ -73,7 +73,7 @@ public class TokenVersionFilter extends OncePerRequestFilter {
         response.setStatus(ErrorCode.UNAUTHORIZED.getCode());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        Result<Void> body = Result.fail(ErrorCode.UNAUTHORIZED, "凭证无效");
+        Result<Void> body = Result.unauthorized("凭证无效");
         response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 }
