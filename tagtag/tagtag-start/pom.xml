@@ -14,11 +14,6 @@
     <name>TAGTAG Start</name>
     <description> 启动层（Spring Boot 应用入口）</description>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <dependency>

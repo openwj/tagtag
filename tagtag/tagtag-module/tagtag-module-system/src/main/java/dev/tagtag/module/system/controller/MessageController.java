@@ -1,5 +1,6 @@
 package dev.tagtag.module.system.controller;
 
+import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
@@ -8,14 +9,13 @@ import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.framework.security.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 import dev.tagtag.module.system.service.MessageService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sys/message")
+@RequestMapping(GlobalConstants.API_PREFIX + "/sys/message")
 @RequiredArgsConstructor
 public class MessageController {
 
@@ -67,52 +67,88 @@ public class MessageController {
     }
 
     /**
-     * 标记消息已读
+     * 标记消息已读（仅限当前用户自己的消息）
+     * @param id 消息ID
+     * @return 空
      */
     @PutMapping("/{id}/read")
-    @RequirePerm(Permissions.MESSAGE_UPDATE)
     public Result<Void> markRead(@PathVariable Long id) {
-        // 实际生产环境应校验该消息是否属于当前用户
+        Long userId = AuthContext.getCurrentUserId();
+        MessageDTO dto = messageService.getById(id);
+        if (dto == null || dto.getReceiverId() == null || !dto.getReceiverId().equals(userId)) {
+            return Result.forbidden("无权限操作该消息");
+        }
         messageService.markRead(id);
         return Result.ok();
     }
 
     /**
-     * 批量标记消息已读
+     * 批量标记消息已读（仅限当前用户自己的消息）
+     * @param ids 消息ID列表
+     * @return 空
      */
     @PutMapping("/read/batch")
-    @RequirePerm(Permissions.MESSAGE_UPDATE)
     public Result<Void> markReadBatch(@RequestBody List<Long> ids) {
-        messageService.markReadBatch(ids);
+        Long userId = AuthContext.getCurrentUserId();
+        java.util.List<Long> ownIds = new java.util.ArrayList<>();
+        if (ids != null) {
+            for (Long mid : ids) {
+                MessageDTO dto = messageService.getById(mid);
+                if (dto != null && dto.getReceiverId() != null && dto.getReceiverId().equals(userId)) {
+                    ownIds.add(mid);
+                }
+            }
+        }
+        if (!ownIds.isEmpty()) {
+            messageService.markReadBatch(ownIds);
+        }
         return Result.ok();
     }
 
     /**
-     * 标记消息未读
+     * 标记消息未读（仅限当前用户自己的消息）
+     * @param id 消息ID
+     * @return 空
      */
     @PutMapping("/{id}/unread")
-    @RequirePerm(Permissions.MESSAGE_UPDATE)
     public Result<Void> markUnread(@PathVariable Long id) {
-        // 实际生产环境应校验该消息是否属于当前用户
+        Long userId = AuthContext.getCurrentUserId();
+        MessageDTO dto = messageService.getById(id);
+        if (dto == null || dto.getReceiverId() == null || !dto.getReceiverId().equals(userId)) {
+            return Result.forbidden("无权限操作该消息");
+        }
         messageService.markUnread(id);
         return Result.ok();
     }
 
     /**
-     * 批量标记消息未读
+     * 批量标记消息未读（仅限当前用户自己的消息）
+     * @param ids 消息ID列表
+     * @return 空
      */
     @PutMapping("/unread/batch")
-    @RequirePerm(Permissions.MESSAGE_UPDATE)
     public Result<Void> markUnreadBatch(@RequestBody List<Long> ids) {
-        messageService.markUnreadBatch(ids);
+        Long userId = AuthContext.getCurrentUserId();
+        java.util.List<Long> ownIds = new java.util.ArrayList<>();
+        if (ids != null) {
+            for (Long mid : ids) {
+                MessageDTO dto = messageService.getById(mid);
+                if (dto != null && dto.getReceiverId() != null && dto.getReceiverId().equals(userId)) {
+                    ownIds.add(mid);
+                }
+            }
+        }
+        if (!ownIds.isEmpty()) {
+            messageService.markUnreadBatch(ownIds);
+        }
         return Result.ok();
     }
 
     /**
-     * 标记全部已读
+     * 标记全部已读（仅当前用户）
+     * @return 空
      */
     @PutMapping("/read-all")
-    @RequirePerm(Permissions.MESSAGE_UPDATE)
     public Result<Void> markAllRead() {
         Long userId = AuthContext.getCurrentUserId();
         messageService.markAllRead(userId);
