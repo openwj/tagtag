@@ -50,15 +50,12 @@ const searchText = ref('');
  */
 const toggleCheckStrictly = () => {
   checkStrictly.value = !checkStrictly.value;
-  try {
-    localStorage.setItem(
-      storageKeyCheckStrictly,
-      JSON.stringify(checkStrictly.value),
-    );
-  } catch {}
+  localStorage.setItem(
+    storageKeyCheckStrictly,
+    JSON.stringify(checkStrictly.value),
+  );
 };
 
-// ...existing code...
 
 // 字段映射 - 使用TreeDataNode格式，key和title已直接映射
 const fieldNames = {
@@ -136,26 +133,17 @@ const loadMenuTree = async () => {
     rawTreeData.value = converted;
     treeData.value = applyFilter(converted, searchText.value);
 
-    // 数据加载完成后，重新验证已选中的权限key
     if (Array.isArray(props.value) && props.value.length > 0) {
       let validKeys = getValidKeys(props.value);
-
-      // 如果是联动模式，剔除父节点ID，防止权限扩大（Antd Tree会自动选中子节点）
-      // 注意：只有当checkStrictly为false时才需要这样做
       if (!checkStrictly.value) {
         const parentKeys = getAllParentKeys(treeData.value);
         validKeys = validKeys.filter((k) => !parentKeys.includes(k));
       }
-
       checkedKeys.value = validKeys;
-      // 默认展开全部，避免用户以为是空的
       expandAll();
     } else {
-      // 如果没有选中项，也默认展开全部，方便查看
       expandAll();
     }
-  } catch (error) {
-    console.error('加载菜单树失败:', error);
   } finally {
     loading.value = false;
   }
@@ -281,12 +269,10 @@ function applyFilter(source: DataNode[], keyword: string): DataNode[] {
 }
 
 // 初始化持久化的联动设置
-try {
-  const saved = localStorage.getItem(storageKeyCheckStrictly);
-  if (saved !== null) {
-    checkStrictly.value = JSON.parse(saved) === true;
-  }
-} catch {}
+const saved = localStorage.getItem(storageKeyCheckStrictly);
+if (saved !== null) {
+  checkStrictly.value = JSON.parse(saved) === true;
+}
 
 // 初始化加载
 loadMenuTree();

@@ -230,9 +230,7 @@ function navTo(nav: WorkbenchProjectItem | WorkbenchQuickNavItem) {
     return;
   }
   if (nav.url?.startsWith('/')) {
-    router.push(nav.url).catch((error) => {
-      console.error('Navigation failed:', error);
-    });
+    router.push(nav.url);
   } else {
     console.warn(`Unknown URL for navigation item: ${nav.title} -> ${nav.url}`);
   }

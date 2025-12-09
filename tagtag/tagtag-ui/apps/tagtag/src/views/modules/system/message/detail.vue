@@ -31,6 +31,9 @@ const router = useRouter();
 const loading = ref(false);
 const message = ref<MessageItem | null>(null);
 
+/**
+ * 加载消息详情
+ */
 const loadDetail = async () => {
   const id = route.params.id;
   if (!id) return;
@@ -38,8 +41,6 @@ const loadDetail = async () => {
   try {
     const res = await getMessage(id as string);
     message.value = res;
-  } catch (error) {
-    console.error(error);
   } finally {
     loading.value = false;
   }
@@ -49,26 +50,26 @@ const handleBack = () => {
   router.back();
 };
 
-const handleRead = async () => {
+/**
+ * 标记当前消息为已读
+ */
+const handleRead = () => {
   if (!message.value || message.value.isRead) return;
-  try {
-    await markMessageRead(message.value.id);
-    message.value.isRead = true;
+  return markMessageRead(message.value.id).then(() => {
+    message.value!.isRead = true;
     AntMessage.success('已标记为已读');
-  } catch {
-    AntMessage.error('操作失败');
-  }
+  });
 };
 
-const handleDelete = async () => {
+/**
+ * 删除当前消息
+ */
+const handleDelete = () => {
   if (!message.value) return;
-  try {
-    await deleteMessage(message.value.id);
+  return deleteMessage(message.value.id).then(() => {
     AntMessage.success('删除成功');
     router.back();
-  } catch {
-    AntMessage.error('删除失败');
-  }
+  });
 };
 
 const typeInfo = computed(() => {

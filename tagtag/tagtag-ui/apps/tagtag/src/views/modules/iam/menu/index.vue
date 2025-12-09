@@ -53,7 +53,6 @@ const gridOptions: VxeGridProps = {
     enabled: false,
   },
   exportConfig: {},
-  // importConfig: {},
   resizeConfig: {},
   proxyConfig: {
     ajax: {
@@ -67,7 +66,6 @@ const gridOptions: VxeGridProps = {
   toolbarConfig: {
     custom: true,
     export: true,
-    // import: true,
     refresh: true,
     zoom: true,
   },
@@ -158,13 +156,6 @@ const getSelectedRows = () => {
 /**
  * 批量删除菜单
  */
-/**
- * 批量删除菜单
- */
-/**
- * 批量删除菜单
- * @returns void
- */
 const handleBatchDelete = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
@@ -202,13 +193,6 @@ const handleBatchDelete = async () => {
 /**
  * 批量启用菜单
  */
-/**
- * 批量启用菜单
- */
-/**
- * 批量启用菜单
- * @returns void
- */
 const handleBatchEnable = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
@@ -235,13 +219,6 @@ const handleBatchEnable = async () => {
 /**
  * 批量禁用菜单
  */
-/**
- * 批量禁用菜单
- */
-/**
- * 批量禁用菜单
- * @returns void
- */
 const handleBatchDisable = async () => {
   const selectedRows = getSelectedRows();
   if (selectedRows.length === 0) {
@@ -265,11 +242,6 @@ const handleBatchDisable = async () => {
   }
 };
 
-/**
- * 处理状态切换
- * @param row 行数据
- * @param checked 是否选中
- */
 /**
  * 状态切换（乐观更新，失败回滚）
  * @param row 行数据

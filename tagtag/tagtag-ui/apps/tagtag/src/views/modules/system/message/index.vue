@@ -107,14 +107,15 @@ const getSelectedRows = () => {
 };
 
 // 删除消息
-const handleDelete = async (id: number | string) => {
-  try {
-    await deleteMessage(id);
+/**
+ * 删除单条消息
+ * @param id 消息ID
+ */
+const handleDelete = (id: number | string) => {
+  return deleteMessage(id).then(() => {
     message.success('删除成功');
     gridApi.reload();
-  } catch {
-    message.error('删除失败');
-  }
+  });
 };
 
 /**

@@ -100,27 +100,32 @@ onMounted(async () => {
  * 提交基本设置并保存到后端
  * @param values 表单值
  */
+/**
+ * 提交基本设置并保存到后端
+ * @param values 表单值
+ */
 async function handleSubmit(values: Record<string, any>) {
   const uid = userStore.userInfo?.id ?? userStore.userInfo?.userId;
   if (!uid) {
     message.error('用户ID缺失，无法更新');
     return;
   }
-  try {
-    const res: any = await updateMe({ id: Number(uid), avatar: avatarUrl.value, ...values });
-    const fresh = res?.data ?? res; // 兼容返回结构
-    if (fresh) {
-      userStore.setUserInfo(fresh);
-    } else {
-      const reload = await getUserInfoApi();
-      userStore.setUserInfo(reload);
-    }
-    message.success('更新成功');
-  } catch (e) {
-    message.error('更新失败');
+  const res: any = await updateMe({ id: Number(uid), avatar: avatarUrl.value, ...values });
+  const fresh = res?.data ?? res;
+  if (fresh) {
+    userStore.setUserInfo(fresh);
+  } else {
+    const reload = await getUserInfoApi();
+    userStore.setUserInfo(reload);
   }
+  message.success('更新成功');
 }
 
+/**
+ * 头像文件选择前置处理：阻止组件自动上传，并手动走一次上传
+ * @param file 选择的头像文件
+ * @returns false 阻止 Upload 组件内部上传流程
+ */
 /**
  * 头像文件选择前置处理：阻止组件自动上传，并手动走一次上传
  * @param file 选择的头像文件
@@ -136,11 +141,7 @@ async function handleAvatarBeforeUpload(file: File) {
     if (url) {
       avatarUrl.value = url;
       message.success('头像上传成功');
-    } else {
-      message.error('上传失败');
     }
-  } catch (e) {
-    message.error('上传失败');
   } finally {
     uploadingAvatar.value = false;
   }

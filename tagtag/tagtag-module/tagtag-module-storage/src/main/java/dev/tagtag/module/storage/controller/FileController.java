@@ -11,10 +11,9 @@ import dev.tagtag.module.storage.entity.FileResource;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.module.storage.service.FileService;
 import dev.tagtag.framework.security.RequirePerm;
-import dev.tagtag.framework.security.JwtService;
 import dev.tagtag.kernel.constant.Permissions;
-import dev.tagtag.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * 文件管理控制器
@@ -32,10 +30,11 @@ import java.util.Map;
 @RestController
 @RequestMapping(GlobalConstants.API_PREFIX + "/storage/files")
 @RequiredArgsConstructor
+@Slf4j
 public class FileController {
 
     private final FileService fileService;
-    private final JwtService jwtService;
+    
 
     /**
      * 文件分页查询
@@ -67,21 +66,7 @@ public class FileController {
         return Result.ok(res);
     }
 
-    /**
-     * 生成短期下载令牌并返回临时下载链接
-     * @param publicId 文件公共ID
-     */
-    @PostMapping("/{publicId}/download-token")
-    @RequirePerm(Permissions.FILE_DOWNLOAD)
-    public Result<Map<String, String>> generateDownloadToken(@PathVariable("publicId") String publicId) {
-        FileResource fr = this.fileService.lambdaQuery().eq(FileResource::getPublicId, publicId).one();
-        if (fr == null) {
-            return Result.fail(ErrorCode.NOT_FOUND, "文件不存在");
-        }
-        String token = jwtService.generateToken(Map.of("fid", publicId), "file-download", 300);
-        String url = "/api/storage/files/download?token=" + token;
-        return Result.ok(Map.of("token", token, "url", url));
-    }
+    
 
     /**
      * 删除单个文件
@@ -115,10 +100,12 @@ public class FileController {
     public ResponseEntity<Resource> download(@PathVariable("publicId") String publicId) {
         FileResource fr = this.fileService.lambdaQuery().eq(FileResource::getPublicId, publicId).one();
         if (fr == null) {
+            log.warn("download: file not found by publicId={}", publicId);
             return ResponseEntity.notFound().build();
         }
         File file = new File(fr.getPath());
         if (!file.exists()) {
+            log.warn("download: path missing for publicId={}, path={}", publicId, fr.getPath());
             return ResponseEntity.notFound().build();
         }
         Resource resource = new FileSystemResource(file);
@@ -129,36 +116,7 @@ public class FileController {
                 .body(resource);
     }
 
-    /**
-     * 基于令牌的下载接口（令牌有效期 5 分钟）
-     * @param token 下载令牌
-     * @return 文件流
-     */
-    @GetMapping("/download")
-    @RequirePerm(Permissions.FILE_DOWNLOAD)
-    public ResponseEntity<Resource> downloadByToken(@RequestParam("token") String token) {
-        if (!jwtService.validateToken(token)) {
-            return ResponseEntity.status(403).build();
-        }
-        String fid = String.valueOf(jwtService.getClaims(token).getOrDefault("fid", ""));
-        if (fid.isBlank()) {
-            return ResponseEntity.status(400).build();
-        }
-        FileResource fr = this.fileService.lambdaQuery().eq(FileResource::getPublicId, fid).one();
-        if (fr == null) {
-            return ResponseEntity.notFound().build();
-        }
-        File file = new File(fr.getPath());
-        if (!file.exists()) {
-            return ResponseEntity.notFound().build();
-        }
-        Resource resource = new FileSystemResource(file);
-        String filename = fr.getOriginalName() == null ? fr.getName() : fr.getOriginalName();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.parseMediaType(fr.getMimeType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : fr.getMimeType()))
-                .body(resource);
-    }
+    
 
     /**
      * 请求包装：分页与查询条件

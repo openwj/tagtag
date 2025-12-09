@@ -21,14 +21,11 @@ const [Modal, modalApi] = useVbenModal({
   onConfirm: async () => {
     try {
       modalApi.setState({ confirmLoading: true });
-      // 转换ID类型为数字
       const menuIds = checkedMenuIds.value.map(Number);
       await assignRoleMenus(roleId.value, menuIds);
       message.success('权限分配成功');
       modalApi.close();
       emit('success');
-    } catch {
-      message.error('权限分配失败');
     } finally {
       modalApi.setState({ confirmLoading: false });
     }
@@ -47,10 +44,7 @@ const [Modal, modalApi] = useVbenModal({
         try {
           // 获取角色已有的菜单权限
           const ids = await listRoleMenuIds(roleId.value);
-          // 转换为字符串数组，适配 Tree 组件
           checkedMenuIds.value = ids.map(String);
-        } catch {
-          message.error('获取角色权限失败');
         } finally {
           modalApi.setState({ loading: false });
         }

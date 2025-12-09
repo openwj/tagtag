@@ -56,25 +56,6 @@ export function batchDeleteFiles(ids: Array<number | string>) {
 }
 
 /**
- * 下载文件
- * @param id 文件ID
- */
-export function downloadFile(id: number | string) {
-  return requestClient.get(`${Api.BaseApi}/${id}/download`, {
-    // 返回二进制流由调用方处理
-    responseType: 'blob' as any,
-  });
-}
-
-/**
- * 获取下载令牌并返回临时链接
- * @param publicId 文件公共ID
- */
-export async function getDownloadToken(publicId: string) {
-  return requestClient.post(`${Api.BaseApi}/${publicId}/download-token`);
-}
-
-/**
  * 通过 publicId 授权下载文件为 Blob
  * @param publicId 文件公共ID
  * @returns 文件二进制流（Blob）

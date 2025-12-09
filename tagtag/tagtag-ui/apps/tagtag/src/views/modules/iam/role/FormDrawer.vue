@@ -54,30 +54,26 @@ const [Drawer, drawerApi] = useVbenDrawer({
       const name = String(formData?.name || '').trim();
       const selfId = String(roleId.value || '');
       if (code) {
-        try {
-          const existedByCode = await getRoleByCode(code);
-          if (
-            existedByCode &&
-            String(existedByCode.id || '') &&
-            String(existedByCode.id) !== selfId
-          ) {
-            message.error('角色编码已存在');
-            return;
-          }
-        } catch {}
+        const existedByCode = await getRoleByCode(code);
+        if (
+          existedByCode &&
+          String(existedByCode.id || '') &&
+          String(existedByCode.id) !== selfId
+        ) {
+          message.error('角色编码已存在');
+          return;
+        }
       }
       if (name) {
-        try {
-          const existedByName = await getRoleByName(name);
-          if (
-            existedByName &&
-            String(existedByName.id || '') &&
-            String(existedByName.id) !== selfId
-          ) {
-            message.error('角色名称已存在');
-            return;
-          }
-        } catch {}
+        const existedByName = await getRoleByName(name);
+        if (
+          existedByName &&
+          String(existedByName.id || '') &&
+          String(existedByName.id) !== selfId
+        ) {
+          message.error('角色名称已存在');
+          return;
+        }
       }
 
       // 保存角色基本信息并获取返回值（优先使用返回的 id）
@@ -92,10 +88,8 @@ const [Drawer, drawerApi] = useVbenDrawer({
       } else {
         currentRoleId = String(saved?.id || '');
         if (!currentRoleId && formData?.code) {
-          try {
-            const created = await getRoleByCode(String(formData.code));
-            currentRoleId = String(created?.id || '');
-          } catch {}
+          const created = await getRoleByCode(String(formData.code));
+          currentRoleId = String(created?.id || '');
         }
       }
 

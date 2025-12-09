@@ -107,9 +107,12 @@ public class DictTypeServiceImpl extends ServiceImpl<DictTypeMapper, DictType> i
         }
     }
 
+    /**
+     * 刷新字典缓存（当前无缓存实现，为显式 no-op）
+     */
     @Override
     public void refreshCache() {
-        // TODO: 实现缓存刷新逻辑
+        // no-op
     }
 
     private DictTypeDTO toDTO(DictType entity) {

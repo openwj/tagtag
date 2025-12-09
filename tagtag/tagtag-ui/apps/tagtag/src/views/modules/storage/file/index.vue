@@ -13,7 +13,6 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   batchDeleteFiles,
   deleteFile,
-  getDownloadToken,
   getFilePage,
   downloadByPublicId,
   uploadFile,
@@ -100,27 +99,10 @@ const gridOptions: VxeGridProps = {
 const [Grid, gridApi] = useVbenVxeGrid({ formOptions, gridOptions });
 
 /**
- * 处理上传文件
- * @param file 原始文件对象
- */
-const handleUpload = async (file: File) => {
-  uploadLoading.value = true;
-  try {
-    await uploadFile(file);
-    message.success({ content: '上传成功', duration: 2 });
-    gridApi.reload();
-  } catch (e) {
-    message.error({ content: '上传失败', duration: 3 });
-  } finally {
-    uploadLoading.value = false;
-  }
-};
-
-/**
  * 自定义上传逻辑：避免 Upload 多次触发导致重复请求
  * @param options Upload 自定义请求参数
  */
-const onCustomUpload = async (options: any) => {
+const onCustomUpload = (options: any) => {
   const file = options?.file as File | undefined;
   if (!file) {
     options?.onError?.(new Error('未选择文件'));
@@ -132,17 +114,18 @@ const onCustomUpload = async (options: any) => {
     return;
   }
   uploadLoading.value = true;
-  try {
-    await uploadFile(file);
-    message.success({ content: '上传成功', duration: 2 });
-    gridApi.reload();
-    options?.onSuccess?.({}, file);
-  } catch (e) {
-    message.error({ content: '上传失败', duration: 3 });
-    options?.onError?.(e);
-  } finally {
-    uploadLoading.value = false;
-  }
+  uploadFile(file)
+    .then(() => {
+      message.success({ content: '上传成功', duration: 2 });
+      gridApi.reload();
+      options?.onSuccess?.({}, file);
+    })
+    .catch((e) => {
+      options?.onError?.(e);
+    })
+    .finally(() => {
+      uploadLoading.value = false;
+    });
 };
 
 /**
@@ -184,29 +167,26 @@ const handleBatchDelete = async () => {
 
 /**
  * 预览文件（新窗口打开）
+ * @param row 当前行数据
  */
-const preview = async (row: any) => {
+const preview = (row: any) => {
   const publicId = row.publicId;
   if (!publicId) return;
-  try {
-    const blob = await downloadByPublicId(publicId);
+  downloadByPublicId(publicId).then((blob) => {
     const objectUrl = URL.createObjectURL(blob as Blob);
     window.open(objectUrl, '_blank');
-    // 可选：稍后释放对象URL
     setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-  } catch (e) {
-    message.error({ content: '预览失败', duration: 3 });
-  }
+  });
 };
 
 /**
  * 下载文件（令牌换取临时链接）
+ * @param row 当前行数据
  */
-const download = async (row: any) => {
+const download = (row: any) => {
   const publicId = row.publicId;
   if (!publicId) return;
-  try {
-    const blob = await downloadByPublicId(publicId);
+  downloadByPublicId(publicId).then((blob) => {
     const objectUrl = URL.createObjectURL(blob as Blob);
     const a = document.createElement('a');
     a.href = objectUrl;
@@ -215,9 +195,7 @@ const download = async (row: any) => {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-  } catch (e) {
-    message.error({ content: '下载失败', duration: 3 });
-  }
+  });
 };
 </script>
 

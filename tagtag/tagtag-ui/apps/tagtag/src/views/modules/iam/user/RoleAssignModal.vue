@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-
-// import { SearchOutlined } from '@ant-design/icons-vue';
 import { useVbenModal } from '@vben/common-ui';
 
 import { Alert, Spin, Tag, Transfer } from 'ant-design-vue';
@@ -35,9 +33,7 @@ const [Modal, modalApi] = useVbenModal({
 });
 
 // 响应式数据
-const searchKeyword = ref('');
 const selectedRoleIds = ref<string[]>([]);
-// 简化：直接使用原始关键词进行筛选
 
 // 计算属性
 const isBatch = computed(() => !props.user && props.userCount > 0);
@@ -57,18 +53,7 @@ const rolesWithAssignedStatus = computed(() => {
   });
 });
 
-/**
- * 角色筛选（简化版）：仅按名称模糊匹配
- */
-const filteredRoles = computed(() => {
-  const kw = (searchKeyword.value || '').toLowerCase();
-  const list = rolesWithAssignedStatus.value;
-  if (!kw) return list;
-  return list.filter((role: any) => {
-    const name = (role.name || '').toLowerCase();
-    return name.includes(kw);
-  });
-});
+// 移除自定义筛选逻辑，使用 Transfer 内置搜索
 
 const transferData = computed(() => {
   return (rolesWithAssignedStatus.value || []).map((role: any) => ({
@@ -108,8 +93,6 @@ watch(
  * @returns {void}
  */
 const openModal = () => {
-  // 重置搜索关键词
-  searchKeyword.value = '';
   // 设置已分配的角色为选中状态
   selectedRoleIds.value = (props.assignedRoleIds || []).map(String);
 
@@ -233,14 +216,14 @@ defineExpose({
       <div v-else>
         <!-- 无角色提示 -->
         <div
-          v-if="filteredRoles.length === 0"
+          v-if="transferData.length === 0"
           class="py-8 text-center text-gray-500"
         >
           <div class="mb-2">
             <span class="icon-[material-symbols--search-off] text-2xl"></span>
           </div>
           <div>
-            {{ searchKeyword ? '未找到匹配的角色' : '暂无可分配的角色' }}
+            暂无可分配的角色
           </div>
         </div>
 

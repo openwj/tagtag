@@ -87,11 +87,9 @@ const gridOptions: VxeGridProps = {
     columnFilterMethod: ({ column }: any) => column.field !== 'action',
     mode: 'current',
   },
-  // importConfig: {},
   toolbarConfig: {
     custom: true,
     export: true,
-    // import: true,
     refresh: true,
     zoom: true,
   },
@@ -118,20 +116,20 @@ const getSelectedRows = () => {
  * @param row 行数据
  * @param checked 新状态
  */
-const handleStatusChange = async (row: any, checked: boolean) => {
+const handleStatusChange = (row: any, checked: boolean) => {
   const prevStatus = row.status;
-  // 乐观更新到目标状态
   row.status = checked ? 1 : 0;
   row.statusLoading = true;
-  try {
-    await updateRoleStatus(row.id, checked ? 1 : 0);
-    message.success({ content: '状态更新成功', duration: 2 });
-  } catch {
-    // 失败回滚到原状态
-    row.status = prevStatus;
-  } finally {
-    row.statusLoading = false;
-  }
+  return updateRoleStatus(row.id, checked ? 1 : 0)
+    .then(() => {
+      message.success({ content: '状态更新成功', duration: 2 });
+    })
+    .catch(() => {
+      row.status = prevStatus;
+    })
+    .finally(() => {
+      row.statusLoading = false;
+    });
 };
 
 /**
@@ -154,8 +152,6 @@ const handleBatchDelete = async () => {
     });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch {
-    message.error({ content: '批量删除失败', duration: 3 });
   } finally {
     batchLoading.value = false;
   }
@@ -181,8 +177,6 @@ const handleBatchEnable = async () => {
     });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch {
-    message.error({ content: '批量启用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
   }
@@ -208,8 +202,6 @@ const handleBatchDisable = async () => {
     });
     gridApi.grid?.clearCheckboxRow();
     gridApi.reload();
-  } catch {
-    message.error({ content: '批量禁用失败', duration: 3 });
   } finally {
     batchLoading.value = false;
   }

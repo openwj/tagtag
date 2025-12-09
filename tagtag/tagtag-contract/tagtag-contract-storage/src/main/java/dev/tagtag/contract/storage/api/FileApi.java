@@ -41,9 +41,9 @@ public interface FileApi {
     Result<Void> batchDelete(BatchIdsDTO ids);
 
     /**
-     * 下载文件
+     * 查询文件元信息
      * @param id 文件ID
-     * @return 二进制流响应
+     * @return 文件 DTO
      */
     Result<FileDTO> getById(Long id);
 }

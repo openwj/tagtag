@@ -108,50 +108,51 @@ const getSelectedRows = () => {
 };
 
 // 标记已读
-const handleRead = async (row: MessageItem) => {
+/**
+ * 标记单条消息为已读
+ * @param row 消息项
+ */
+const handleRead = (row: MessageItem) => {
   if (row.isRead) return;
-  try {
-    await markMessageRead(row.id);
+  return markMessageRead(row.id).then(() => {
     row.isRead = true;
     message.success('已标记为已读');
-    // 刷新当前行样式
     gridApi.reload();
-  } catch {
-    message.error('操作失败');
-  }
+  });
 };
 
 // 全部已读
-const handleReadAll = async () => {
-  try {
-    await markAllMessageRead();
+/**
+ * 全部标记为已读
+ */
+const handleReadAll = () => {
+  return markAllMessageRead().then(() => {
     message.success('全部已读');
     gridApi.reload();
-  } catch {
-    message.error('操作失败');
-  }
+  });
 };
 
 // 删除消息
-const handleDelete = async (id: number | string) => {
-  try {
-    await deleteMessage(id);
+/**
+ * 删除单条消息
+ * @param id 消息ID
+ */
+const handleDelete = (id: number | string) => {
+  return deleteMessage(id).then(() => {
     message.success('删除成功');
     gridApi.reload();
-  } catch {
-    message.error('删除失败');
-  }
+  });
 };
 
 // 清空消息
-const handleClear = async () => {
-  try {
-    await clearAllMessages();
+/**
+ * 清空所有消息
+ */
+const handleClear = () => {
+  return clearAllMessages().then(() => {
     message.success('清空成功');
     gridApi.reload();
-  } catch {
-    message.error('清空失败');
-  }
+  });
 };
 
 /**

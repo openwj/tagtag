@@ -20,10 +20,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.security.DigestInputStream;
 import java.util.HexFormat;
 
 /**
@@ -62,7 +65,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
     }
 
     /**
-     * 上传文件到本地并入库
+     * 上传文件到本地并入库（流式计算校验和）
      * @param file MultipartFile
      * @return 保存后的实体
      */
@@ -76,10 +79,20 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
         Files.createDirectories(root);
         String fname = System.currentTimeMillis() + "_" + (originalName == null ? "file" : originalName);
         Path target = root.resolve(fname);
-        Files.copy(file.getInputStream(), target);
-
-        // 计算校验和
-        String checksum = calcSha256(file.getBytes());
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+        try (InputStream in = file.getInputStream(); DigestInputStream dis = new DigestInputStream(in, md); OutputStream out = Files.newOutputStream(target)) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = dis.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+        }
+        String checksum = HexFormat.of().formatHex(md.digest());
 
         String publicId = UUID.randomUUID().toString();
         FileResource fr = new FileResource()
@@ -149,6 +162,11 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
         return dto;
     }
 
+    /**
+     * 计算输入字节的 SHA-256 摘要
+     * @param bytes 输入字节数组
+     * @return 十六进制摘要字符串
+     */
     private static String calcSha256(byte[] bytes) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

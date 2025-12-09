@@ -64,12 +64,8 @@ const defaultFormValues = {
   status: true,
 };
 
-// function onSubmit(values: Record<string, any>) {
-//   message.info(JSON.stringify(values)); // 只会执行一次
-// }
 
 const [Form, formApi] = useVbenForm({
-  // handleSubmit: onSubmit,
   schema: formSchema,
   showDefaultActions: false,
   // 大屏一行显示3个，中屏一行显示2个，小屏一行显示1个

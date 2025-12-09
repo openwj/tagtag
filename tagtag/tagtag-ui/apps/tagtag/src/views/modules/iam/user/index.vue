@@ -107,11 +107,9 @@ const gridOptions: VxeGridProps = {
     },
   },
   exportConfig: {},
-  // importConfig: {},
   toolbarConfig: {
     custom: true,
     export: true,
-    // import: true,
     refresh: true,
     zoom: true,
   },
@@ -216,23 +214,27 @@ const handleBatchDelete = async () => {
   });
 };
 
+
 /**
- * 状态切换操作
+ * 状态切换（失败仅回滚，不重复错误提示）
  * @param row 用户行数据
  */
-const handleStatusToggle = async (row: Record<string, any>) => {
+const handleStatusToggle = (row: Record<string, any>) => {
+  const prevStatus = row.status;
   const newStatus = row.status === 1 ? 0 : 1;
   const statusText = newStatus === 1 ? '启用' : '禁用';
   row.statusLoading = true;
-  try {
-    await updateUserStatus(row.id, newStatus);
-    row.status = newStatus;
-    message.success({ content: `用户${statusText}成功`, duration: 2 });
-  } catch {
-    message.error({ content: `用户${statusText}失败`, duration: 3 });
-  } finally {
-    row.statusLoading = false;
-  }
+  return updateUserStatus(row.id, newStatus)
+    .then(() => {
+      row.status = newStatus;
+      message.success({ content: `用户${statusText}成功`, duration: 2 });
+    })
+    .catch(() => {
+      row.status = prevStatus;
+    })
+    .finally(() => {
+      row.statusLoading = false;
+    });
 };
 
 /**
@@ -315,9 +317,12 @@ const handleResetPassword = async (row: Record<string, any>) => {
  * 为单个用户分配角色，加载角色列表和用户已分配角色
  * @param row 用户行数据
  */
+/**
+ * 打开角色分配对话框（加载角色与用户角色）
+ */
 const handleAssignRoles = async (row: Record<string, any>) => {
+  const loadingMessage = message.loading('正在加载角色信息...', 0);
   try {
-    const loadingMessage = message.loading('正在加载角色信息...', 0);
     selectedUserForRole.value = row;
     selectedUsersForBatchRole.value = [];
     selectedRoleIds.value = [];
@@ -330,13 +335,9 @@ const handleAssignRoles = async (row: Record<string, any>) => {
       selectedRoleIds.value = userRolesData?.map((role: any) => role.id) || [];
     }
 
-    loadingMessage();
     roleAssignModalRef.value?.openModal();
-  } catch {
-    message.info({
-      content: '角色分配暂不可用：角色查询接口不可用',
-      duration: 3,
-    });
+  } finally {
+    loadingMessage();
   }
 };
 
@@ -344,14 +345,17 @@ const handleAssignRoles = async (row: Record<string, any>) => {
  * 批量分配角色操作
  * 为多个选中用户批量分配角色，验证选择状态并加载角色列表
  */
+/**
+ * 批量分配角色（加载角色列表）
+ */
 const handleBatchAssignRoles = async () => {
+  const selectedRows = gridApi.grid.getCheckboxRecords();
+  if (!selectedRows || selectedRows.length === 0) {
+    message.warning({ content: '请先选择要分配角色的用户', duration: 3 });
+    return;
+  }
+  const loadingMessage = message.loading('正在加载角色信息...', 0);
   try {
-    const selectedRows = gridApi.grid.getCheckboxRecords();
-    if (!selectedRows || selectedRows.length === 0) {
-      message.warning({ content: '请先选择要分配角色的用户', duration: 3 });
-      return;
-    }
-    const loadingMessage = message.loading('正在加载角色信息...', 0);
     selectedUserForRole.value = null;
     selectedUsersForBatchRole.value = selectedRows;
     selectedRoleIds.value = [];
@@ -359,13 +363,9 @@ const handleBatchAssignRoles = async () => {
     const rolesData = await getAllRoles();
     allRoles.value = rolesData || [];
 
-    loadingMessage();
     roleAssignModalRef.value?.openModal();
-  } catch {
-    message.info({
-      content: '批量分配角色暂不可用：角色查询接口不可用',
-      duration: 3,
-    });
+  } finally {
+    loadingMessage();
   }
 };
 
