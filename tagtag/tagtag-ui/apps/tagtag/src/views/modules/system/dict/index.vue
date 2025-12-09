@@ -84,6 +84,8 @@ const [TypeGrid, typeGridApi] = useVbenVxeGrid({
   formOptions: {
     schema: typeSearchFormSchema,
     actionWrapperClass: 'col-span-1',
+    collapsed: true,
+    showCollapseButton: true,
   },
   gridOptions: typeGridOptions,
   gridEvents: {
@@ -127,6 +129,10 @@ async function handleRefreshCache() {
   message.success('刷新成功');
 }
 
+/**
+ * 选中字典类型后刷新右侧数据表格
+ * @param row 选中的字典类型行
+ */
 function handleTypeSelect(row: any) {
   currentDictType.value = row;
   dataGridApi.reload();
