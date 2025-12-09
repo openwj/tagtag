@@ -1,5 +1,6 @@
 package dev.tagtag.module.iam.controller;
 
+import dev.tagtag.common.model.PageRequest;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.exception.ErrorCode;
@@ -22,7 +23,7 @@ import dev.tagtag.contract.iam.dto.UserOperationRequest;
 import dev.tagtag.contract.iam.dto.ChangePasswordRequest;
 import dev.tagtag.framework.security.context.AuthContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import dev.tagtag.contract.iam.dto.UserPageRequest;
+import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.framework.security.RequirePerm;
 import java.util.List;
 import dev.tagtag.kernel.constant.AppMessages;
@@ -39,15 +40,14 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * 用户分页查询接口（请求体包含查询条件与分页参数）
-     *
-     * @param req 包含 UserQueryDTO 与 PageQuery 的请求对象
+     * 用户分页查询接口（通用分页请求体）
+     * @param req 通用分页请求体，包含查询条件与分页参数
      * @return 分页结果
      */
     @PostMapping("/page")
     @RequirePerm(Permissions.USER_READ)
-    public Result<PageResult<UserDTO>> page(@Valid @RequestBody UserPageRequest req) {
-        PageResult<UserDTO> pr = userService.page(req.getQuery(), req.getPage());
+    public Result<PageResult<UserDTO>> page(@Valid @RequestBody  PageRequest<UserQueryDTO> req) {
+        PageResult<UserDTO> pr = userService.page(req.query(), req.page());
         return Result.ok(pr);
     }
 

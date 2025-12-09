@@ -14,11 +14,6 @@
     <name>TAGTAG Framework</name>
     <description>框架整合层（Spring、MyBatis、Security 等基础设施整合）</description>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <dependency>

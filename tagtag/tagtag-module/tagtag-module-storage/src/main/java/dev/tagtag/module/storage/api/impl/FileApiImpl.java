@@ -4,7 +4,7 @@ import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.storage.api.FileApi;
-import dev.tagtag.contract.storage.dto.BatchIdsDTO;
+import dev.tagtag.common.model.BatchIdsDTO;
 import dev.tagtag.contract.storage.dto.FileDTO;
 import dev.tagtag.contract.storage.dto.FilePageQuery;
 import dev.tagtag.contract.storage.dto.FileUploadResult;

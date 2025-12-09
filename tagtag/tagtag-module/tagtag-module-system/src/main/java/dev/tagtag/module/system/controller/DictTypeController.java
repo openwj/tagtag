@@ -1,12 +1,15 @@
 package dev.tagtag.module.system.controller;
 
-import dev.tagtag.common.model.PageQuery;
+ 
+import dev.tagtag.common.model.PageRequest;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.system.dto.DictTypeDTO;
 import dev.tagtag.contract.system.dto.DictTypeQueryDTO;
 import dev.tagtag.module.system.service.DictTypeService;
+import dev.tagtag.framework.security.RequirePerm;
+import dev.tagtag.kernel.constant.Permissions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,37 +25,43 @@ public class DictTypeController {
 
     /**
      * 字典类型分页查询
-     * @param req 包含查询条件与分页参数
+     * @param req 通用分页请求体，包含查询条件与分页参数
      * @return 分页结果（list/total）
      */
     @PostMapping("/page")
-    public Result<PageResult<DictTypeDTO>> page(@RequestBody DictTypePageRequest req) {
-        return Result.ok(dictTypeService.page(req.getQuery(), req.getPage()));
+    @RequirePerm(Permissions.DICT_TYPE_READ)
+    public Result<PageResult<DictTypeDTO>> page(@RequestBody PageRequest<DictTypeQueryDTO> req) {
+        return Result.ok(dictTypeService.page(req.query(), req.page()));
     }
 
     @GetMapping("/list")
+    @RequirePerm(Permissions.DICT_TYPE_READ)
     public Result<List<DictTypeDTO>> list() {
         return Result.ok(dictTypeService.listAll());
     }
 
     @GetMapping("/{id}")
+    @RequirePerm(Permissions.DICT_TYPE_READ)
     public Result<DictTypeDTO> get(@PathVariable Long id) {
         return Result.ok(dictTypeService.getById(id));
     }
 
     @PostMapping
+    @RequirePerm(Permissions.DICT_TYPE_CREATE)
     public Result<Void> save(@RequestBody @Validated DictTypeDTO dto) {
         dictTypeService.save(dto);
         return Result.ok();
     }
 
     @PutMapping
+    @RequirePerm(Permissions.DICT_TYPE_UPDATE)
     public Result<Void> update(@RequestBody @Validated DictTypeDTO dto) {
         dictTypeService.update(dto);
         return Result.ok();
     }
 
     @DeleteMapping("/{id}")
+    @RequirePerm(Permissions.DICT_TYPE_DELETE)
     public Result<Void> delete(@PathVariable Long id) {
         dictTypeService.delete(id);
         return Result.ok();
@@ -64,35 +73,20 @@ public class DictTypeController {
      * @return 空
      */
     @DeleteMapping
+    @RequirePerm(Permissions.DICT_TYPE_DELETE)
     public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
         dictTypeService.deleteBatch(ids);
         return Result.ok();
     }
 
-    /**
-     * 批量删除字典类型（POST 兼容接口）
-     * 兼容部分网关/代理不支持 DELETE 携带请求体的场景
-     * @param ids 待删除的字典类型 ID 列表
-     * @return 空
-     */
-    @PostMapping("/batch-delete")
-    public Result<Void> batchDeleteByPost(@RequestBody List<Long> ids) {
-        dictTypeService.deleteBatch(ids);
-        return Result.ok();
-    }
+    
 
     @PostMapping("/refresh")
+    @RequirePerm(Permissions.DICT_TYPE_UPDATE)
     public Result<Void> refreshCache() {
         dictTypeService.refreshCache();
         return Result.ok();
     }
 
-    /**
-     * 字典类型分页请求体
-     */
-    @lombok.Data
-    public static class DictTypePageRequest {
-        private DictTypeQueryDTO query;
-        private PageQuery page;
-    }
+    
 }

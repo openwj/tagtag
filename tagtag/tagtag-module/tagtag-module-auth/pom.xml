@@ -14,11 +14,6 @@
     <name>TAGTAG Module Auth</name>
     <description>Auth 业务模块层（业务实现）</description>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <!-- 框架层（Spring Web/Validation/Security 等依赖） -->

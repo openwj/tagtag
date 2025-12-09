@@ -14,11 +14,6 @@
     <name>TAGTAG Kernel</name>
     <description>核心支撑层（业务基础设施、AOP 注解、枚举、工具类）</description>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <!-- 内部模块依赖 -->

@@ -11,9 +11,9 @@ import dev.tagtag.framework.util.PageResults;
 import java.util.UUID;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.storage.entity.FileResource;
+import dev.tagtag.module.storage.convert.FileMapperConvert;
 import dev.tagtag.module.storage.mapper.FileMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -38,6 +38,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
 
     @Value("${storage.local.base-path:uploads}")
     private String basePath;
+    private final FileMapperConvert fileMapperConvert;
 
     /**
      * 分页查询文件
@@ -71,45 +72,8 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
      */
     public FileResource uploadLocal(MultipartFile file) throws IOException {
         String originalName = file.getOriginalFilename();
-        String ext = (originalName != null && originalName.contains(".")) ? originalName.substring(originalName.lastIndexOf('.') + 1) : "";
         String mime = file.getContentType();
-
-        // 构建存储路径
-        Path root = Paths.get(basePath).toAbsolutePath();
-        Files.createDirectories(root);
-        String fname = System.currentTimeMillis() + "_" + (originalName == null ? "file" : originalName);
-        Path target = root.resolve(fname);
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
-        try (InputStream in = file.getInputStream(); DigestInputStream dis = new DigestInputStream(in, md); OutputStream out = Files.newOutputStream(target)) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = dis.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-        }
-        String checksum = HexFormat.of().formatHex(md.digest());
-
-        String publicId = UUID.randomUUID().toString();
-        FileResource fr = new FileResource()
-                .setPublicId(publicId)
-                .setName(fname)
-                .setOriginalName(originalName)
-                .setExt(ext)
-                .setSize(file.getSize())
-                .setMimeType(mime)
-                .setStorageType("local")
-                .setPath(target.toString())
-                .setChecksum(checksum)
-                .setUrl("/api/storage/files/" + publicId + "/download")
-                .setStatus(1)
-                .setDeleted(0);
-        this.save(fr);
-        return fr;
+        return saveLocal(file.getInputStream(), file.getSize(), originalName, mime);
     }
 
     /**
@@ -120,32 +84,9 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
      * @return 保存后的实体
      */
     public FileResource uploadLocal(byte[] content, String filename, String mime) throws IOException {
-        String ext = (filename != null && filename.contains(".")) ? filename.substring(filename.lastIndexOf('.') + 1) : "";
-
-        Path root = Paths.get(basePath).toAbsolutePath();
-        Files.createDirectories(root);
-        String fname = System.currentTimeMillis() + "_" + (filename == null ? "file" : filename);
-        Path target = root.resolve(fname);
-        Files.write(target, content);
-
-        String checksum = calcSha256(content);
-
-        String publicId = UUID.randomUUID().toString();
-        FileResource fr = new FileResource()
-                .setPublicId(publicId)
-                .setName(fname)
-                .setOriginalName(filename)
-                .setExt(ext)
-                .setSize((long) content.length)
-                .setMimeType(mime)
-                .setStorageType("local")
-                .setPath(target.toString())
-                .setChecksum(checksum)
-                .setUrl("/api/storage/files/" + publicId + "/download")
-                .setStatus(1)
-                .setDeleted(0);
-        this.save(fr);
-        return fr;
+        try (InputStream in = new java.io.ByteArrayInputStream(content)) {
+            return saveLocal(in, content.length, filename, mime);
+        }
     }
 
     /**
@@ -154,9 +95,8 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
      * @return DTO
      */
     public FileDTO toDTO(FileResource fr) {
-        FileDTO dto = new FileDTO();
-        BeanUtils.copyProperties(fr, dto);
-        if (fr.getCreateTime() != null) {
+        FileDTO dto = fileMapperConvert.toDTO(fr);
+        if (fr != null && fr.getCreateTime() != null) {
             dto.setCreateTime(fr.getCreateTime().toString());
         }
         return dto;
@@ -167,13 +107,42 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
      * @param bytes 输入字节数组
      * @return 十六进制摘要字符串
      */
-    private static String calcSha256(byte[] bytes) {
+    private FileResource saveLocal(InputStream in, long size, String filename, String mime) throws IOException {
+        String originalName = filename;
+        String ext = (originalName != null && originalName.contains(".")) ? originalName.substring(originalName.lastIndexOf('.') + 1) : "";
+        Path root = Paths.get(basePath).toAbsolutePath();
+        Files.createDirectories(root);
+        String fname = System.currentTimeMillis() + "_" + (originalName == null ? "file" : originalName);
+        Path target = root.resolve(fname);
+        MessageDigest md;
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] out = md.digest(bytes);
-            return HexFormat.of().formatHex(out);
+            md = MessageDigest.getInstance("SHA-256");
         } catch (Exception e) {
-            return "";
+            throw new IOException(e);
         }
+        try (DigestInputStream dis = new DigestInputStream(in, md); OutputStream out = Files.newOutputStream(target)) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = dis.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+        }
+        String checksum = HexFormat.of().formatHex(md.digest());
+        String publicId = UUID.randomUUID().toString();
+        FileResource fr = new FileResource()
+                .setPublicId(publicId)
+                .setName(fname)
+                .setOriginalName(originalName)
+                .setExt(ext)
+                .setSize(size)
+                .setMimeType(mime)
+                .setStorageType("local")
+                .setPath(target.toString())
+                .setChecksum(checksum)
+                .setUrl("/api/storage/files/" + publicId + "/download")
+                .setStatus(1)
+                .setDeleted(0);
+        this.save(fr);
+        return fr;
     }
 }

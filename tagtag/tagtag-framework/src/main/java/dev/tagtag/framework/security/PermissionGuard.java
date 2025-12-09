@@ -26,7 +26,7 @@ public class PermissionGuard {
      */
     @Around("@annotation(rp)")
     public Object around(ProceedingJoinPoint pjp, RequirePerm rp) throws Throwable {
-        String required = Permissions.PREFIX + rp.value();
+        String required = Permissions.authority(rp.value());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) throw new AccessDeniedException("未认证");
         Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
@@ -40,4 +40,3 @@ public class PermissionGuard {
         return pjp.proceed();
     }
 }
-

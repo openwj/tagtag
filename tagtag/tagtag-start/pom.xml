@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>tagtag-start</artifactId>
-    <version>1.0.0</version>
     <packaging>jar</packaging>
     <name>TAGTAG Start</name>
     <description> 启动层（Spring Boot 应用入口）</description>

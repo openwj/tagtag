@@ -2,11 +2,10 @@ package dev.tagtag.module.storage.controller;
 
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
-import dev.tagtag.contract.storage.dto.BatchIdsDTO;
+import dev.tagtag.common.model.BatchIdsDTO;
 import dev.tagtag.contract.storage.dto.FileDTO;
 import dev.tagtag.contract.storage.dto.FilePageQuery;
 import dev.tagtag.contract.storage.dto.FileUploadResult;
-import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.module.storage.entity.FileResource;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.module.storage.service.FileService;
@@ -38,13 +37,12 @@ public class FileController {
 
     /**
      * 文件分页查询
-     * @param query 查询条件
-     * @param page 分页参数
+     * @param req 通用分页请求体，包含查询条件与分页参数
      * @return 分页结果
      */
     @PostMapping("/page")
-    public Result<PageResult<FileDTO>> page(@RequestBody ReqPage req) {
-        PageResult<FileDTO> pr = fileService.pageFiles(req.getQuery(), req.getPage());
+    public Result<PageResult<FileDTO>> page(@RequestBody dev.tagtag.common.model.PageRequest<FilePageQuery> req) {
+        PageResult<FileDTO> pr = fileService.pageFiles(req.query(), req.page());
         return Result.ok(pr);
     }
 
@@ -118,16 +116,5 @@ public class FileController {
 
     
 
-    /**
-     * 请求包装：分页与查询条件
-     */
-    public static class ReqPage {
-        private FilePageQuery query;
-        private PageQuery page;
-
-        public FilePageQuery getQuery() { return query; }
-        public void setQuery(FilePageQuery query) { this.query = query; }
-        public PageQuery getPage() { return page; }
-        public void setPage(PageQuery page) { this.page = page; }
-    }
+    
 }

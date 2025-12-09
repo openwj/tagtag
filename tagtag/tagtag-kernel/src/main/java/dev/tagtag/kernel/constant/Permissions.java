@@ -52,6 +52,31 @@ public final class Permissions {
     /** 文件：下载 */
     public static final String FILE_DOWNLOAD = "file:download";
 
+    /** 字典类型：创建 */
+    public static final String DICT_TYPE_CREATE = "dictType:create";
+    /** 字典类型：更新 */
+    public static final String DICT_TYPE_UPDATE = "dictType:update";
+    /** 字典类型：删除 */
+    public static final String DICT_TYPE_DELETE = "dictType:delete";
+    /** 字典类型：读取 */
+    public static final String DICT_TYPE_READ = "dictType:read";
+
+    /** 字典数据：创建 */
+    public static final String DICT_DATA_CREATE = "dictData:create";
+    /** 字典数据：更新 */
+    public static final String DICT_DATA_UPDATE = "dictData:update";
+    /** 字典数据：删除 */
+    public static final String DICT_DATA_DELETE = "dictData:delete";
+    /** 字典数据：读取 */
+    public static final String DICT_DATA_READ = "dictData:read";
+
+    /** 消息：读取 */
+    public static final String MESSAGE_READ = "message:read";
+    /** 消息：更新（标记已读/未读） */
+    public static final String MESSAGE_UPDATE = "message:update";
+    /** 消息：删除 */
+    public static final String MESSAGE_DELETE = "message:delete";
+
     /**
      * 将业务权限码拼接为完整的 GrantedAuthority 字符串
      * @param code 业务权限码（如 "user:create"）
