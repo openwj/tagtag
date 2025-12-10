@@ -1,230 +1,180 @@
 <script lang="ts" setup>
 import type {
-  WorkbenchProjectItem,
+  AnalysisOverviewItem,
   WorkbenchQuickNavItem,
-  WorkbenchTodoItem,
   WorkbenchTrendItem,
 } from '@vben/common-ui';
 
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
   AnalysisChartCard,
   WorkbenchHeader,
-  WorkbenchProject,
   WorkbenchQuickNav,
-  WorkbenchTodo,
   WorkbenchTrends,
 } from '@vben/common-ui';
+import {
+  SvgBellIcon,
+  SvgCakeIcon,
+  SvgCardIcon,
+  SvgDownloadIcon,
+} from '@vben/icons';
 import { preferences } from '@vben/preferences';
-import { useUserStore } from '@vben/stores';
+import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
+
+import dayjs from 'dayjs';
+
+import { getMessagePage } from '#/api/modules/system/message';
+import {
+  loadFileDistribution,
+  loadOverview,
+  type StatisticsOverview,
+} from '#/api/modules/system/statistics';
+import { $t } from '#/locales';
 
 import AnalyticsVisitsSource from '../analytics/analytics-visits-source.vue';
 
 const userStore = useUserStore();
-
-// 这是一个示例数据，实际项目中需要根据实际情况进行调整
-// url 也可以是内部路由，在 navTo 方法中识别处理，进行内部跳转
-// 例如：url: /dashboard/workspace
-const projectItems: WorkbenchProjectItem[] = [
-  {
-    color: '',
-    content: '不要等待机会，而要创造机会。',
-    date: '2021-04-01',
-    group: '开源组',
-    icon: 'carbon:logo-github',
-    title: 'Github',
-    url: 'https://github.com',
-  },
-  {
-    color: '#3fb27f',
-    content: '现在的你决定将来的你。',
-    date: '2021-04-01',
-    group: '算法组',
-    icon: 'ion:logo-vue',
-    title: 'Vue',
-    url: 'https://vuejs.org',
-  },
-  {
-    color: '#e18525',
-    content: '没有什么才能比努力更重要。',
-    date: '2021-04-01',
-    group: '上班摸鱼',
-    icon: 'ion:logo-html5',
-    title: 'Html5',
-    url: 'https://developer.mozilla.org/zh-CN/docs/Web/HTML',
-  },
-  {
-    color: '#bf0c2c',
-    content: '热情和欲望可以突破一切难关。',
-    date: '2021-04-01',
-    group: 'UI',
-    icon: 'ion:logo-angular',
-    title: 'Angular',
-    url: 'https://angular.io',
-  },
-  {
-    color: '#00d8ff',
-    content: '健康的身体是实现目标的基石。',
-    date: '2021-04-01',
-    group: '技术牛',
-    icon: 'bx:bxl-react',
-    title: 'React',
-    url: 'https://reactjs.org',
-  },
-  {
-    color: '#EBD94E',
-    content: '路是走出来的，而不是空想出来的。',
-    date: '2021-04-01',
-    group: '架构组',
-    icon: 'ion:logo-javascript',
-    title: 'Js',
-    url: 'https://developer.mozilla.org/zh-CN/docs/Web/JavaScript',
-  },
-];
-
-// 同样，这里的 url 也可以使用以 http 开头的外部链接
-const quickNavItems: WorkbenchQuickNavItem[] = [
-  {
-    color: '#1fdaca',
-    icon: 'ion:home-outline',
-    title: '首页',
-    url: '/',
-  },
-  {
-    color: '#6b8afd',
-    icon: 'ion:person-circle-outline',
-    title: '个人中心',
-    url: '/profile',
-  },
-  {
-    color: '#bf0c2c',
-    icon: 'ion:grid-outline',
-    title: '仪表盘',
-    url: '/dashboard',
-  },
-  {
-    color: '#e18525',
-    icon: 'ion:layers-outline',
-    title: '组件',
-    url: '/demos/features/icons',
-  },
-  {
-    color: '#3fb27f',
-    icon: 'ion:settings-outline',
-    title: '系统管理',
-    url: '/demos/features/login-expired', // 这里的 URL 是示例，实际项目中需要根据实际情况进行调整
-  },
-  {
-    color: '#4daf1bc9',
-    icon: 'ion:key-outline',
-    title: '权限管理',
-    url: '/demos/access/page-control',
-  },
-  {
-    color: '#00d8ff',
-    icon: 'ion:bar-chart-outline',
-    title: '图表',
-    url: '/analytics',
-  },
-];
-
-const todoItems = ref<WorkbenchTodoItem[]>([
-  {
-    completed: false,
-    content: `审查最近提交到Git仓库的前端代码，确保代码质量和规范。`,
-    date: '2024-07-30 11:00:00',
-    title: '审查前端代码提交',
-  },
-  {
-    completed: true,
-    content: `检查并优化系统性能，降低CPU使用率。`,
-    date: '2024-07-30 11:00:00',
-    title: '系统性能优化',
-  },
-  {
-    completed: false,
-    content: `进行系统安全检查，确保没有安全漏洞或未授权的访问。 `,
-    date: '2024-07-30 11:00:00',
-    title: '安全检查',
-  },
-  {
-    completed: false,
-    content: `更新项目中的所有npm依赖包，确保使用最新版本。`,
-    date: '2024-07-30 11:00:00',
-    title: '更新项目依赖',
-  },
-  {
-    completed: false,
-    content: `修复用户报告的页面UI显示问题，确保在不同浏览器中显示一致。 `,
-    date: '2024-07-30 11:00:00',
-    title: '修复UI显示问题',
-  },
-]);
-const trendItems: WorkbenchTrendItem[] = [
-  {
-    avatar: 'svg:avatar-1',
-    content: `在 <a>开源组</a> 创建了项目 <a>Vue</a>`,
-    date: '刚刚',
-    title: '威廉',
-  },
-  {
-    avatar: 'svg:avatar-2',
-    content: `关注了 <a>威廉</a> `,
-    date: '1个小时前',
-    title: '艾文',
-  },
-  {
-    avatar: 'svg:avatar-3',
-    content: `发布了 <a>个人动态</a> `,
-    date: '1天前',
-    title: '克里斯',
-  },
-  {
-    avatar: 'svg:avatar-4',
-    content: `发表文章 <a>如何编写一个Vite插件</a> `,
-    date: '2天前',
-    title: 'Vben',
-  },
-  {
-    avatar: 'svg:avatar-1',
-    content: `回复了 <a>杰克</a> 的问题 <a>如何进行项目优化？</a>`,
-    date: '3天前',
-    title: '皮特',
-  },
-  {
-    avatar: 'svg:avatar-2',
-    content: `关闭了问题 <a>如何运行项目</a> `,
-    date: '1周前',
-    title: '杰克',
-  },
-  {
-    avatar: 'svg:avatar-3',
-    content: `发布了 <a>个人动态</a> `,
-    date: '1周前',
-    title: '威廉',
-  },
-  {
-    avatar: 'svg:avatar-4',
-    content: `推送了代码到 <a>Github</a>`,
-    date: '2021-04-01 20:00',
-    title: '威廉',
-  },
-  {
-    avatar: 'svg:avatar-4',
-    content: `发表文章 <a>如何编写使用 Admin Vben</a> `,
-    date: '2021-03-01 20:00',
-    title: 'Vben',
-  },
-];
-
+const accessStore = useAccessStore();
 const router = useRouter();
 
-// 这是一个示例方法，实际项目中需要根据实际情况进行调整
-// This is a sample method, adjust according to the actual project requirements
-function navTo(nav: WorkbenchProjectItem | WorkbenchQuickNavItem) {
+const overviewItems = ref<AnalysisOverviewItem[]>([]);
+const trendItems = ref<WorkbenchTrendItem[]>([]);
+const loading = ref(true);
+const fileDistribution = ref<any[]>([]);
+const statistics = ref<StatisticsOverview>();
+
+// Quick Navigation Items
+const quickNavItems = ref<WorkbenchQuickNavItem[]>([]);
+
+const currentDate = computed(() => {
+  return dayjs().format('YYYY年MM月DD日 dddd');
+});
+
+const greeting = computed(() => {
+  const hour = dayjs().hour();
+  if (hour < 6) return '夜深了，注意休息';
+  if (hour < 9) return '早上好';
+  if (hour < 12) return '上午好';
+  if (hour < 14) return '中午好';
+  if (hour < 17) return '下午好';
+  if (hour < 19) return '傍晚好';
+  return '晚上好';
+});
+
+const welcomeMessage = computed(() => {
+  const hour = dayjs().hour();
+  if (hour < 12) return '开始您一天的工作吧！';
+  if (hour < 18) return '继续您一天的工作吧！';
+  return '工作辛苦了，注意休息！';
+});
+
+onMounted(async () => {
+  try {
+    const [ov, msgs, fileDist] = await Promise.all([
+      loadOverview(),
+      getMessagePage({}, { pageNo: 1, pageSize: 5 }),
+      loadFileDistribution('type'),
+    ]);
+    renderOverview(ov);
+    statistics.value = ov;
+    renderTrends(msgs?.list || []);
+    fileDistribution.value = fileDist;
+    renderQuickNav();
+  } catch (error) {
+    console.error('Failed to load dashboard data:', error);
+  } finally {
+    loading.value = false;
+  }
+});
+
+function renderQuickNav() {
+  const menus = accessStore.accessMenus;
+  const flatMenus: any[] = [];
+
+  function flatten(items: any[]) {
+    for (const item of items) {
+      if (item.children && item.children.length > 0) {
+        flatten(item.children);
+      } else if (item.path && !item.meta?.hideInMenu) {
+        // Exclude Analytics and Dashboard/Workspace from Quick Nav
+        const isExcluded =
+          item.path === '/analytics' ||
+          item.path === '/workspace' ||
+          item.path.startsWith('/workspace/');
+        if (!isExcluded) {
+          flatMenus.push(item);
+        }
+      }
+    }
+  }
+  flatten(menus);
+
+  // Pick top 8 leaf menus
+  const palette = [
+    '#1fdaca',
+    '#6b8afd',
+    '#bf0c2c',
+    '#e18525',
+    '#3fb27f',
+    '#4daf1bc9',
+    '#00d8ff',
+    '#EBD94E',
+  ];
+
+  quickNavItems.value = flatMenus.slice(0, 8).map((menu, index) => ({
+    color: palette[index % palette.length],
+    icon: menu.meta?.icon || 'ion:grid-outline',
+    title: menu.meta?.title || menu.name,
+    url: menu.path,
+  }));
+}
+
+function renderOverview(ov: StatisticsOverview) {
+  overviewItems.value = [
+    {
+      icon: SvgCardIcon,
+      title: $t('page.dashboard.users'),
+      totalTitle: $t('page.dashboard.usersTotal'),
+      totalValue: ov.usersTotal,
+      value: 0, // No daily increment data in overview, simplified
+    },
+    {
+      icon: SvgBellIcon,
+      title: $t('page.dashboard.messages'),
+      totalTitle: $t('page.dashboard.messagesTotal'),
+      totalValue: ov.messagesTotal,
+      value: ov.unreadMessages,
+    },
+    {
+      icon: SvgDownloadIcon,
+      title: $t('page.dashboard.files'),
+      totalTitle: $t('page.dashboard.filesTotal'),
+      totalValue: ov.filesTotal,
+      value: 0,
+    },
+    {
+      icon: SvgCakeIcon,
+      title: $t('page.dashboard.dicts'),
+      totalTitle: $t('page.dashboard.dictsTotal'),
+      totalValue: ov.dictDataTotal,
+      value: ov.dictTypesTotal,
+    },
+  ];
+}
+
+function renderTrends(msgs: any[]) {
+  trendItems.value = msgs.map((msg) => ({
+    avatar: msg.avatar || 'svg:avatar-1',
+    content: msg.content,
+    date: msg.createTime,
+    title: msg.senderName || msg.title || 'System',
+  }));
+}
+
+function navTo(nav: WorkbenchQuickNavItem) {
   if (nav.url?.startsWith('http')) {
     openWindow(nav.url);
     return;
@@ -238,33 +188,80 @@ function navTo(nav: WorkbenchProjectItem | WorkbenchQuickNavItem) {
 </script>
 
 <template>
-  <div class="p-5">
+  <div class="p-5" v-loading="loading">
     <WorkbenchHeader
       :avatar="userStore.userInfo?.avatar || preferences.app.defaultAvatar"
     >
       <template #title>
-        早安,
+        {{ greeting }},
         {{ userStore.userInfo?.nickname || userStore.userInfo?.username }},
-        开始您一天的工作吧！
+        {{ welcomeMessage }}
       </template>
-      <template #description> 今日晴，20℃ - 32℃！ </template>
+      <template #description> {{ currentDate }} </template>
+      <template #extra>
+        <div class="flex flex-col justify-center text-right">
+          <span class="text-foreground/80"> 未读消息 </span>
+          <span class="text-2xl">{{ statistics?.unreadMessages ?? 0 }}/{{ statistics?.messagesTotal ?? 0 }}</span>
+        </div>
+
+        <div class="mx-12 flex flex-col justify-center text-right md:mx-16">
+          <span class="text-foreground/80"> 用户 </span>
+          <span class="text-2xl">{{ statistics?.usersTotal ?? 0 }}</span>
+        </div>
+        <div class="mr-4 flex flex-col justify-center text-right md:mr-10">
+          <span class="text-foreground/80"> 文件 </span>
+          <span class="text-2xl">{{ statistics?.filesTotal ?? 0 }}</span>
+        </div>
+      </template>
     </WorkbenchHeader>
 
-    <div class="mt-5 flex flex-col lg:flex-row">
-      <div class="mr-4 w-full lg:w-3/5">
-        <WorkbenchProject :items="projectItems" title="项目" @click="navTo" />
-        <WorkbenchTrends :items="trendItems" class="mt-5" title="最新动态" />
+    <!-- System Overview Cards -->
+    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        v-for="(item, idx) in overviewItems"
+        :key="idx"
+        class="relative overflow-hidden rounded-xl border bg-card p-5 shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <div
+            class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg"
+          >
+            <component :is="item.icon" class="h-5 w-5" />
+          </div>
+          <div class="text-xs font-medium text-muted-foreground">
+            {{ item.totalTitle }}
+          </div>
+        </div>
+        <div class="mt-4 text-3xl font-bold tracking-tight">
+          {{ item.totalValue }}
+        </div>
+        <div class="mt-2 flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">{{ item.title }}</span>
+          <span
+            v-if="item.value > 0"
+            class="font-medium text-green-600"
+          >
+            +{{ item.value }}
+          </span>
+        </div>
       </div>
-      <div class="w-full lg:w-2/5">
+    </div>
+
+    <div class="mt-5 flex flex-col lg:flex-row gap-5">
+      <div class="w-full lg:w-2/3 flex flex-col gap-5">
+        <WorkbenchTrends
+          :items="trendItems"
+          title="最新消息"
+        />
+      </div>
+      <div class="w-full lg:w-1/3 flex flex-col gap-5">
         <WorkbenchQuickNav
           :items="quickNavItems"
-          class="mt-5 lg:mt-0"
           title="快捷导航"
           @click="navTo"
         />
-        <WorkbenchTodo :items="todoItems" class="mt-5" title="待办事项" />
-        <AnalysisChartCard class="mt-5" title="访问来源">
-          <AnalyticsVisitsSource />
+        <AnalysisChartCard title="文件分布">
+          <AnalyticsVisitsSource :items="fileDistribution" />
         </AnalysisChartCard>
       </div>
     </div>

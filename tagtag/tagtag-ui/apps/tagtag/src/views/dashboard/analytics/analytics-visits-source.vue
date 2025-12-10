@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { EchartsUIType } from '@vben/plugins/echarts';
-import type { DistributionItem } from './use-analytics-data';
+import type { DistributionItem } from '#/api/modules/system/statistics';
 
 import { onMounted, ref, watch } from 'vue';
 

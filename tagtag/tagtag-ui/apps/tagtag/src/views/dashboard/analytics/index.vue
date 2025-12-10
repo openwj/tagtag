@@ -18,13 +18,13 @@ import DistributionCard from './components/DistributionCard.vue';
 import { $t } from '#/locales';
 import { onMounted, ref } from 'vue';
 import {
-  loadOverview,
-  loadTrends,
   loadFileDistribution,
   loadMessageDistribution,
-  type TrendSeries,
+  loadOverview,
+  loadTrends,
   type DistributionItem,
-} from './use-analytics-data';
+  type TrendSeries,
+} from '#/api/modules/system/statistics';
 
 const overviewItems = ref<AnalysisOverviewItem[]>([]);
 
