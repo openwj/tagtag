@@ -77,6 +77,9 @@ public final class Permissions {
     /** 消息：删除 */
     public static final String MESSAGE_DELETE = "message:delete";
 
+    /** 统计：读取 */
+    public static final String STATS_READ = "stats:read";
+
     /**
      * 将业务权限码拼接为完整的 GrantedAuthority 字符串
      * @param code 业务权限码（如 "user:create"）

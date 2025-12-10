@@ -36,9 +36,27 @@
     "loginSuccessDesc": "Welcome"
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Overview",
     "analytics": "Analytics",
-    "workspace": "Workspace"
+    "workspace": "Workspace",
+    "trends": "Trends",
+    "monthVisits": "Monthly Visits",
+    "users": "Users",
+    "usersTotal": "Total Users",
+    "messages": "Messages",
+    "messagesTotal": "Total Messages",
+    "files": "Files",
+    "filesTotal": "Total Files",
+    "dicts": "Dictionaries",
+    "dictsTotal": "Total Dictionaries",
+    "visitCount": "Visit Count",
+    "visitSource": "Visit Source",
+    "lastUpdated": "Last Updated",
+    "sumInRange": "Sum in Range",
+    "avgPerDay": "Avg per Day",
+    "coverageRadar": "System Coverage Radar",
+    "fileDist": "File Distribution",
+    "messageDist": "Message Distribution"
   }
   ,
   "file": {

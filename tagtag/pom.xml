@@ -160,7 +160,7 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- MapStruct / Flyway 统一版本 -->
+            <!-- MapStruct 统一版本 -->
             <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>

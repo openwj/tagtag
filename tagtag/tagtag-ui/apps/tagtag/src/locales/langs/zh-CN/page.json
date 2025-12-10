@@ -38,7 +38,25 @@
   "dashboard": {
     "title": "概览",
     "analytics": "分析页",
-    "workspace": "工作台"
+    "workspace": "工作台",
+    "trends": "趋势",
+    "monthVisits": "月访问量",
+    "users": "用户量",
+    "usersTotal": "总用户量",
+    "messages": "消息",
+    "messagesTotal": "总消息数",
+    "files": "文件",
+    "filesTotal": "总文件数",
+    "dicts": "字典",
+    "dictsTotal": "字典总数",
+    "visitCount": "访问数量",
+    "visitSource": "访问来源",
+    "lastUpdated": "最后更新时间",
+    "sumInRange": "范围合计",
+    "avgPerDay": "日均",
+    "coverageRadar": "系统覆盖雷达",
+    "fileDist": "文件分布",
+    "messageDist": "消息分布"
   }
   ,
   "file": {
