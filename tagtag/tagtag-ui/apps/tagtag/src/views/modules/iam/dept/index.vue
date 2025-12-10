@@ -3,7 +3,6 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 
 import {
   Button,
-  Divider,
   message,
   Popconfirm,
   Switch,
@@ -137,17 +136,19 @@ const handleSuccess = () => {
       table-title-help="公司组织架构信息"
     >
       <template #toolbar-tools>
-        <Button
-          class="flex items-center px-2"
-          type="primary"
-          v-access:code="'dept:create'"
-          @click="handleAdd"
-        >
-          <template #icon>
-            <span class="icon-[lucide--plus] mr-1"></span>
-          </template>
-          新增
-        </Button>
+        <div class="flex items-center gap-3">
+          <Button
+            class="flex items-center px-2"
+            type="primary"
+            v-access:code="'dept:create'"
+            @click="handleAdd"
+          >
+            <template #icon>
+              <span class="icon-[lucide--plus] mr-1"></span>
+            </template>
+            新增
+          </Button>
+        </div>
       </template>
 
       <template #name="{ row }">
@@ -180,7 +181,7 @@ const handleSuccess = () => {
       </template>
 
       <template #action="{ row }">
-        <div class="flex items-center justify-center gap-0.5">
+        <div class="flex items-center justify-center gap-1.5">
           <Tooltip title="新增子部门">
             <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
@@ -191,12 +192,10 @@ const handleSuccess = () => {
               @click="handleAdd(row)"
             >
               <template #icon>
-                <div class="icon-[lucide--plus] text-xs"></div>
+                <span class="icon-[lucide--plus] text-white"></span>
               </template>
             </Button>
           </Tooltip>
-
-          <Divider type="vertical" class="mx-1 h-4" />
 
           <Tooltip title="编辑">
             <Button
@@ -209,12 +208,10 @@ const handleSuccess = () => {
               @click="handleEdit(row)"
             >
               <template #icon>
-                <div class="icon-[lucide--edit] text-xs"></div>
+                <span class="icon-[lucide--edit] text-blue-500"></span>
               </template>
             </Button>
           </Tooltip>
-
-          <Divider type="vertical" class="mx-1 h-4" />
 
           <Popconfirm
             cancel-text="取消"
@@ -234,7 +231,7 @@ const handleSuccess = () => {
                 v-access:code="'dept:delete'"
               >
                 <template #icon>
-                  <div class="icon-[lucide--trash-2] text-xs"></div>
+                  <span class="icon-[lucide--trash-2] text-red-500"></span>
                 </template>
               </Button>
             </Tooltip>

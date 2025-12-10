@@ -9,7 +9,6 @@ import {
   Button,
   message,
   Popconfirm,
-  Space,
   Tag,
   Tooltip,
 } from 'ant-design-vue';
@@ -151,7 +150,7 @@ async function handleBatchDeleteData() {
     <div class="flex-1 overflow-hidden">
       <DataGrid>
         <template #toolbar_buttons>
-          <Space>
+          <div class="flex items-center gap-3">
             <Button
               type="primary"
               :disabled="!props.dictType"
@@ -173,36 +172,41 @@ async function handleBatchDeleteData() {
                 删除
               </Button>
             </Popconfirm>
-          </Space>
+          </div>
         </template>
         <template #status="{ row }">
-          <Tag :color="row.status === 1 ? 'green' : 'red'">
+          <Tag :color="row.status === 1 ? 'green' : 'red'" :bordered="false">
             {{ row.status === 1 ? '正常' : '停用' }}
           </Tag>
         </template>
         <template #action="{ row }">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5">
             <Tooltip title="编辑">
               <Button
-                type="link"
+                class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+                ghost
+                shape="circle"
                 size="small"
+                type="primary"
                 @click="handleOpenDataDrawer(true, row)"
-                class="!p-0"
               >
                 <template #icon>
-                  <span
-                    class="icon-[lucide--edit] text-lg text-blue-500"
-                  ></span>
+                  <span class="icon-[lucide--edit] text-blue-500"></span>
                 </template>
               </Button>
             </Tooltip>
             <Popconfirm title="确认删除？" @confirm="handleDeleteData(row)">
               <Tooltip title="删除">
-                <Button type="link" size="small" danger class="!p-0">
+                <Button
+                  class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
+                  danger
+                  ghost
+                  shape="circle"
+                  size="small"
+                  type="primary"
+                >
                   <template #icon>
-                    <span
-                      class="icon-[lucide--trash-2] text-lg text-red-500"
-                    ></span>
+                    <span class="icon-[lucide--trash-2] text-red-500"></span>
                   </template>
                 </Button>
               </Tooltip>

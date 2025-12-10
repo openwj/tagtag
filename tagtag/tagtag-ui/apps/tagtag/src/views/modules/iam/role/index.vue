@@ -8,7 +8,6 @@ import { Page, useVbenDrawer, useVbenModal } from '@vben/common-ui';
 
 import {
   Button,
-  Divider,
   Dropdown,
   Menu,
   message,
@@ -263,7 +262,7 @@ const handleSuccess = () => {
   <Page auto-content-height>
     <Grid table-title="角色信息" table-title-help="系统角色信息">
       <template #toolbar-tools>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
           <Button
             class="flex items-center px-2"
             type="primary"
@@ -358,17 +357,17 @@ const handleSuccess = () => {
       </template>
 
       <template #roleType="{ row }">
-        <Tag v-if="row.roleType === 1" color="error">
+        <Tag v-if="row.roleType === 1" color="error" :bordered="false">
           <span class="icon-[lucide--shield] mr-1 align-text-bottom"></span>
           系统角色
         </Tag>
 
-        <Tag v-else-if="row.roleType === 2" color="processing">
+        <Tag v-else-if="row.roleType === 2" color="processing" :bordered="false">
           <span class="icon-[lucide--briefcase] mr-1 align-text-bottom"></span>
           业务角色
         </Tag>
 
-        <Tag v-else color="default">
+        <Tag v-else color="default" :bordered="false">
           <span
             class="icon-[lucide--help-circle] mr-1 align-text-bottom"
           ></span>
@@ -398,7 +397,7 @@ const handleSuccess = () => {
       </template>
 
       <template #action="{ row }">
-        <div class="flex items-center justify-center gap-0.5">
+        <div class="flex items-center justify-center gap-1.5">
           <Tooltip title="分配权限">
             <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
@@ -411,12 +410,10 @@ const handleSuccess = () => {
               aria-label="分配权限"
             >
               <template #icon>
-                <div class="icon-[lucide--shield-check] text-xs"></div>
+                <span class="icon-[lucide--shield-check] text-purple-500"></span>
               </template>
             </Button>
           </Tooltip>
-
-          <Divider type="vertical" class="mx-1 h-4" />
 
           <Tooltip title="编辑角色">
             <Button
@@ -430,12 +427,10 @@ const handleSuccess = () => {
               aria-label="编辑角色"
             >
               <template #icon>
-                <div class="icon-[lucide--edit] text-xs"></div>
+                <span class="icon-[lucide--edit] text-blue-500"></span>
               </template>
             </Button>
           </Tooltip>
-
-          <Divider type="vertical" class="mx-1 h-4" />
 
           <Popconfirm
             cancel-text="取消"
@@ -457,7 +452,7 @@ const handleSuccess = () => {
                 aria-label="删除角色"
               >
                 <template #icon>
-                  <div class="icon-[lucide--trash-2] text-xs"></div>
+                  <span class="icon-[lucide--trash-2] text-red-500"></span>
                 </template>
               </Button>
             </Tooltip>

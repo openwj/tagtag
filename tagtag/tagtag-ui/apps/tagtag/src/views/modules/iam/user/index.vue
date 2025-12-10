@@ -462,7 +462,7 @@ function handleClearDept() {
       <div class="w-5/6">
         <Grid table-title="用户信息" table-title-help="系统用户信息">
           <template #toolbar-tools>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
               <div v-if="selectedDeptId" class="flex items-center gap-2">
                 <Tag color="blue">已按部门筛选</Tag>
                 <Tooltip title="清除部门筛选">
@@ -495,7 +495,7 @@ function handleClearDept() {
                       v-access:code="'user:delete'"
                       @click="handleBatchDelete"
                     >
-                      <div class="icon-[lucide--trash-2] mr-2"></div>
+                      <span class="icon-[lucide--trash-2] mr-2"></span>
                       批量删除
                     </Menu.Item>
                     <Menu.Item
@@ -503,7 +503,7 @@ function handleClearDept() {
                       v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(1)"
                     >
-                      <div class="icon-[lucide--check-circle] mr-2"></div>
+                      <span class="icon-[lucide--check-circle] mr-2"></span>
                       批量启用
                     </Menu.Item>
                     <Menu.Item
@@ -511,7 +511,7 @@ function handleClearDept() {
                       v-access:code="'user:update'"
                       @click="handleBatchStatusUpdate(0)"
                     >
-                      <div class="icon-[lucide--x-circle] mr-2"></div>
+                      <span class="icon-[lucide--x-circle] mr-2"></span>
                       批量禁用
                     </Menu.Item>
                     <Menu.Item
@@ -519,7 +519,7 @@ function handleClearDept() {
                       v-access:code="'user:assignRole'"
                       @click="handleBatchAssignRoles"
                     >
-                      <div class="icon-[lucide--users] mr-2"></div>
+                      <span class="icon-[lucide--users] mr-2"></span>
                       批量分配角色
                     </Menu.Item>
                   </Menu>
@@ -602,7 +602,7 @@ function handleClearDept() {
                   aria-label="编辑用户"
                 >
                   <template #icon>
-                    <div class="icon-[lucide--edit] text-blue-500"></div>
+                    <span class="icon-[lucide--edit] text-blue-500"></span>
                   </template>
                 </Button>
               </Tooltip>
@@ -618,7 +618,7 @@ function handleClearDept() {
                   aria-label="重置密码"
                 >
                   <template #icon>
-                    <div class="icon-[lucide--lock] text-orange-500"></div>
+                    <span class="icon-[lucide--lock] text-orange-500"></span>
                   </template>
                 </Button>
               </Tooltip>
@@ -634,7 +634,7 @@ function handleClearDept() {
                   aria-label="分配角色"
                 >
                   <template #icon>
-                    <div class="icon-[lucide--user-plus] text-purple-500"></div>
+                    <span class="icon-[lucide--user-plus] text-purple-500"></span>
                   </template>
                 </Button>
               </Tooltip>
@@ -658,7 +658,7 @@ function handleClearDept() {
                     aria-label="删除用户"
                   >
                     <template #icon>
-                      <div class="icon-[lucide--trash-2] text-red-500"></div>
+                      <span class="icon-[lucide--trash-2] text-red-500"></span>
                     </template>
                   </Button>
                 </Tooltip>

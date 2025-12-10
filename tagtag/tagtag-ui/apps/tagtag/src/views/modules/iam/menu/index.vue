@@ -9,7 +9,6 @@ import { Page, useVbenModal } from '@vben/common-ui';
 import { Icon } from '@iconify/vue';
 import {
   Button,
-  Divider,
   Dropdown,
   Menu,
   message,
@@ -385,7 +384,7 @@ const handleCollapseAllMenus = async () => {
               class="flex items-center justify-center"
               @click="handleExpandAllMenus"
             >
-              <span class="icon-[material-symbols--unfold-more]"></span>
+              <span class="icon-[lucide--expand]"></span>
             </Button>
           </Tooltip>
           <Tooltip title="收起全部">
@@ -395,7 +394,7 @@ const handleCollapseAllMenus = async () => {
               class="flex items-center justify-center"
               @click="handleCollapseAllMenus"
             >
-              <span class="icon-[material-symbols--unfold-less]"></span>
+              <span class="icon-[lucide--fold-vertical]"></span>
             </Button>
           </Tooltip>
         </div>
@@ -484,7 +483,7 @@ const handleCollapseAllMenus = async () => {
 
       <template #toolbar-actions> </template>
       <template #action="{ row }">
-        <div class="flex items-center justify-center gap-0.5">
+        <div class="flex items-center justify-center gap-1.5">
           <Tooltip title="新增子菜单">
             <Button
               class="flex h-7 w-7 items-center justify-center p-0 transition-transform hover:scale-110 hover:shadow-sm"
@@ -496,12 +495,10 @@ const handleCollapseAllMenus = async () => {
               @click="handleAdd(row)"
             >
               <template #icon>
-                <div class="icon-[lucide--plus] text-xs"></div>
+                <span class="icon-[lucide--plus] text-white"></span>
               </template>
             </Button>
           </Tooltip>
-
-          <Divider type="vertical" class="mx-1 h-4" />
 
           <Tooltip title="编辑菜单">
             <Button
@@ -515,12 +512,10 @@ const handleCollapseAllMenus = async () => {
               @click="handleEdit(row)"
             >
               <template #icon>
-                <div class="icon-[lucide--edit] text-xs"></div>
+                <span class="icon-[lucide--edit] text-blue-500"></span>
               </template>
             </Button>
           </Tooltip>
-
-          <Divider type="vertical" class="mx-1 h-4" />
 
           <Popconfirm
             cancel-text="取消"
@@ -542,7 +537,7 @@ const handleCollapseAllMenus = async () => {
                 v-access:code="'menu:delete'"
               >
                 <template #icon>
-                  <div class="icon-[lucide--trash-2] text-xs"></div>
+                  <span class="icon-[lucide--trash-2] text-red-500"></span>
                 </template>
               </Button>
             </Tooltip>
