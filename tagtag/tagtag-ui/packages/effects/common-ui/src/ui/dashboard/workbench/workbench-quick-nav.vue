@@ -30,27 +30,27 @@ defineEmits(['click']);
     <CardHeader class="py-4">
       <CardTitle class="text-lg">{{ title }}</CardTitle>
     </CardHeader>
-    <CardContent class="flex flex-wrap p-0">
-      <template v-for="(item, index) in items" :key="item.title">
-        <div
-          :class="{
-            'border-r-0': index % 3 === 2,
-            'border-b-0': index < 3,
-            'pb-4': index > 2,
-            'rounded-bl-xl': index === items.length - 3,
-            'rounded-br-xl': index === items.length - 1,
-          }"
-          class="flex-col-center border-border group w-1/3 cursor-pointer border-r border-t py-8 hover:shadow-xl"
-          @click="$emit('click', item)"
-        >
-          <VbenIcon
-            :color="item.color"
-            :icon="item.icon"
-            class="size-7 transition-all duration-300 group-hover:scale-125"
-          />
-          <span class="text-md mt-2 truncate">{{ item.title }}</span>
-        </div>
-      </template>
+    <CardContent class="p-4 pt-0">
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+        <template v-for="(item, index) in items" :key="item.title">
+          <div
+            class="group flex flex-col items-center justify-center rounded-lg border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-md cursor-pointer"
+            @click="$emit('click', item)"
+          >
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/5 transition-colors group-hover:bg-primary/10"
+            >
+              <VbenIcon
+                :icon="item.icon"
+                class="size-6 text-primary transition-transform duration-300 group-hover:scale-110"
+              />
+            </div>
+            <span class="mt-3 truncate text-sm font-medium text-foreground/80 group-hover:text-primary">
+              {{ item.title }}
+            </span>
+          </div>
+        </template>
+      </div>
     </CardContent>
   </Card>
 </template>
