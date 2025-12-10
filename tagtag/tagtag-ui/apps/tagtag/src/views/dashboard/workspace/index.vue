@@ -126,7 +126,7 @@ function renderQuickNav() {
 
   quickNavItems.value = flatMenus.slice(0, 8).map((menu, index) => ({
     color: palette[index % palette.length],
-    icon: menu.meta?.icon || 'ion:grid-outline',
+    icon: menu.icon || menu.meta?.icon || 'ion:grid-outline',
     title: menu.meta?.title || menu.name,
     url: menu.path,
   }));
@@ -247,6 +247,14 @@ function navTo(nav: WorkbenchQuickNavItem) {
       </div>
     </div>
 
+    <div class="mt-5">
+      <WorkbenchQuickNav
+        :items="quickNavItems"
+        title="快捷导航"
+        @click="navTo"
+      />
+    </div>
+
     <div class="mt-5 flex flex-col lg:flex-row gap-5">
       <div class="w-full lg:w-2/3 flex flex-col gap-5">
         <WorkbenchTrends
@@ -255,11 +263,6 @@ function navTo(nav: WorkbenchQuickNavItem) {
         />
       </div>
       <div class="w-full lg:w-1/3 flex flex-col gap-5">
-        <WorkbenchQuickNav
-          :items="quickNavItems"
-          title="快捷导航"
-          @click="navTo"
-        />
         <AnalysisChartCard title="文件分布">
           <AnalyticsVisitsSource :items="fileDistribution" />
         </AnalysisChartCard>
