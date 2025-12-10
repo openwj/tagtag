@@ -218,30 +218,31 @@ export const formSchema: VbenFormProps['schema'] = [
     component: 'Input',
     fieldName: 'path',
     label: '路由地址',
-    rules: z
-      .string()
-      .min(1, '请输入路由地址')
-      .max(200, '路由地址不能超过200个字符'),
     componentProps: {
       placeholder: '请输入路由地址，如：/system/menu',
       maxlength: 200,
     },
+    help: '访问的路由地址，如：`user`，外链时作为路由 key，如：`/external/link`',
     dependencies: {
       show(values) {
         return values.menuType !== 2;
       },
+      rules(values) {
+        return values.isExternal
+          ? z.string().optional()
+          : z
+              .string()
+              .min(1, '请输入路由地址')
+              .max(200, '路由地址不能超过200个字符');
+      },
       // 随意一个字段改变时，都会触发
-      triggerFields: ['menuType'],
+      triggerFields: ['menuType', 'isExternal'],
     },
   },
   {
     component: 'Input',
     fieldName: 'component',
     label: '组件路径',
-    rules: z
-      .string()
-      .min(1, '请输入组件路径')
-      .max(200, '组件路径不能超过200个字符'),
     componentProps: {
       placeholder: '请输入组件路径，如：/views/system/menu/index',
       maxlength: 200,
@@ -249,10 +250,18 @@ export const formSchema: VbenFormProps['schema'] = [
     formItemClass: 'col-span-2',
     dependencies: {
       show(values) {
-        return values.menuType === 1;
+        return values.menuType === 1 && !values.isExternal;
+      },
+      rules(values) {
+        return values.isExternal
+          ? z.string().optional()
+          : z
+              .string()
+              .min(1, '请输入组件路径')
+              .max(200, '组件路径不能超过200个字符');
       },
       // 随意一个字段改变时，都会触发
-      triggerFields: ['menuType'],
+      triggerFields: ['menuType', 'isExternal'],
     },
   },
   {
@@ -262,8 +271,8 @@ export const formSchema: VbenFormProps['schema'] = [
       checkedChildren: '显示',
       unCheckedChildren: '隐藏',
     },
-    fieldName: 'isHidden',
-    label: '是否隐藏',
+    fieldName: 'showInMenu',
+    label: '是否显示',
     dependencies: {
       show(values) {
         return values.menuType !== 2;
@@ -271,7 +280,7 @@ export const formSchema: VbenFormProps['schema'] = [
       // 随意一个字段改变时，都会触发
       triggerFields: ['menuType'],
     },
-    defaultValue: 0,
+    defaultValue: true,
   },
   {
     component: 'Switch',
@@ -280,7 +289,7 @@ export const formSchema: VbenFormProps['schema'] = [
       checkedChildren: '启用',
       unCheckedChildren: '禁用',
     },
-    fieldName: 'isKeepalive',
+    fieldName: 'keepAlive',
     label: '是否缓存',
     dependencies: {
       show(values) {
@@ -289,7 +298,7 @@ export const formSchema: VbenFormProps['schema'] = [
       // 随意一个字段改变时，都会触发
       triggerFields: ['menuType'],
     },
-    defaultValue: 0,
+    defaultValue: false,
   },
   {
     component: 'Switch',
@@ -307,17 +316,12 @@ export const formSchema: VbenFormProps['schema'] = [
       // 随意一个字段改变时，都会触发
       triggerFields: ['menuType'],
     },
-    defaultValue: 0,
+    defaultValue: false,
   },
   {
     component: 'Input',
-    fieldName: 'externalUrl',
+    fieldName: 'link',
     label: '外链地址',
-    rules: z
-      .string()
-      .max(500, '外链地址不能超过500个字符')
-      .url('请输入有效的URL地址')
-      .optional(),
     componentProps: {
       placeholder: '请输入外链地址，如：https://www.example.com',
       maxlength: 500,
@@ -325,7 +329,16 @@ export const formSchema: VbenFormProps['schema'] = [
     formItemClass: 'col-span-2',
     dependencies: {
       show(values) {
-        return values.isExternal === 1;
+        return values.isExternal;
+      },
+      rules(values) {
+        return values.isExternal
+          ? z
+              .string()
+              .min(1, '请输入外链地址')
+              .max(500, '外链地址不能超过500个字符')
+              .url('请输入有效的URL地址')
+          : z.string().optional();
       },
       // 随意一个字段改变时，都会触发
       triggerFields: ['isExternal'],
@@ -354,6 +367,6 @@ export const formSchema: VbenFormProps['schema'] = [
     },
     fieldName: 'status',
     label: '状态',
-    defaultValue: 1,
+    defaultValue: true,
   },
 ];

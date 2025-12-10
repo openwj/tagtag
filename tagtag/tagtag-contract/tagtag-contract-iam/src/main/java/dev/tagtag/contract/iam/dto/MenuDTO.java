@@ -34,10 +34,11 @@ public class MenuDTO {
     private Integer status;
     /** 0目录 1菜单 2按钮 */
     private Integer menuType;
-    private Integer isHidden;
-    private Integer isExternal;
-    private String externalUrl;
-    private Integer isKeepalive;
+    
+    private Boolean hideInMenu;
+    private String link;
+    private String iframeSrc;
+    private Boolean keepAlive;
 
     /** 树结构子节点（树接口返回时使用） */
     private List<MenuDTO> children;

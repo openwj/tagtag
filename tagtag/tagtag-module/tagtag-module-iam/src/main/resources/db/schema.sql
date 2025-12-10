@@ -64,11 +64,11 @@ CREATE TABLE iam_menu (
   sort INT NOT NULL DEFAULT 0,
   status TINYINT(1) NOT NULL DEFAULT 1,
   menu_type TINYINT(1) NOT NULL DEFAULT 1,
-  is_hidden TINYINT(1) NOT NULL DEFAULT 0,
-  is_external TINYINT(1) NOT NULL DEFAULT 0,
-  external_url VARCHAR(500) DEFAULT NULL,
+  hide_in_menu TINYINT(1) NOT NULL DEFAULT 0,
+  link VARCHAR(500) DEFAULT NULL,
+  iframe_src VARCHAR(500) DEFAULT NULL,
   remark VARCHAR(500) DEFAULT NULL,
-  is_keepalive TINYINT(1) NOT NULL DEFAULT 0,
+  keep_alive TINYINT(1) NOT NULL DEFAULT 0,
   create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   create_by BIGINT DEFAULT NULL,
   update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -80,8 +80,7 @@ CREATE TABLE iam_menu (
   KEY idx_status (status) USING BTREE,
   KEY idx_sort (sort) USING BTREE,
   KEY idx_menu_type (menu_type) USING BTREE,
-  KEY idx_is_hidden (is_hidden) USING BTREE,
-  KEY idx_is_external (is_external) USING BTREE,
+  KEY idx_hide_in_menu (hide_in_menu) USING BTREE,
   KEY idx_create_time (create_time) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -5,7 +5,14 @@ import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +93,79 @@ public class GlobalExceptionHandler {
         if (msg.isBlank()) msg = "参数约束违反";
         Result<Void> body = Result.fail(ErrorCode.UNPROCESSABLE_ENTITY, msg, errors);
         return ResponseEntity.status(ErrorCode.UNPROCESSABLE_ENTITY.getCode()).body(body);
+    }
+
+    /**
+     * 处理数据库唯一键冲突异常
+     * @param ex 异常
+     * @return 409 响应体
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<Result<Void>> handleDuplicateKey(DuplicateKeyException ex) {
+        log.warn("Database duplicate key exception: {}", ex.getMessage());
+        Result<Void> body = Result.fail(ErrorCode.CONFLICT, "数据已存在，请检查唯一性约束");
+        return ResponseEntity.status(ErrorCode.CONFLICT.getCode()).body(body);
+    }
+
+    /**
+     * 处理数据库数据完整性异常（外键约束、Data too long等）
+     * @param ex 异常
+     * @return 409 响应体
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Result<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.warn("Database integrity violation: {}", ex.getMessage());
+        Result<Void> body = Result.fail(ErrorCode.CONFLICT, "数据完整性冲突，请检查数据依赖");
+        return ResponseEntity.status(ErrorCode.CONFLICT.getCode()).body(body);
+    }
+
+    /**
+     * 处理不支持的HTTP方法
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Result<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        String msg = "不支持的方法: " + ex.getMethod();
+        Result<Void> body = Result.fail(ErrorCode.METHOD_NOT_ALLOWED, msg);
+        return ResponseEntity.status(ErrorCode.METHOD_NOT_ALLOWED.getCode()).body(body);
+    }
+
+    /**
+     * 处理不支持的媒体类型
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<Result<Void>> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
+        String msg = "不支持的媒体类型: " + ex.getContentType();
+        Result<Void> body = Result.fail(ErrorCode.UNSUPPORTED_MEDIA_TYPE, msg);
+        return ResponseEntity.status(ErrorCode.UNSUPPORTED_MEDIA_TYPE.getCode()).body(body);
+    }
+
+    /**
+     * 处理请求体不可读（JSON格式错误等）
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Result<Void>> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Request body not readable: {}", ex.getMessage());
+        Result<Void> body = Result.fail(ErrorCode.BAD_REQUEST, "请求体格式错误");
+        return ResponseEntity.status(ErrorCode.BAD_REQUEST.getCode()).body(body);
+    }
+
+    /**
+     * 处理缺少请求参数
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Result<Void>> handleMissingParam(MissingServletRequestParameterException ex) {
+        String msg = "缺少必填参数: " + ex.getParameterName();
+        Result<Void> body = Result.fail(ErrorCode.BAD_REQUEST, msg);
+        return ResponseEntity.status(ErrorCode.BAD_REQUEST.getCode()).body(body);
+    }
+
+    /**
+     * 处理404未找到（需配置 spring.mvc.throw-exception-if-no-handler-found=true）
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Result<Void>> handleNoHandlerFound(NoHandlerFoundException ex) {
+        Result<Void> body = Result.fail(ErrorCode.NOT_FOUND, "资源不存在: " + ex.getRequestURL());
+        return ResponseEntity.status(ErrorCode.NOT_FOUND.getCode()).body(body);
     }
 
     /**

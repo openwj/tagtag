@@ -199,10 +199,10 @@ public class AuthController {
                 copy.setSort(node.getSort());
                 copy.setStatus(node.getStatus());
                 copy.setMenuType(node.getMenuType());
-                copy.setIsHidden(node.getIsHidden());
-                copy.setIsExternal(node.getIsExternal());
-                copy.setExternalUrl(node.getExternalUrl());
-                copy.setIsKeepalive(node.getIsKeepalive());
+                copy.setHideInMenu(node.getHideInMenu());
+                copy.setLink(node.getLink());
+                copy.setIframeSrc(node.getIframeSrc());
+                copy.setKeepAlive(node.getKeepAlive());
                 copy.setChildren(children);
                 res.add(copy);
             }
@@ -227,13 +227,16 @@ public class AuthController {
         RouteMetaDTO meta = new RouteMetaDTO();
         meta.setTitle(dto.getMenuName());
         meta.setIcon(dto.getIcon());
-        meta.setKeepAlive(Flags.isTrue(dto.getIsKeepalive()));
-        meta.setHide(Flags.isTrue(dto.getIsHidden()));
+        meta.setKeepAlive(Boolean.TRUE.equals(dto.getKeepAlive()));
+        meta.setHideInMenu(Boolean.TRUE.equals(dto.getHideInMenu()));
         meta.setOrder(dto.getSort() == null ? 0 : dto.getSort());
 
-        if (Flags.isTrue(dto.getIsExternal())) {
+        if (dto.getIframeSrc() != null && !dto.getIframeSrc().isBlank()) {
             r.setComponent("IFrameView");
-            meta.setIframeSrc(dto.getExternalUrl());
+            meta.setIframeSrc(dto.getIframeSrc());
+        } else if (dto.getLink() != null && !dto.getLink().isBlank()) {
+            meta.setLink(dto.getLink());
+            r.setComponent("BasicLayout");
         } else if (dto.getComponent() != null && !dto.getComponent().isBlank()) {
             String comp = dto.getComponent().startsWith("/") ? dto.getComponent() : "/" + dto.getComponent();
             r.setComponent(comp);

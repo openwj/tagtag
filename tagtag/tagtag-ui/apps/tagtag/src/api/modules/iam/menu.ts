@@ -22,10 +22,9 @@ export namespace MenuApiParams {
     sort?: number;
     status?: number;
     menuType?: number; // 0目录 1菜单 2按钮
-    isHidden?: number;
-    isExternal?: number;
-    externalUrl?: string;
-    isKeepalive?: number;
+    hideInMenu?: boolean;
+    keepAlive?: boolean;
+    link?: string;
     remark?: string;
   }
 }

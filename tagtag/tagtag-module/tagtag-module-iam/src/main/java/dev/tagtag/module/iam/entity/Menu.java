@@ -21,11 +21,13 @@ public class Menu {
     private Integer sort;
     private Integer status;
     private Integer menuType; // 0目录 1菜单 2按钮
-    private Integer isHidden;
-    private Integer isExternal;
-    private String externalUrl;
+    
+    private Boolean hideInMenu;
+    private String link;
+    private String iframeSrc;
+    private Boolean keepAlive;
+    
     private String remark;
-    private Integer isKeepalive;
     private LocalDateTime createTime;
     private Long createBy;
     private LocalDateTime updateTime;

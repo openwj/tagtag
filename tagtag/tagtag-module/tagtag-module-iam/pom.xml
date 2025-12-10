@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>tagtag-module-iam</artifactId>
-    <version>1.0.0</version>
     <name>TAGTAG Module Iam</name>
     <description>Iam 业务模块层（业务实现）</description>
 

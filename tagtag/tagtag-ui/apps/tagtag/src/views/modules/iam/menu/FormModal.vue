@@ -56,10 +56,10 @@ const defaultFormValues = {
   path: '',
   component: '',
   sort: 0,
-  isHidden: false,
+  showInMenu: true,
   isExternal: false,
-  isKeepalive: false,
-  externalUrl: '',
+  keepAlive: false,
+  link: '',
   remark: '',
   status: true,
 };
@@ -88,12 +88,16 @@ const [Modal, modalApi] = useVbenModal({
         ...formData,
         status: boolToNumber(formData.status, 1),
         menuType: Number(formData.menuType || 0),
-        isHidden: boolToNumber(formData.isHidden),
-        isExternal: boolToNumber(formData.isExternal),
-        isKeepalive: boolToNumber(formData.isKeepalive),
+        hideInMenu: !formData.showInMenu,
+        keepAlive: !!formData.keepAlive,
+        link: formData.isExternal ? formData.link : '',
         sort: Number(formData.sort || 0),
         parentId: Number(formData.parentId) || 0,
       };
+
+      // Clean up UI-only fields
+      delete (data as any).isExternal;
+      delete (data as any).showInMenu;
 
       const payload = data as MenuApiParams.MenuForm;
       await (isUpdate.value ? editMenu(payload) : addMenu(payload));
@@ -138,10 +142,10 @@ const [Modal, modalApi] = useVbenModal({
             // 使用展开运算符和辅助函数简化赋值
             const formValues = {
               ...menu,
-              // 数字转布尔值
-              isHidden: numberToBool(menu.isHidden),
-              isExternal: numberToBool(menu.isExternal),
-              isKeepalive: numberToBool(menu.isKeepalive),
+              showInMenu: !menu.hideInMenu,
+              keepAlive: !!menu.keepAlive,
+              isExternal: !!menu.link,
+              link: menu.link,
               status: numberToBool(menu.status),
               // 确保数字类型
               menuType: Number(menu.menuType || 0),

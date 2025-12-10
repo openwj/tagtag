@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>tagtag-module-system</artifactId>
-    <version>1.0.0</version>
     <name>TAGTAG Module System</name>
     <description>System 业务模块层（业务实现）</description>
 

@@ -10,7 +10,6 @@
   </parent>
 
   <artifactId>tagtag-module-storage</artifactId>
-  <version>1.0.0</version>
   <name>TAGTAG Module Storage</name>
   <description>Storage 业务模块层（文件管理实现）</description>
 

@@ -10,7 +10,8 @@ public class RouteMetaDTO {
   private String title;
   private String icon;
   private Boolean keepAlive;
-  private Boolean hide;
+  private Boolean hideInMenu;
   private Integer order;
+  private String link;
   private String iframeSrc;
 }

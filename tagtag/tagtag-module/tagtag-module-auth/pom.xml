@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>tagtag-module-auth</artifactId>
-    <version>1.0.0</version>
     <name>TAGTAG Module Auth</name>
     <description>Auth 业务模块层（业务实现）</description>
 
