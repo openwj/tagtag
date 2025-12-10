@@ -65,27 +65,29 @@ function onChangeRange(days: number) {
 </script>
 
 <template>
-  <div>
-    <div class="mb-2 flex items-center justify-between">
-      <div class="text-sm text-muted-foreground">{{ summary.sumText }} · {{ summary.avgText }}</div>
-      <div class="flex gap-2">
+  <div class="rounded-xl border bg-card p-5 shadow-sm">
+    <div class="mb-5 flex items-center justify-between">
+      <div class="flex flex-col">
+        <span class="text-base font-semibold">趋势分析</span>
+        <span class="mt-1 text-xs text-muted-foreground">{{ summary.sumText }} · {{ summary.avgText }}</span>
+      </div>
+      <div class="flex items-center rounded-lg border bg-muted p-1">
         <button
           v-for="d in ranges"
           :key="d"
-          class="rounded border px-2 py-1 text-sm"
-          :class="current === d ? 'bg-primary text-white' : ''"
+          class="rounded-md px-3 py-1 text-xs font-medium transition-all"
+          :class="current === d ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:bg-white/50'"
           @click="onChangeRange(d)"
         >
-          {{ d }}d
+          {{ d }}天
         </button>
       </div>
     </div>
-    <EchartsUI ref="chartRef" />
+    <div class="h-[360px] w-full">
+      <EchartsUI ref="chartRef" />
+    </div>
   </div>
 </template>
 
 <style scoped>
-.text-muted-foreground { color: rgba(0,0,0,0.6); }
-@media (prefers-color-scheme: dark) { .text-muted-foreground { color: rgba(255,255,255,0.6); } }
-.bg-primary { background-color: #4f69fd; }
 </style>

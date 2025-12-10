@@ -44,18 +44,37 @@ function onSelectDim(e: Event) {
 </script>
 
 <template>
-  <div class="rounded-lg border p-4">
-    <div class="mb-2 flex items-center justify-between">
-      <div class="text-sm font-semibold">{{ title }}</div>
+  <div class="flex flex-col rounded-xl border bg-card p-5 shadow-sm">
+    <div class="mb-5 flex items-center justify-between">
+      <div class="text-base font-semibold">{{ title }}</div>
       <div class="flex items-center gap-2">
-        <select v-if="dimensions?.length" class="rounded border px-2 py-1 text-sm" :value="dimension" @change="onSelectDim">
-          <option v-for="d in dimensions" :key="d.value" :value="d.value">{{ d.label }}</option>
-        </select>
-        <button v-if="onRefresh" class="rounded border px-2 py-1 text-sm" @click="onRefresh?.()">Refresh</button>
+        <div class="relative" v-if="dimensions?.length">
+          <select
+            class="appearance-none rounded-md border bg-transparent px-3 py-1 pr-8 text-xs font-medium focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            :value="dimension"
+            @change="onSelectDim"
+          >
+            <option v-for="d in dimensions" :key="d.value" :value="d.value">{{ d.label }}</option>
+          </select>
+           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
+              <svg class="h-3 w-3 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+           </div>
+        </div>
+        <button
+          v-if="onRefresh"
+          class="rounded-md border bg-transparent p-1.5 text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+          @click="onRefresh?.()"
+          title="刷新"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        </button>
       </div>
     </div>
-    <EchartsUI ref="chartRef" />
+    <div class="flex-1 min-h-[300px]">
+      <EchartsUI ref="chartRef" />
+    </div>
   </div>
-  
 </template>
 
+<style scoped>
+</style>

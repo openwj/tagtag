@@ -13,11 +13,7 @@ import {
 import OverviewGrid from './components/OverviewGrid.vue';
 import TrendsPanel from './components/TrendsPanel.vue';
 import DistributionCard from './components/DistributionCard.vue';
-import AnalyticsTrends from './analytics-trends.vue';
-import AnalyticsVisitsData from './analytics-visits-data.vue';
-import AnalyticsVisitsSales from './analytics-visits-sales.vue';
-import AnalyticsVisitsSource from './analytics-visits-source.vue';
-import AnalyticsVisits from './analytics-visits.vue';
+// 移除历史未使用模块的 import
 
 import { $t } from '#/locales';
 import { onMounted, ref } from 'vue';
@@ -108,9 +104,8 @@ async function refreshTrends(days: number) {
       <TrendsPanel :series="trends" @rangeChange="refreshTrends" />
     </div>
 
-    <div class="mt-5 w-full md:flex">
+    <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
       <DistributionCard
-        class="mt-5 md:mr-4 md:mt-0 md:w-1/3"
         :title="$t('page.dashboard.coverageRadar')"
         :items="[
           { name: 'users', value: overviewItems[0]?.totalValue || 0 },
@@ -121,7 +116,6 @@ async function refreshTrends(days: number) {
         chart="radar"
       />
       <DistributionCard
-        class="mt-5 md:mr-4 md:mt-0 md:w-1/3"
         :title="$t('page.dashboard.fileDist')"
         :items="fileTypeDist"
         chart="pie"
@@ -134,7 +128,6 @@ async function refreshTrends(days: number) {
         :onDimensionChange="async (v: string) => { fileTypeDist = await loadFileDistribution(v as any) }"
       />
       <DistributionCard
-        class="mt-5 md:mt-0 md:w-1/3"
         :title="$t('page.dashboard.messageDist')"
         :items="messageStatusDist"
         chart="rose"
