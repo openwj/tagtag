@@ -139,7 +139,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
                 .setStorageType("local")
                 .setPath(target.toString())
                 .setChecksum(checksum)
-                .setUrl("/api/storage/files/" + publicId + "/download")
+                .setUrl("/api/storage/files/view/" + publicId)
                 .setStatus(1)
                 .setDeleted(0);
         this.save(fr);

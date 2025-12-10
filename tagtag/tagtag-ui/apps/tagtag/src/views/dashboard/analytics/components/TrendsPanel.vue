@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { EchartsUIType } from '@vben/plugins/echarts'
-import type { TrendSeries } from '../use-analytics-data'
+import type { TrendSeries } from '#/api/modules/system/statistics'
 import { ref, computed, watch, onMounted } from 'vue'
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts'
 import { $t } from '#/locales'
 
-const props = defineProps<{ series?: TrendSeries | null }>()
+const props = defineProps<{ series?: TrendSeries | null; loading?: boolean }>()
 const emit = defineEmits<{ (e: 'rangeChange', days: number): void }>()
 
 const ranges = [7, 30, 90]
@@ -43,10 +43,10 @@ function renderTrends(s?: TrendSeries | null) {
   const userData = s?.userCreatedPerDay ?? []
   const msgData = s?.messageCreatedPerDay ?? []
   renderEcharts({
-    grid: { bottom: 0, containLabel: true, left: '1%', right: '1%', top: '8%' },
+    grid: { bottom: 20, left: 40, right: 20, top: '12%' },
     series: [
-      { areaStyle: {}, data: userData, itemStyle: { color: '#5ab1ef' }, smooth: true, type: 'line', name: 'Users' },
-      { areaStyle: {}, data: msgData, itemStyle: { color: '#019680' }, smooth: true, type: 'line', name: 'Messages' },
+      { areaStyle: {}, data: userData, itemStyle: { color: '#5ab1ef' }, smooth: true, type: 'line', name: $t('page.dashboard.users') },
+      { areaStyle: {}, data: msgData, itemStyle: { color: '#019680' }, smooth: true, type: 'line', name: $t('page.dashboard.messages') },
     ],
     legend: { top: 0 },
     tooltip: { axisPointer: { lineStyle: { width: 1 } }, trigger: 'axis' },
@@ -65,7 +65,10 @@ function onChangeRange(days: number) {
 </script>
 
 <template>
-  <div class="rounded-xl border bg-card p-5 shadow-sm">
+  <div class="rounded-xl border bg-card p-5 shadow-sm relative">
+    <div v-if="loading" class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-card/50 backdrop-blur-sm">
+      <div class="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+    </div>
     <div class="mb-5 flex items-center justify-between">
       <div class="flex flex-col">
         <span class="text-base font-semibold">趋势分析</span>

@@ -89,6 +89,33 @@ public class FileController {
     }
 
     /**
+     * 预览文件（用于图片等），不强制下载，支持缓存
+     * @param publicId 文件PublicID
+     * @return 二进制流（Inline）
+     */
+    @GetMapping("/view/{publicId}")
+    public ResponseEntity<Resource> view(@PathVariable("publicId") String publicId) {
+        FileResource fr = this.fileService.lambdaQuery().eq(FileResource::getPublicId, publicId).one();
+        if (fr == null) {
+            return ResponseEntity.notFound().build();
+        }
+        File file = new File(fr.getPath());
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource resource = new FileSystemResource(file);
+        
+        // 缓存 30 天
+        long cacheAge = 30 * 24 * 3600; 
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .header(HttpHeaders.CACHE_CONTROL, "public, max-age=" + cacheAge)
+                .contentType(MediaType.parseMediaType(fr.getMimeType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : fr.getMimeType()))
+                .body(resource);
+    }
+
+    /**
      * 下载文件
      * @param id 文件ID
      * @return 二进制流

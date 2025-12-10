@@ -16,7 +16,7 @@ import DistributionCard from './components/DistributionCard.vue';
 // 移除历史未使用模块的 import
 
 import { $t } from '#/locales';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, markRaw } from 'vue';
 import {
   loadFileDistribution,
   loadMessageDistribution,
@@ -32,6 +32,7 @@ const trends = ref<TrendSeries | null>(null);
 const fileTypeDist = ref<DistributionItem[]>([]);
 const messageStatusDist = ref<DistributionItem[]>([]);
 const loading = ref(true);
+const trendLoading = ref(false);
 
 const chartTabs: TabOption[] = [];
 
@@ -43,31 +44,32 @@ onMounted(async () => {
       loadFileDistribution('type'),
       loadMessageDistribution('status'),
     ]);
+    // ... (rest is same)
 
     overviewItems.value = [
       {
-        icon: SvgCardIcon,
+        icon: markRaw(SvgCardIcon),
         title: $t('page.dashboard.users'),
         totalTitle: $t('page.dashboard.usersTotal'),
         totalValue: ov.usersTotal,
         value: ts.userCreatedPerDay?.[ts.userCreatedPerDay.length - 1] ?? 0,
       },
       {
-        icon: SvgBellIcon,
+        icon: markRaw(SvgBellIcon),
         title: $t('page.dashboard.messages'),
         totalTitle: $t('page.dashboard.messagesTotal'),
         totalValue: ov.messagesTotal,
         value: ov.unreadMessages,
       },
       {
-        icon: SvgDownloadIcon,
+        icon: markRaw(SvgDownloadIcon),
         title: $t('page.dashboard.files'),
         totalTitle: $t('page.dashboard.filesTotal'),
         totalValue: ov.filesTotal,
         value: fileDist.reduce((acc, cur) => acc + (cur?.value ?? 0), 0),
       },
       {
-        icon: SvgCakeIcon,
+        icon: markRaw(SvgCakeIcon),
         title: $t('page.dashboard.dicts'),
         totalTitle: $t('page.dashboard.dictsTotal'),
         totalValue: ov.dictDataTotal,
@@ -87,13 +89,21 @@ onMounted(async () => {
 });
 
 async function refreshTrends(days: number) {
-  loading.value = true;
+  trendLoading.value = true;
   try {
     const ts = await loadTrends(days);
     trends.value = ts;
   } finally {
-    loading.value = false;
+    trendLoading.value = false;
   }
+}
+
+async function onFileTypeChange(v: string) {
+  fileTypeDist.value = await loadFileDistribution(v as any);
+}
+
+async function onMsgStatusChange(v: string) {
+  messageStatusDist.value = await loadMessageDistribution(v as any);
 }
 </script>
 
@@ -101,7 +111,7 @@ async function refreshTrends(days: number) {
   <div class="p-5" v-loading="loading">
     <OverviewGrid :items="overviewItems" :updated-at="Date.now()" />
     <div class="mt-5">
-      <TrendsPanel :series="trends" @rangeChange="refreshTrends" />
+      <TrendsPanel :series="trends" :loading="trendLoading" @rangeChange="refreshTrends" />
     </div>
 
     <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -125,7 +135,7 @@ async function refreshTrends(days: number) {
           { label: 'ext', value: 'ext' },
         ]"
         dimension="type"
-        :onDimensionChange="async (v: string) => { fileTypeDist = await loadFileDistribution(v as any) }"
+        :onDimensionChange="onFileTypeChange"
       />
       <DistributionCard
         :title="$t('page.dashboard.messageDist')"
@@ -136,7 +146,7 @@ async function refreshTrends(days: number) {
           { label: 'type', value: 'type' },
         ]"
         dimension="status"
-        :onDimensionChange="async (v: string) => { messageStatusDist = await loadMessageDistribution(v as any) }"
+        :onDimensionChange="onMsgStatusChange"
       />
     </div>
   </div>

@@ -31,7 +31,7 @@ security:
   jwt:
     access-ttl-seconds: ${SECURITY_JWT_ACCESS_TTL_SECONDS:3600}
     refresh-ttl-seconds: ${SECURITY_JWT_REFRESH_TTL_SECONDS:604800}
-  permit-paths: /actuator/health,/actuator/info
+  permit-paths: /actuator/health,/actuator/info,/api/storage/files/view/**
 
 cache:
   default-ttl: ${CACHE_DEFAULT_TTL:5m}

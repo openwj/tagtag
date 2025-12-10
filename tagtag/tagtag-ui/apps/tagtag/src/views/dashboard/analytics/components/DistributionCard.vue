@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { EchartsUIType } from '@vben/plugins/echarts'
-import type { DistributionItem } from '../use-analytics-data'
+import type { DistributionItem } from '#/api/modules/system/statistics'
 import { ref, watch, onMounted } from 'vue'
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts'
 
@@ -24,14 +24,56 @@ const { renderEcharts } = useEcharts(chartRef)
 function render(items?: DistributionItem[]) {
   const data = (items ?? []).map(d => ({ name: d.name, value: d.value }))
   if (props.chart === 'radar') {
-    renderEcharts({ legend: { bottom: 0 }, radar: { indicator: data.map(d => ({ name: d.name })) }, series: [{ data: [{ name: 'value', value: data.map(d => Number(d.value) || 0) }], type: 'radar' }] })
+    const maxVal = Math.max(...data.map(d => Number(d.value) || 0), 0)
+    // Ensure max is a multiple of 4 (splitNumber) to avoid unreadable ticks
+    const baseMax = Math.max(maxVal > 0 ? maxVal * 1.2 : 0, 10)
+    const max = Math.ceil(baseMax / 4) * 4
+
+    renderEcharts({
+      legend: { bottom: 0 },
+      radar: {
+        indicator: data.map(d => ({ name: d.name, max })),
+        splitArea: { show: true, areaStyle: { color: ['transparent'] } },
+        splitNumber: 4,
+        axisName: {
+          color: 'hsl(var(--muted-foreground))'
+        }
+      },
+      series: [{
+        data: [{ name: 'Value', value: data.map(d => Number(d.value) || 0) }],
+        type: 'radar',
+        symbolSize: 0,
+        areaStyle: { opacity: 0.5 }
+      }],
+      tooltip: { trigger: 'item' }
+    })
     return
   }
   if (props.chart === 'pie') {
-    renderEcharts({ series: [{ data, type: 'pie', radius: ['40%', '65%'] }], tooltip: { trigger: 'item' } })
+    renderEcharts({
+      series: [{
+        data,
+        type: 'pie',
+        radius: ['40%', '65%'],
+        itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 1 },
+        label: { show: false }
+      }],
+      tooltip: { trigger: 'item' }
+    })
     return
   }
-  renderEcharts({ series: [{ data: data.toSorted((a, b) => Number(a.value) - Number(b.value)), type: 'pie', roseType: 'radius' }], tooltip: { trigger: 'item' } })
+  // Rose
+  renderEcharts({
+    series: [{
+      data: data.toSorted((a, b) => Number(a.value) - Number(b.value)),
+      type: 'pie',
+      roseType: 'radius',
+      radius: ['10%', '65%'],
+      itemStyle: { borderRadius: 4 },
+      label: { show: false }
+    }],
+    tooltip: { trigger: 'item' }
+  })
 }
 
 onMounted(() => render(props.items))

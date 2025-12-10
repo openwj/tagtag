@@ -5,7 +5,7 @@ import type {
   WorkbenchTrendItem,
 } from '@vben/common-ui';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, markRaw } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -114,14 +114,14 @@ function renderQuickNav() {
 
   // Pick top 8 leaf menus
   const palette = [
-    '#1fdaca',
-    '#6b8afd',
-    '#bf0c2c',
-    '#e18525',
-    '#3fb27f',
-    '#4daf1bc9',
-    '#00d8ff',
-    '#EBD94E',
+    'hsl(var(--primary))',
+    '#6366f1',
+    '#ec4899',
+    '#8b5cf6',
+    '#14b8a6',
+    '#f59e0b',
+    '#10b981',
+    '#06b6d4',
   ];
 
   quickNavItems.value = flatMenus.slice(0, 8).map((menu, index) => ({
@@ -135,28 +135,28 @@ function renderQuickNav() {
 function renderOverview(ov: StatisticsOverview) {
   overviewItems.value = [
     {
-      icon: SvgCardIcon,
+      icon: markRaw(SvgCardIcon),
       title: $t('page.dashboard.users'),
       totalTitle: $t('page.dashboard.usersTotal'),
       totalValue: ov.usersTotal,
       value: 0, // No daily increment data in overview, simplified
     },
     {
-      icon: SvgBellIcon,
+      icon: markRaw(SvgBellIcon),
       title: $t('page.dashboard.messages'),
       totalTitle: $t('page.dashboard.messagesTotal'),
       totalValue: ov.messagesTotal,
       value: ov.unreadMessages,
     },
     {
-      icon: SvgDownloadIcon,
+      icon: markRaw(SvgDownloadIcon),
       title: $t('page.dashboard.files'),
       totalTitle: $t('page.dashboard.filesTotal'),
       totalValue: ov.filesTotal,
       value: 0,
     },
     {
-      icon: SvgCakeIcon,
+      icon: markRaw(SvgCakeIcon),
       title: $t('page.dashboard.dicts'),
       totalTitle: $t('page.dashboard.dictsTotal'),
       totalValue: ov.dictDataTotal,
@@ -199,18 +199,19 @@ function navTo(nav: WorkbenchQuickNavItem) {
       </template>
       <template #description> {{ currentDate }} </template>
       <template #extra>
-        <div class="flex flex-col justify-center text-right">
-          <span class="text-foreground/80"> 未读消息 </span>
-          <span class="text-2xl">{{ statistics?.unreadMessages ?? 0 }}/{{ statistics?.messagesTotal ?? 0 }}</span>
-        </div>
-
-        <div class="mx-12 flex flex-col justify-center text-right md:mx-16">
-          <span class="text-foreground/80"> 用户 </span>
-          <span class="text-2xl">{{ statistics?.usersTotal ?? 0 }}</span>
-        </div>
-        <div class="mr-4 flex flex-col justify-center text-right md:mr-10">
-          <span class="text-foreground/80"> 文件 </span>
-          <span class="text-2xl">{{ statistics?.filesTotal ?? 0 }}</span>
+        <div class="hidden items-center gap-8 md:flex">
+          <div class="flex flex-col justify-center text-right">
+            <span class="text-foreground/80"> 未读消息 </span>
+            <span class="text-2xl">{{ statistics?.unreadMessages ?? 0 }}/{{ statistics?.messagesTotal ?? 0 }}</span>
+          </div>
+          <div class="flex flex-col justify-center text-right">
+            <span class="text-foreground/80"> 用户 </span>
+            <span class="text-2xl">{{ statistics?.usersTotal ?? 0 }}</span>
+          </div>
+          <div class="flex flex-col justify-center text-right">
+            <span class="text-foreground/80"> 文件 </span>
+            <span class="text-2xl">{{ statistics?.filesTotal ?? 0 }}</span>
+          </div>
         </div>
       </template>
     </WorkbenchHeader>
@@ -238,10 +239,10 @@ function navTo(nav: WorkbenchQuickNavItem) {
         <div class="mt-2 flex items-center justify-between text-xs">
           <span class="text-muted-foreground">{{ item.title }}</span>
           <span
-            v-if="item.value > 0"
-            class="font-medium text-green-600"
+            v-if="item.value !== 0"
+            :class="['font-medium', item.value > 0 ? 'text-green-600' : 'text-red-600']"
           >
-            +{{ item.value }}
+            {{ item.value > 0 ? '+' : '' }}{{ item.value }}
           </span>
         </div>
       </div>
