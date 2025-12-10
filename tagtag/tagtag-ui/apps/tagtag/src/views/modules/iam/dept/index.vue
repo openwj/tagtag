@@ -12,7 +12,7 @@ import {
 } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteDept, getDeptTree } from '#/api/modules/iam/dept';
+import { deleteDept, getDeptTree, updateDeptStatus } from '#/api/modules/iam/dept';
 // 注：不再依赖分页封装，页面内直接适配后端字段
 
 import { columns, searchFormSchema } from './data';
@@ -83,22 +83,26 @@ const handleAdd = (row: Record<string, any>) => {
 };
 
 /**
- * 状态切换（乐观更新，失败回滚）
- * @param record 部门记录
+ * 部门状态切换（Promise 风格，无 try/catch）
+ * @param row 部门行数据
+ * @param checked 目标状态（true=启用，false=禁用）
  */
-const handleStatusChange = async (record: any) => {
-  const prevStatus = record.status;
-  record.statusLoading = true;
-  try {
-    const statusValue = record.status ? 1 : 0;
-    await updateDeptStatus(record.id, statusValue);
-    message.success({ content: '状态更新成功', duration: 2 });
-  } catch {
-    record.status = prevStatus;
-    message.error({ content: '状态更新失败', duration: 3 });
-  } finally {
-    record.statusLoading = false;
-  }
+const handleStatusChange = (
+  row: { id: number | string; status: number; statusLoading?: boolean },
+  checked: boolean,
+) => {
+  row.statusLoading = true;
+  const target = checked ? 1 : 0;
+  return updateDeptStatus(row.id, target)
+    .then(() => {
+      row.status = target;
+      message.success({ content: '状态更新成功', duration: 2 });
+      // 可选：如需强一致性，可刷新表格
+      // gridApi.query();
+    })
+    .finally(() => {
+      row.statusLoading = false;
+    });
 };
 
 /**
@@ -165,11 +169,8 @@ const handleSuccess = () => {
           checked-children="启用"
           un-checked-children="禁用"
           @change="
-            (checked: boolean | string | number) => {
-              const isChecked = Boolean(checked);
-              row.status = isChecked ? 1 : 0;
-              handleStatusChange(row);
-            }
+            (checked: boolean | string | number) =>
+              handleStatusChange(row, Boolean(checked))
           "
         />
       </template>
