@@ -35,13 +35,14 @@ const tabs = [
     <div class="flex flex-col gap-6 lg:flex-row lg:gap-10">
       <!-- 侧边导航 -->
       <aside class="w-full lg:w-64 flex-none">
-         <nav class="bg-card border-border flex flex-col space-y-1 rounded-lg border p-2 shadow-sm">
+         <nav class="bg-card border-border flex flex-row space-x-1 overflow-x-auto rounded-lg border p-2 shadow-sm lg:flex-col lg:space-x-0 lg:space-y-1">
             <button
               v-for="tab in tabs"
               :key="tab.value"
               @click="activeTab = tab.value"
               :class="[
-                'flex w-full items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200',
+                'flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200',
+                'flex-1 justify-center whitespace-nowrap lg:w-full lg:justify-start',
                 activeTab === tab.value
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -68,7 +69,7 @@ const tabs = [
 
       <!-- 内容区域 -->
       <main class="flex-1 min-w-0">
-        <Transition name="fade" mode="out-in">
+        <Transition name="fade-slide" mode="out-in">
           <ProfileBase v-if="activeTab === 'basic'" />
           <ProfilePasswordSetting v-else-if="activeTab === 'password'" />
         </Transition>
@@ -78,13 +79,18 @@ const tabs = [
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-slide-enter-from {
   opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

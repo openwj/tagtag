@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { VbenFormSchema } from '#/adapter/form';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, h } from 'vue';
 
-import { ProfileBaseSetting } from '@vben/common-ui';
+import { ProfileBaseSetting, z } from '@vben/common-ui';
 import { Icon } from '@iconify/vue';
 
 import { getUserInfoApi } from '#/api';
@@ -33,24 +33,41 @@ const formSchema = computed((): VbenFormSchema[] => {
       fieldName: 'nickname',
       component: 'Input',
       label: '昵称',
+      componentProps: {
+        placeholder: '请输入您的昵称',
+      },
+      rules: z.string().min(1, { message: '请输入昵称' }),
+      renderComponentContent: () => ({
+        prefix: () => h(Icon, { icon: 'lucide:user', class: 'text-muted-foreground' }),
+      }),
     },
     {
       fieldName: 'username',
       component: 'Input',
       label: '用户名',
       componentProps: { disabled: true }, // 用户名通常不可修改
+      renderComponentContent: () => ({
+        prefix: () => h(Icon, { icon: 'lucide:shield', class: 'text-muted-foreground' }),
+      }),
     },
     {
       fieldName: 'email',
       component: 'Input',
       label: '电子邮箱',
       componentProps: { type: 'email', placeholder: '请输入邮箱地址' },
+      rules: z.string().email({ message: '请输入正确的邮箱格式' }).optional().or(z.literal('')),
+      renderComponentContent: () => ({
+        prefix: () => h(Icon, { icon: 'lucide:mail', class: 'text-muted-foreground' }),
+      }),
     },
     {
       fieldName: 'phone',
       component: 'Input',
       label: '手机号码',
       componentProps: { placeholder: '请输入手机号码' },
+      renderComponentContent: () => ({
+        prefix: () => h(Icon, { icon: 'lucide:phone', class: 'text-muted-foreground' }),
+      }),
     },
     {
       fieldName: 'gender',
@@ -183,6 +200,10 @@ async function handleAvatarBeforeUpload(file: File) {
           </div>
 
           <!-- 悬浮遮罩层 -->
+          <div v-if="uploadingAvatar" class="absolute inset-0 z-20 flex items-center justify-center bg-black/50 text-white">
+            <Icon icon="lucide:loader-2" class="size-8 animate-spin" />
+          </div>
+
           <div class="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <Upload
               :max-count="1"
