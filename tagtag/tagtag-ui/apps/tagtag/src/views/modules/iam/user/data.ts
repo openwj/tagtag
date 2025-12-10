@@ -265,7 +265,7 @@ export const formSchema: VbenFormProps['schema'] = [
     componentProps: {
       placeholder: '请选择生日',
       format: 'YYYY-MM-DD',
-      valueFormat: 'YYYY-MM-DD HH:mm:ss',
+      valueFormat: 'YYYY-MM-DD',
       showTime: false,
       class: 'w-full',
     },
