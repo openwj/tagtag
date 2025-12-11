@@ -12,7 +12,7 @@ import { useAuthStore } from '#/store';
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
-const loginRef = ref<any>(null);
+const captchaKey = ref(Date.now());
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -41,6 +41,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: markRaw(ImageCaptchaInput),
       componentProps: {
+        key: captchaKey.value,
         placeholder: $t('authentication.code'),
         autocomplete: 'off',
         /**
@@ -65,13 +66,20 @@ const formSchema = computed((): VbenFormSchema[] => {
     },
   ];
 });
+
+async function handleLogin(values: any) {
+  try {
+    await authStore.authLogin(values);
+  } catch {
+    captchaKey.value = Date.now();
+  }
+}
 </script>
 
 <template>
   <AuthenticationLogin
-    ref="loginRef"
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
-    @submit="(p) => authStore.authLogin(p)"
+    @submit="handleLogin"
   />
 </template>

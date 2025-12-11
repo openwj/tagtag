@@ -17,6 +17,7 @@ defineOptions({ name: 'Register' });
 
 const loading = ref(false);
 const router = useRouter();
+const captchaKey = ref(Date.now());
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -77,6 +78,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: markRaw(ImageCaptchaInput),
       componentProps: {
+        key: captchaKey.value,
         placeholder: $t('page.auth.code'),
         autocomplete: 'off',
         fetchImage: async () => {
@@ -154,6 +156,9 @@ async function handleSubmit(value: Recordable<any>) {
         });
       }
     }, 1000);
+  } catch (error) {
+    captchaKey.value = Date.now();
+    throw error;
   } finally {
     loading.value = false;
   }
