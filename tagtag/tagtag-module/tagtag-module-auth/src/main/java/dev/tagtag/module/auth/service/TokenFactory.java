@@ -42,6 +42,7 @@ public class TokenFactory {
         claims.put(SecurityClaims.ROLES, roleIds);
         claims.put(SecurityClaims.PERMS, perms);
         claims.put(SecurityClaims.VER, ver);
+        claims.put(SecurityClaims.IS_ADMIN, full.getIsAdmin());
         return claims;
     }
 

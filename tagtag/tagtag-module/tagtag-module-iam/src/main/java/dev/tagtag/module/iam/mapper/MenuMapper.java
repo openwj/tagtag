@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import dev.tagtag.module.iam.entity.Menu;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -19,4 +22,10 @@ public interface MenuMapper extends BaseMapper<Menu> {
      * @return 分页结果
      */
     IPage<Menu> selectPage(IPage<Menu> page, @Param("q") MenuQueryDTO q);
+
+    /**
+     * 查询所有有效的权限编码（menu_type=2, status=1）
+     * @return 权限编码列表
+     */
+    List<String> selectAllPermissionCodes();
 }

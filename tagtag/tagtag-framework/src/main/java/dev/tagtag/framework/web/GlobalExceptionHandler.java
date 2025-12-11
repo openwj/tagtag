@@ -38,7 +38,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Result<Void>> handleBusiness(BusinessException ex) {
         int status = ex.getHttpStatus();
-        String msg = ex.getErrorCode() == ErrorCode.UNAUTHORIZED ? "未登录或会话已过期" : ex.getMessage();
+        String msg = ex.getMessage();
+        if ((msg == null || msg.isBlank()) && ex.getErrorCode() == ErrorCode.UNAUTHORIZED) {
+            msg = "未登录或会话已过期";
+        }
         Result<Void> body = (ex.getErrorCode() == ErrorCode.UNAUTHORIZED)
                 ? Result.unauthorized(msg)
                 : (ex.getErrorCode() == ErrorCode.FORBIDDEN)

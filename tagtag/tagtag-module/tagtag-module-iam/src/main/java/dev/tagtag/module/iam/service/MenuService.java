@@ -5,6 +5,7 @@ import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import java.util.List;
+import java.util.Set;
 
 public interface MenuService {
 
@@ -31,6 +32,11 @@ public interface MenuService {
      */
     List<MenuDTO> listTree(MenuQueryDTO query);
 
+    /**
+     * 查询所有有效的权限编码（按钮类型）
+     * @return 权限编码集合
+     */
+    Set<String> listAllPermissionCodes();
 
     /**
      * 更新菜单状态

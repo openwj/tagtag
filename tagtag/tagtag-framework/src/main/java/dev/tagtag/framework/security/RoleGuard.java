@@ -1,5 +1,7 @@
 package dev.tagtag.framework.security;
 
+import dev.tagtag.framework.security.context.AuthContext;
+import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.kernel.constant.Roles;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -26,14 +28,27 @@ public class RoleGuard {
      */
     @Around("@annotation(rr)")
     public Object around(ProceedingJoinPoint pjp, RequireRole rr) throws Throwable {
+        // 1. 获取当前用户主体（若未登录会抛出 UNAUTHORIZED 异常）
+        UserPrincipal principal = AuthContext.getCurrentPrincipal();
+
+        // 2. 超级管理员直接放行
+        if (principal.isAdmin()) {
+            return pjp.proceed();
+        }
+
+        // 3. 常规角色校验
         String required = Roles.PREFIX + rr.value();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) throw new AccessDeniedException("未认证");
+
         Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
         boolean match = false;
         if (authorities != null) {
             for (GrantedAuthority ga : authorities) {
-                if (ga != null && required.equals(ga.getAuthority())) { match = true; break; }
+                if (ga != null && required.equals(ga.getAuthority())) {
+                    match = true;
+                    break;
+                }
             }
         }
         if (!match) throw new AccessDeniedException("角色不足: " + required);

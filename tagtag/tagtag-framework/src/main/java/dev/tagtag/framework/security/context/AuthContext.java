@@ -104,7 +104,9 @@ public final class AuthContext {
         Set<Long> roleIds = claimAsLongSet(jwt, SecurityClaims.ROLES);
         Set<String> perms = claimAsStringSet(jwt, SecurityClaims.PERMS);
         Long ver = claimAsLong(jwt, SecurityClaims.VER);
-        return new UserPrincipal(uid, uname, roleIds, perms, ver);
+        Long isAdminLong = claimAsLong(jwt, SecurityClaims.IS_ADMIN);
+        boolean isAdmin = isAdminLong != null && isAdminLong == 1L;
+        return new UserPrincipal(uid, uname, roleIds, perms, ver, isAdmin);
     }
 
     /**

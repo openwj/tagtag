@@ -5,7 +5,6 @@ import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.framework.security.model.UserPrincipal;
-import dev.tagtag.common.util.Flags;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.auth.dto.LoginRequest;
 import dev.tagtag.contract.auth.dto.RefreshRequest;
@@ -34,6 +33,7 @@ import dev.tagtag.contract.auth.dto.RouteMetaDTO;
 import java.util.Set;
 import java.util.List;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.ArrayList;
 
@@ -144,6 +144,11 @@ public class AuthController {
     @GetMapping("/codes")
     public Result<Set<String>> codes() {
         UserPrincipal principal = AuthContext.getCurrentPrincipal();
+        // 如果是超级管理员，返回所有权限码
+        if (principal.isAdmin()) {
+            Set<String> all = menuApi.listAllPermissionCodes().getData();
+            return Result.ok(all);
+        }
         List<Long> roleIds = new ArrayList<>(principal.getRoleIds());
         Set<String> perms = permissionResolver.resolvePermissions(roleIds);
         return Result.ok(perms);
@@ -157,13 +162,18 @@ public class AuthController {
     @GetMapping("/menu/all")
     public Result<List<RouteRecordStringComponentDTO>> allMenus() {
         UserPrincipal principal = AuthContext.getCurrentPrincipal();
-        List<Long> roleIds = new ArrayList<>(Objects.requireNonNullElse(principal.getRoleIds(), Collections.emptySet()));
-
-        List<Long> assignedMenuIds = roleApi.listMenuIdsByRoleIds(roleIds).getData();
-        java.util.Set<Long> idSet = assignedMenuIds == null ? java.util.Collections.emptySet() : new java.util.LinkedHashSet<>(assignedMenuIds);
-
+        List<MenuDTO> filteredTree;
         List<MenuDTO> fullTree = menuApi.listMenuTree(null).getData();
-        List<MenuDTO> filteredTree = filterTreeByIds(fullTree, idSet);
+
+        // 如果是超级管理员，不过滤，直接返回完整树
+        if (principal.isAdmin()) {
+            filteredTree = fullTree;
+        } else {
+            List<Long> roleIds = new ArrayList<>(Objects.requireNonNullElse(principal.getRoleIds(), Collections.emptySet()));
+            List<Long> assignedMenuIds = roleApi.listMenuIdsByRoleIds(roleIds).getData();
+            Set<Long> idSet = assignedMenuIds == null ? Collections.emptySet() : new LinkedHashSet<>(assignedMenuIds);
+            filteredTree = filterTreeByIds(fullTree, idSet);
+        }
 
         List<RouteRecordStringComponentDTO> routes = new ArrayList<>();
         for (MenuDTO dto : filteredTree) {

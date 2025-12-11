@@ -20,8 +20,12 @@ import dev.tagtag.common.exception.ErrorCode;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.Collections;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +55,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 创建菜单 */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree", "allPermissionCodes"}, allEntries = true)
     public Long create(MenuDTO menu) {
         Menu entity = menuMapperConvert.toEntity(menu);
         super.save(entity);
@@ -61,7 +65,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     /** 更新菜单（忽略源对象中的空值） */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree", "allPermissionCodes"}, allEntries = true)
     public void update(MenuDTO menu) {
         if (menu == null || menu.getId() == null) return;
         Menu entity = super.getById(menu.getId());
@@ -76,7 +80,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree", "allPermissionCodes"}, allEntries = true)
     public void delete(Long id) {
         if (id == null) return;
         // 保护：存在子菜单禁止删除
@@ -137,6 +141,19 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return roots;
     }
 
+    /**
+     * 查询所有有效的权限编码（按钮类型）
+     * @return 权限编码集合
+     */
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "allPermissionCodes", key = "'all'")
+    public Set<String> listAllPermissionCodes() {
+        List<String> codes = baseMapper.selectAllPermissionCodes();
+        if (codes == null || codes.isEmpty()) return Collections.emptySet();
+        return codes.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
 
     /**
      * 更新菜单状态
@@ -145,7 +162,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree", "allPermissionCodes"}, allEntries = true)
     public void updateStatus(Long id, int status) {
         if (id == null) return;
         this.lambdaUpdate().eq(Menu::getId, id).set(Menu::getStatus, status).update();
@@ -158,7 +175,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree", "allPermissionCodes"}, allEntries = true)
     public void batchUpdateStatus(List<Long> ids, int status) {
         if (ids == null || ids.isEmpty()) return;
         LinkedHashSet<Long> uniq = new LinkedHashSet<>(ids);
@@ -174,7 +191,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(cacheNames = {"menuById", "menuTree"}, allEntries = true)
+    @CacheEvict(cacheNames = {"menuById", "menuTree", "allPermissionCodes"}, allEntries = true)
     public void batchDelete(List<Long> ids) {
         if (ids == null || ids.isEmpty()) return;
         LinkedHashSet<Long> uniq = new LinkedHashSet<>(ids);

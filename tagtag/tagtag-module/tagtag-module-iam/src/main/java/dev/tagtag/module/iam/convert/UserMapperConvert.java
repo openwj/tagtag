@@ -33,5 +33,6 @@ public interface UserMapperConvert {
 
     /** 用DTO更新实体（忽略源对象中的空值） */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "password", ignore = true)
     void updateEntityFromDTO(UserDTO dto, @MappingTarget User entity);
 }

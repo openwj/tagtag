@@ -40,4 +40,13 @@
         ORDER BY create_time DESC, id DESC
     </select>
 
+    <!-- 查询所有有效的权限编码 -->
+    <select id="selectAllPermissionCodes" resultType="string">
+        SELECT DISTINCT menu_code
+        FROM iam_menu
+        WHERE menu_type = 2
+          AND status = 1
+          AND deleted = 0
+    </select>
+
 </mapper>

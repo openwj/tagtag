@@ -13,4 +13,5 @@ public final class SecurityClaims {
     public static final String PERMS = "perms";
     public static final String VER = "ver";
     public static final String TYP = "typ";
+    public static final String IS_ADMIN = "is_admin";
 }

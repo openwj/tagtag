@@ -16,6 +16,7 @@ public class UserPrincipal {
     private final Set<Long> roleIds;
     private final Set<String> permissions;
     private final Long version;
+    private final boolean isAdmin;
 
     /**
      * 构造函数：基于基本字段初始化主体
@@ -24,13 +25,15 @@ public class UserPrincipal {
      * @param roleIds 角色ID集合
      * @param permissions 权限集合（业务码）
      * @param version 令牌版本
+     * @param isAdmin 是否超级管理员
      */
-    public UserPrincipal(Long id, String username, Set<Long> roleIds, Set<String> permissions, Long version) {
+    public UserPrincipal(Long id, String username, Set<Long> roleIds, Set<String> permissions, Long version, boolean isAdmin) {
         this.id = id;
         this.username = username;
         this.roleIds = roleIds == null ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(roleIds));
         this.permissions = permissions == null ? Collections.emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(permissions));
         this.version = version;
+        this.isAdmin = isAdmin;
     }
 
 

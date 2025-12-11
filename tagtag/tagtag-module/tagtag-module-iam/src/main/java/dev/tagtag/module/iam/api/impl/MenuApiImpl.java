@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -56,5 +57,15 @@ public class MenuApiImpl implements MenuApi {
     @Override
     public Result<List<MenuDTO>> listMenuTree(MenuQueryDTO filter) {
         return Result.ok(menuService.listTree(filter));
+    }
+
+    /**
+     * 查询所有有效的权限编码（按钮类型）
+     *
+     * @return 权限编码集合
+     */
+    @Override
+    public Result<Set<String>> listAllPermissionCodes() {
+        return Result.ok(menuService.listAllPermissionCodes());
     }
 }
