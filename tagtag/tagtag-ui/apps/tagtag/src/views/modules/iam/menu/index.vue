@@ -51,6 +51,8 @@ const gridOptions: VxeGridProps = {
   pagerConfig: {
     enabled: false,
   },
+  scrollY: { enabled: true, gt: 20 },
+  scrollX: { enabled: true, gt: 20 },
   exportConfig: {},
   resizeConfig: {},
   proxyConfig: {
@@ -71,7 +73,7 @@ const gridOptions: VxeGridProps = {
   treeConfig: {
     // parentField: 'parentId',
     rowField: 'id',
-    expandAll: true,
+    expandAll: false,
   },
 };
 
