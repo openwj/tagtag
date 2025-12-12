@@ -26,7 +26,12 @@ const { t } = useI18n()
     <div class="absolute top-[-10%] right-1/4 w-[800px] h-[800px] bg-indigo-500/20 blur-[120px] rounded-full pointer-events-none mix-blend-screen animate-pulse-slow delay-1000" />
 
     <div class="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-20 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-      <div class="mx-auto max-w-4xl text-center">
+      <div class="mx-auto max-w-5xl text-center">
+        <!-- Logo -->
+        <div class="mb-8 flex justify-center">
+          <img src="/logo.png" alt="Tagtag Logo" class="h-24 w-auto drop-shadow-2xl animate-fade-in-up" />
+        </div>
+
         <!-- Badge -->
         <div class="mb-8 flex justify-center">
           <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 dark:text-neutral-400 ring-1 ring-gray-200 dark:ring-white/10 hover:ring-cyan-500/50 dark:hover:ring-cyan-400/50 hover:bg-gray-50 dark:hover:bg-white/5 transition duration-300 cursor-default backdrop-blur-xl group shadow-[0_0_15px_rgba(6,182,212,0.1)] hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]">
@@ -36,11 +41,10 @@ const { t } = useI18n()
         </div>
 
         <!-- Hero Title -->
-        <h1 class="text-6xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-8xl mb-8 leading-tight">
+        <h1 class="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-7xl mb-8 leading-tight">
           <span class="inline-block bg-gradient-to-b from-gray-900 via-gray-900 to-gray-600 dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent">
             {{ t('hero.title_part1') }}
           </span>
-          <br>
           <span class="inline-block bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto] drop-shadow-[0_0_30px_rgba(129,140,248,0.3)]">
             {{ t('hero.title_part2') }}
           </span>

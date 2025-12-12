@@ -18,9 +18,9 @@
   },
   "hero": {
     "badge": "Tagtag v1.0 is now available",
-    "title_part1": "Build Faster.",
-    "title_part2": "Scale Better.",
-    "description": "The enterprise-grade Java Spring Boot framework for the modern web. Modular, performant, and built for developer happiness.",
+    "title_part1": "Tagtag Starter",
+    "title_part2": "Next-Gen Fullstack Scaffold",
+    "description": "Simplicity First, No Bloat. A modern admin framework based on Spring Boot 3 and Vben Admin 5. The lightweight foundation for your new projects.",
     "start_building": "Start Building",
     "view_on_github": "View on GitHub"
   },

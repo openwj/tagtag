@@ -24,8 +24,8 @@ export default defineAppConfig({
     to: '/',
     logo: {
       alt: 'Tagtag Starter',
-      light: '',
-      dark: ''
+      light: '/logo.png',
+      dark: '/logo.png'
     },
     search: true,
     colorMode: true,

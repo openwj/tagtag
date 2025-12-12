@@ -18,9 +18,9 @@
   },
   "hero": {
     "badge": "Tagtag v1.0 正式发布",
-    "title_part1": "构建更快",
-    "title_part2": "扩展更强",
-    "description": "面向现代 Web 的企业级 Java Spring Boot 框架。模块化、高性能，专为提升开发幸福感而打造。",
+    "title_part1": "Tagtag Starter",
+    "title_part2": "新一代全栈开发脚手架",
+    "description": "极致简洁，拒绝臃肿。基于 Spring Boot 3 和 Vben Admin 5 的现代化后台管理框架，专为新项目打造的轻量级底座。",
     "start_building": "开始构建",
     "view_on_github": "在 GitHub 上查看"
   },

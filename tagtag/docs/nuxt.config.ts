@@ -97,13 +97,13 @@ export default defineNuxtConfig({
   },
 
   llms: {
-    domain: 'https://docs-template.nuxt.dev/',
-    title: 'Nuxt Docs Template',
+    domain: 'https://github.com/admin/openwj/tagtag',
+    title: 'Tagtag Documentation',
     description:
-      'A template for building documentation with Nuxt UI and Nuxt Content.',
+      'Documentation for Tagtag - A modular, enterprise-grade Java Spring Boot admin framework.',
     full: {
-      title: 'Nuxt Docs Template - Full Documentation',
-      description: 'This is the full documentation for the Nuxt Docs Template.'
+      title: 'Tagtag - Full Documentation',
+      description: 'The complete documentation for Tagtag framework.'
     },
     sections: [
       {

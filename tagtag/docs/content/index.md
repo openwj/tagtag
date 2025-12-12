@@ -1,7 +1,7 @@
 ---
 seo:
-  title: Tagtag Starter - 通用后台管理框架
-  description: 模块化、企业级的 Java Spring Boot 管理框架。
+  title: Tagtag Starter - 新一代全栈开发脚手架
+  description: 基于 Spring Boot 3 和 Vben Admin 5 的现代化后台管理框架。极致简洁，拒绝臃肿，专为新项目打造的轻量级底座。
 ---
 
 ::u-page-hero
@@ -26,11 +26,11 @@ ui:
 ---
 #title
 Tagtag
-<span class="text-primary">通用后台管理框架</span>
+<span class="text-primary">新一代全栈开发脚手架</span>
 
 #description
-一个模块化、企业级的 Java Spring Boot 后台管理框架。
-专为可扩展性、高性能和极致开发体验而构建。
+基于 Spring Boot 3 和 Vben Admin 5 构建的现代化后台管理框架。
+**极致简洁，拒绝臃肿**。专为新项目打造的轻量级底座，内置模块化架构与契约设计，助您快速构建稳健的商业应用。
 
 #default
   ::u-landing-hero-code
