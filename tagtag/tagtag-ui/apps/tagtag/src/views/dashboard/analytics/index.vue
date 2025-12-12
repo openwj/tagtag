@@ -1,8 +1,13 @@
 <script lang="ts" setup>
 import type { AnalysisOverviewItem } from '@vben/common-ui';
-import type { TabOption } from '@vben/types';
 
-import { AnalysisChartCard } from '@vben/common-ui';
+import type {
+  DistributionItem,
+  TrendSeries,
+} from '#/api/modules/system/statistics';
+
+import { markRaw, onMounted, ref } from 'vue';
+
 import {
   SvgBellIcon,
   SvgCakeIcon,
@@ -10,31 +15,26 @@ import {
   SvgDownloadIcon,
 } from '@vben/icons';
 
-import OverviewGrid from './components/OverviewGrid.vue';
-import TrendsPanel from './components/TrendsPanel.vue';
-import DistributionCard from './components/DistributionCard.vue';
-// 移除历史未使用模块的 import
-
-import { $t } from '#/locales';
-import { onMounted, ref, markRaw } from 'vue';
 import {
   loadFileDistribution,
   loadMessageDistribution,
   loadOverview,
   loadTrends,
-  type DistributionItem,
-  type TrendSeries,
 } from '#/api/modules/system/statistics';
+// 移除历史未使用模块的 import
+import { $t } from '#/locales';
+
+import DistributionCard from './components/DistributionCard.vue';
+import OverviewGrid from './components/OverviewGrid.vue';
+import TrendsPanel from './components/TrendsPanel.vue';
 
 const overviewItems = ref<AnalysisOverviewItem[]>([]);
 
-const trends = ref<TrendSeries | null>(null);
+const trends = ref<null | TrendSeries>(null);
 const fileTypeDist = ref<DistributionItem[]>([]);
 const messageStatusDist = ref<DistributionItem[]>([]);
 const loading = ref(true);
 const trendLoading = ref(false);
-
-const chartTabs: TabOption[] = [];
 
 onMounted(async () => {
   try {
@@ -80,9 +80,9 @@ onMounted(async () => {
     trends.value = ts;
     fileTypeDist.value = fileDist;
     messageStatusDist.value = msgDist;
-  } catch (err) {
+  } catch (error) {
     // 可选：错误处理与回退静态数据
-    console.error('Load analytics failed', err);
+    console.error('Load analytics failed', error);
   } finally {
     loading.value = false;
   }
@@ -111,7 +111,11 @@ async function onMsgStatusChange(v: string) {
   <div class="p-5" v-loading="loading">
     <OverviewGrid :items="overviewItems" :updated-at="Date.now()" />
     <div class="mt-5">
-      <TrendsPanel :series="trends" :loading="trendLoading" @rangeChange="refreshTrends" />
+      <TrendsPanel
+        :series="trends"
+        :loading="trendLoading"
+        @range-change="refreshTrends"
+      />
     </div>
 
     <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -135,7 +139,7 @@ async function onMsgStatusChange(v: string) {
           { label: 'ext', value: 'ext' },
         ]"
         dimension="type"
-        :onDimensionChange="onFileTypeChange"
+        :on-dimension-change="onFileTypeChange"
       />
       <DistributionCard
         :title="$t('page.dashboard.messageDist')"
@@ -146,7 +150,7 @@ async function onMsgStatusChange(v: string) {
           { label: 'type', value: 'type' },
         ]"
         dimension="status"
-        :onDimensionChange="onMsgStatusChange"
+        :on-dimension-change="onMsgStatusChange"
       />
     </div>
   </div>

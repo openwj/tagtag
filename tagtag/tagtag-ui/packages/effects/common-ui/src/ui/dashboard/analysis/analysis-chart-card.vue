@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), {});
 <template>
   <Card>
     <CardHeader>
-      <CardTitle class="text-xl">{{ title }}</CardTitle>
+      <CardTitle class="text-lg">{{ title }}</CardTitle>
     </CardHeader>
     <CardContent>
       <slot></slot>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { EchartsUIType } from '@vben/plugins/echarts';
+
 import type { DistributionItem } from '#/api/modules/system/statistics';
 
 import { computed, onMounted, ref, watch } from 'vue';
@@ -13,17 +14,6 @@ const chartRef = ref<EchartsUIType>();
 const { renderEcharts } = useEcharts(chartRef);
 
 const hasData = computed(() => !!props.items && props.items.length > 0);
-
-/**
- * 获取系统主题主色（HSL）
- * @returns HSL 颜色字符串，如 hsl(212 100% 45%)
- */
-function getPrimaryColorHsl(): string {
-  const v = getComputedStyle(document.documentElement)
-    .getPropertyValue('--primary')
-    .trim();
-  return v ? `hsl(${v})` : '#4f69fd';
-}
 
 /**
  * 基于主色生成色板（浅/深/偏移）
@@ -93,7 +83,7 @@ watch(
     <EchartsUI v-show="hasData" ref="chartRef" />
     <div
       v-if="!hasData"
-      class="text-muted-foreground flex h-full w-full flex-col items-center justify-center"
+      class="flex h-full w-full flex-col items-center justify-center text-muted-foreground"
     >
       <EmptyIcon class="size-12" />
       <span class="mt-2 text-sm">暂无数据</span>

@@ -5,12 +5,15 @@ import type {
   WorkbenchTrendItem,
 } from '@vben/common-ui';
 
-import { computed, onMounted, ref, markRaw } from 'vue';
+import type { StatisticsOverview } from '#/api/modules/system/statistics';
+
+import { computed, markRaw, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
   AnalysisChartCard,
   WorkbenchHeader,
+  WorkbenchOverview,
   WorkbenchQuickNav,
   WorkbenchTrends,
 } from '@vben/common-ui';
@@ -30,7 +33,6 @@ import { getMessagePage } from '#/api/modules/system/message';
 import {
   loadFileDistribution,
   loadOverview,
-  type StatisticsOverview,
 } from '#/api/modules/system/statistics';
 import { $t } from '#/locales';
 
@@ -202,7 +204,9 @@ function navTo(nav: WorkbenchQuickNavItem) {
         <div class="hidden items-center gap-8 md:flex">
           <div class="flex flex-col justify-center text-right">
             <span class="text-foreground/80"> 未读消息 </span>
-            <span class="text-2xl">{{ statistics?.unreadMessages ?? 0 }}/{{ statistics?.messagesTotal ?? 0 }}</span>
+            <span class="text-2xl">{{ statistics?.unreadMessages ?? 0 }}/{{
+                statistics?.messagesTotal ?? 0
+              }}</span>
           </div>
           <div class="flex flex-col justify-center text-right">
             <span class="text-foreground/80"> 用户 </span>
@@ -217,36 +221,7 @@ function navTo(nav: WorkbenchQuickNavItem) {
     </WorkbenchHeader>
 
     <!-- System Overview Cards -->
-    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      <div
-        v-for="(item, idx) in overviewItems"
-        :key="idx"
-        class="relative overflow-hidden rounded-xl border bg-card p-5 shadow-sm"
-      >
-        <div class="flex items-center justify-between">
-          <div
-            class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg"
-          >
-            <component :is="item.icon" class="h-5 w-5" />
-          </div>
-          <div class="text-xs font-medium text-muted-foreground">
-            {{ item.totalTitle }}
-          </div>
-        </div>
-        <div class="mt-4 text-3xl font-bold tracking-tight">
-          {{ item.totalValue }}
-        </div>
-        <div class="mt-2 flex items-center justify-between text-xs">
-          <span class="text-muted-foreground">{{ item.title }}</span>
-          <span
-            v-if="item.value !== 0"
-            :class="['font-medium', item.value > 0 ? 'text-green-600' : 'text-red-600']"
-          >
-            {{ item.value > 0 ? '+' : '' }}{{ item.value }}
-          </span>
-        </div>
-      </div>
-    </div>
+    <WorkbenchOverview :items="overviewItems" class="mt-5" />
 
     <div class="mt-5">
       <WorkbenchQuickNav
@@ -256,14 +231,11 @@ function navTo(nav: WorkbenchQuickNavItem) {
       />
     </div>
 
-    <div class="mt-5 flex flex-col lg:flex-row gap-5">
-      <div class="w-full lg:w-2/3 flex flex-col gap-5">
-        <WorkbenchTrends
-          :items="trendItems"
-          title="最新消息"
-        />
+    <div class="mt-5 flex flex-col gap-5 lg:flex-row">
+      <div class="flex w-full flex-col gap-5 lg:w-2/3">
+        <WorkbenchTrends :items="trendItems" title="最新消息" />
       </div>
-      <div class="w-full lg:w-1/3 flex flex-col gap-5">
+      <div class="flex w-full flex-col gap-5 lg:w-1/3">
         <AnalysisChartCard title="文件分布">
           <AnalyticsVisitsSource :items="fileDistribution" />
         </AnalysisChartCard>

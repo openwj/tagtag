@@ -1,0 +1,86 @@
+{
+  "navigation": {
+    "home": "Home",
+    "docs": "Docs",
+    "announcements": "Announcements"
+  },
+  "search": {
+    "placeholder": "Search docs...",
+    "label": "Search"
+  },
+  "footer": {
+    "credits": "Copyright © {year} Tagtag Team"
+  },
+  "toc": {
+    "title": "On this page",
+    "edit": "Edit this page on GitHub",
+    "community": "Community"
+  },
+  "hero": {
+    "badge": "Tagtag v1.0 is now available",
+    "title_part1": "Build Faster.",
+    "title_part2": "Scale Better.",
+    "description": "The enterprise-grade Java Spring Boot framework for the modern web. Modular, performant, and built for developer happiness.",
+    "start_building": "Start Building",
+    "view_on_github": "View on GitHub"
+  },
+  "cta": {
+    "title": "Ready to build your admin system?",
+    "subtitle": "Start using Tagtag today.",
+    "description": "Get started with Tagtag today and build robust enterprise applications with ease.",
+    "get_started": "Get Started"
+  },
+  "quick_start": {
+    "title": "Quick Start",
+    "subtitle": "Get up and running in minutes.",
+    "backend": "Backend (Java)",
+    "frontend": "Frontend (Vue)",
+    "steps": {
+      "clone": {
+        "title": "Clone",
+        "desc": "Clone the repository"
+      },
+      "install": {
+        "title": "Install",
+        "desc": "Install dependencies"
+      },
+      "run": {
+        "title": "Run",
+        "desc": "Start the application"
+      }
+    }
+  },
+  "tech_stack": {
+    "label": "Powered By",
+    "title": "Built on Modern Foundations"
+  },
+  "features": {
+    "title": "Core Features",
+    "subtitle": "Everything you need to build admin systems",
+    "description": "Tagtag provides a robust foundation for your enterprise applications, allowing you to focus on business logic.",
+    "modular": {
+      "title": "Modular Architecture",
+      "description": "Strictly layered design with common, framework, kernel, contract, and module. Decoupled and maintainable."
+    },
+    "enterprise": {
+      "title": "Enterprise Ready",
+      "description": "Built-in RBAC, Operation Logs, and Rate Limiting."
+    },
+    "contract": {
+      "title": "Contract First",
+      "description": "Clear separation of API definitions and implementations using DTOs and Interfaces."
+    },
+    "modern": {
+      "title": "Modern Stack",
+      "description": "Built on Spring Boot 3, MyBatis Plus, and Redis, integrated with Vben Admin (Vue 3)."
+    },
+    "integrations": {
+      "title": "System Modules",
+      "description": "Built-in Dictionary, Configuration, and Notification modules."
+    },
+    "dx": {
+      "title": "Developer Experience",
+      "description": "Standardized error handling, response wrapping, and utility libraries."
+    }
+  }
+}

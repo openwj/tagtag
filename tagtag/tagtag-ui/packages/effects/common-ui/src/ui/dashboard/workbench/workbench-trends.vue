@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { WorkbenchTrendItem } from '../typing';
 
+import { EmptyIcon } from '@vben/icons';
+
 import {
   Card,
   CardContent,
@@ -59,6 +61,14 @@ withDefaults(defineProps<Props>(), {
           </div>
         </li>
       </ul>
+
+      <div
+        v-if="!items || items.length === 0"
+        class="text-muted-foreground flex h-full w-full flex-col items-center justify-center"
+      >
+        <EmptyIcon class="size-12" />
+        <span class="mt-2 text-sm">暂无数据</span>
+      </div>
     </CardContent>
   </Card>
 </template>

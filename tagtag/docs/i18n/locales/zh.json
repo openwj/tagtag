@@ -1,0 +1,86 @@
+{
+  "navigation": {
+    "home": "首页",
+    "docs": "文档",
+    "announcements": "公告"
+  },
+  "search": {
+    "placeholder": "搜索文档...",
+    "label": "搜索"
+  },
+  "footer": {
+    "credits": "Copyright © {year} Tagtag Team"
+  },
+  "toc": {
+    "title": "本页目录",
+    "edit": "在 GitHub 上编辑此页",
+    "community": "社区"
+  },
+  "hero": {
+    "badge": "Tagtag v1.0 正式发布",
+    "title_part1": "构建更快",
+    "title_part2": "扩展更强",
+    "description": "面向现代 Web 的企业级 Java Spring Boot 框架。模块化、高性能，专为提升开发幸福感而打造。",
+    "start_building": "开始构建",
+    "view_on_github": "在 GitHub 上查看"
+  },
+  "cta": {
+    "title": "准备好构建您的后台系统了吗？",
+    "subtitle": "立即开始使用 Tagtag。",
+    "description": "立即开始使用 Tagtag，轻松构建稳健的企业级应用。",
+    "get_started": "快速开始"
+  },
+  "quick_start": {
+    "title": "快速上手",
+    "subtitle": "几分钟内启动您的第一个项目",
+    "backend": "后端 (Java)",
+    "frontend": "前端 (Vue)",
+    "steps": {
+      "clone": {
+        "title": "克隆",
+        "desc": "克隆代码仓库"
+      },
+      "install": {
+        "title": "安装",
+        "desc": "安装依赖"
+      },
+      "run": {
+        "title": "运行",
+        "desc": "启动应用程序"
+      }
+    }
+  },
+  "tech_stack": {
+    "label": "技术驱动",
+    "title": "基于现代技术栈构建"
+  },
+  "features": {
+    "title": "核心特性",
+    "subtitle": "构建后台管理系统所需的一切",
+    "description": "Tagtag 为您的企业级应用提供坚实的基础，让您专注于业务逻辑。",
+    "modular": {
+      "title": "模块化架构",
+      "description": "严格的分层设计：common、framework、kernel、contract 和 module。解耦且易于维护。"
+    },
+    "enterprise": {
+      "title": "企业级能力",
+      "description": "内置 RBAC（基于角色的访问控制）、操作日志和接口限流。"
+    },
+    "contract": {
+      "title": "契约优先",
+      "description": "使用 DTO 和 Interface 清晰分离 API 定义与实现，确保接口稳定性。"
+    },
+    "modern": {
+      "title": "现代技术栈",
+      "description": "基于 Spring Boot 3、MyBatis Plus、Redis 构建，集成 Vben Admin (Vue 3) 企业级前端。"
+    },
+    "integrations": {
+      "title": "系统模块",
+      "description": "内置字典管理、系统参数配置和消息通知模块，快速搭建业务。"
+    },
+    "dx": {
+      "title": "开发体验",
+      "description": "标准化的异常处理、响应封装和工具库，大幅加速日常开发流程。"
+    }
+  }
+}
