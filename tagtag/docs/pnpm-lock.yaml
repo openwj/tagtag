@@ -17,9 +17,6 @@ importers:
       '@iconify-json/vscode-icons':
         specifier: ^1.2.36
         version: 1.2.36
-      '@iconify/json':
-        specifier: ^2.2.417
-        version: 2.2.417
       '@nuxt/content':
         specifier: ^3.8.2
         version: 3.8.2(better-sqlite3@12.4.6)(magicast@0.5.1)
@@ -676,9 +673,6 @@ packages:
 
   '@iconify/collections@1.0.610':
     resolution: {integrity: sha512-HFIv5V09CIb3ZylZbaZhUfGZfoHPwtEcEg8RmTIFABRTTtCI4olYjaVkQuvF1m3hnz+skbdeD0DeGnd+wP0vLg==}
-
-  '@iconify/json@2.2.417':
-    resolution: {integrity: sha512-/MzthgckJ4vEwdHmAbAn6Bph5WnR4tzVcHMs/nZl3v5hOVRw80SK28UPnG7jjsCB41WWjWPnWdMEdOZfUMZS5w==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -7032,11 +7026,6 @@ snapshots:
   '@iconify/collections@1.0.610':
     dependencies:
       '@iconify/types': 2.0.0
-
-  '@iconify/json@2.2.417':
-    dependencies:
-      '@iconify/types': 2.0.0
-      pathe: 2.0.3
 
   '@iconify/types@2.0.0': {}
 
