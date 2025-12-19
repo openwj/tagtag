@@ -40,7 +40,8 @@ export default defineNuxtConfig({
             'md',
             'yaml',
             'java',
-            'sql'
+            'sql',
+            'xml'
           ]
         }
       }

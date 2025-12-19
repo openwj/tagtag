@@ -14,7 +14,7 @@ const { t } = useI18n()
     </div>
 
     <!-- Grain Texture Overlay -->
-    <div class="absolute inset-0 z-[1] opacity-[0.04] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
+    <div class="absolute inset-0 z-1 opacity-[0.04] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
 
     <!-- Grid Background Animation -->
     <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
@@ -35,17 +35,17 @@ const { t } = useI18n()
         <!-- Badge -->
         <div class="mb-8 flex justify-center">
           <div class="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-500 dark:text-neutral-400 ring-1 ring-gray-200 dark:ring-white/10 hover:ring-cyan-500/50 dark:hover:ring-cyan-400/50 hover:bg-gray-50 dark:hover:bg-white/5 transition duration-300 cursor-default backdrop-blur-xl group shadow-[0_0_15px_rgba(6,182,212,0.1)] hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]">
-            <span class="bg-gradient-to-r from-cyan-500 to-indigo-500 dark:from-cyan-400 dark:to-indigo-400 bg-clip-text text-transparent font-semibold mr-2 group-hover:brightness-125 transition-all">New</span>
+            <span class="bg-linear-to-r from-cyan-500 to-indigo-500 dark:from-cyan-400 dark:to-indigo-400 bg-clip-text text-transparent font-semibold mr-2 group-hover:brightness-125 transition-all">New</span>
             {{ t('hero.badge') }}
           </div>
         </div>
 
         <!-- Hero Title -->
         <h1 class="text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-7xl mb-8 leading-tight">
-          <span class="inline-block bg-gradient-to-b from-gray-900 via-gray-900 to-gray-600 dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent">
+          <span class="inline-block bg-linear-to-b from-gray-900 via-gray-900 to-gray-600 dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent">
             {{ t('hero.title_part1') }}
           </span>
-          <span class="inline-block bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto] drop-shadow-[0_0_30px_rgba(129,140,248,0.3)]">
+          <span class="inline-block bg-linear-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto] drop-shadow-[0_0_30px_rgba(129,140,248,0.3)]">
             {{ t('hero.title_part2') }}
           </span>
         </h1>
@@ -60,8 +60,10 @@ const { t } = useI18n()
             size="xl"
             color="primary"
             variant="solid"
-            class="relative px-8 py-4 rounded-full font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] transition-all duration-300 hover:scale-105"
+            class="group relative px-8 py-4 rounded-full font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] transition-all duration-300 hover:scale-105 overflow-hidden"
           >
+            <!-- Button Shine Effect -->
+            <div class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
             <span class="relative z-10">{{ t('hero.start_building') }}</span>
           </UButton>
 
@@ -99,8 +101,14 @@ const { t } = useI18n()
               </div>
 
               <!-- Code Content -->
-              <div class="p-6 text-left overflow-hidden">
-                <pre class="text-xs sm:text-sm leading-6 text-gray-300 font-mono"><code><span class="text-[#c678dd]">@RestController</span>
+              <div class="flex text-left overflow-hidden">
+                <!-- Line Numbers -->
+                <div class="hidden sm:block py-6 pl-4 pr-2 text-right font-mono text-xs sm:text-sm leading-6 text-gray-600 select-none border-r border-white/5 bg-white/5">
+                  1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15
+                </div>
+                <!-- Code -->
+                <div class="p-6 w-full">
+                  <pre class="text-xs sm:text-sm leading-6 text-gray-300 font-mono"><code><span class="text-[#c678dd]">@RestController</span>
 <span class="text-[#c678dd]">@RequestMapping</span>(<span class="text-[#98c379]">"/users"</span>)
 <span class="text-[#56b6c2]">public class</span> <span class="text-[#e5c07b]">UserController</span> {
 
@@ -115,6 +123,7 @@ const { t } = useI18n()
         <span class="text-[#c678dd]">return</span> <span class="text-[#e5c07b]">Result</span>.success(userService.create(dto));
     }
 }</code></pre>
+                </div>
               </div>
 
               <!-- Bottom Glow Reflection -->

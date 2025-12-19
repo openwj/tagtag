@@ -56,11 +56,13 @@ const features = computed(() => {
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
 
     <div class="relative mx-auto max-w-7xl px-6 lg:px-8 z-10">
-      <div class="mx-auto max-w-2xl text-center mb-20">
-        <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-cyan-400 uppercase tracking-wide">
+      <div class="mx-auto max-w-2xl text-center mb-20 relative">
+        <h2 class="text-base font-semibold leading-7 text-indigo-600 dark:text-cyan-400 uppercase tracking-wide flex items-center justify-center gap-2">
+          <span class="w-8 h-px bg-indigo-600/50 dark:bg-cyan-400/50 rounded-full"></span>
           {{ t('features.title') }}
+          <span class="w-8 h-px bg-indigo-600/50 dark:bg-cyan-400/50 rounded-full"></span>
         </h2>
-        <p class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl bg-gradient-to-r from-gray-900 via-gray-900 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-transparent">
+        <p class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl bg-linear-to-r from-gray-900 via-gray-900 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-transparent">
           {{ t('features.subtitle') }}
         </p>
         <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-neutral-400">
