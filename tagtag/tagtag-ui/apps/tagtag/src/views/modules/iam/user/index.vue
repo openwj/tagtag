@@ -242,7 +242,7 @@ const handleStatusToggle = (row: Record<string, any>) => {
     row.status === USER_STATUS.ENABLED
       ? USER_STATUS.DISABLED
       : USER_STATUS.ENABLED;
-  const statusText = STATUS_MAP[newStatus].text;
+  const statusText = STATUS_MAP[newStatus]?.text || '未知';
   row.statusLoading = true;
   return updateUserStatus(row.id, newStatus)
     .then(() => {
@@ -565,12 +565,12 @@ function handleClearDept() {
             <Tag
               v-if="GENDER_MAP[row.gender]"
               :bordered="false"
-              :color="GENDER_MAP[row.gender].color"
+              :color="GENDER_MAP[row.gender]?.color"
             >
               <span
-                :class="`${GENDER_MAP[row.gender].icon} mr-1 align-text-bottom`"
+:class="`${GENDER_MAP[row.gender]?.icon || 'icon-[lucide--help-circle]'} mr-1 align-text-bottom`"
               ></span>
-              {{ GENDER_MAP[row.gender].text }}
+              {{ GENDER_MAP[row.gender]?.text || '未知' }}
             </Tag>
             <Tag v-else :bordered="false" color="default">
               <span

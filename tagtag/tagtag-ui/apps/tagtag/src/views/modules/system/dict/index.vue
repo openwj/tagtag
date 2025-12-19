@@ -13,10 +13,10 @@ const currentDictType = ref<any>(null);
   <Page auto-content-height>
     <div class="flex h-full gap-4">
       <!-- 左侧：字典类型 -->
-      <DictType @select="(row) => (currentDictType = row)" />
+      <DictType class="w-5/12" @select="(row) => (currentDictType = row)" />
 
       <!-- 右侧：字典数据 -->
-      <DictData :dict-type="currentDictType" />
+      <DictData class="w-0 flex-1" :dict-type="currentDictType" />
     </div>
   </Page>
 </template>

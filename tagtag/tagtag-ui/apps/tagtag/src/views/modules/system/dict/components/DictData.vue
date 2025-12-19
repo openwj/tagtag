@@ -29,12 +29,18 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const statusMap: Record<number, { text: string; color: string }> = {
+  1: { text: '正常', color: 'green' },
+  0: { text: '停用', color: 'red' },
+};
+
 const [DataDrawerComponent, dataDrawerApi] = useVbenDrawer({
   connectedComponent: DataDrawer,
 });
 
 const dataGridOptions: VxeGridProps = {
   columns: dataColumns,
+  emptyText: '请先在左侧选择字典类型',
   proxyConfig: {
     enabled: true,
     autoLoad: false, // 默认不加载，等选中类型后再加载
@@ -134,7 +140,7 @@ async function handleBatchDeleteData() {
 
 <template>
   <div
-    class="flex h-full w-7/12 flex-col rounded-lg border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-800 dark:bg-[#151515]"
+    class="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-800 dark:bg-[#151515]"
   >
     <div
       class="mb-2 flex items-center border-l-4 border-primary px-2 py-1 text-base font-bold"

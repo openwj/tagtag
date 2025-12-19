@@ -3,13 +3,7 @@ import type { VxeGridProps } from '#/adapter/vxe-table';
 
 import { useVbenDrawer } from '@vben/common-ui';
 
-import {
-  Button,
-  message,
-  Popconfirm,
-  Tag,
-  Tooltip,
-} from 'ant-design-vue';
+import { Button, message, Popconfirm, Tag, Tooltip } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -71,10 +65,13 @@ const typeGridOptions: VxeGridProps = {
 const [TypeGrid, typeGridApi] = useVbenVxeGrid({
   formOptions: {
     schema: typeSearchFormSchema,
-    actionWrapperClass: 'col-span-1',
     collapsed: true,
     showCollapseButton: true,
-  },
+    baseColProps: { span: 24 },
+    // labelWidth: 70,
+    actionColOptions: { span: 24 },
+    compact: true,
+  } as any,
   gridOptions: typeGridOptions,
   gridEvents: {
     cellClick: ({ row }: any) => handleTypeSelect(row),
@@ -135,7 +132,7 @@ function handleTypeSelect(row: any) {
 
 <template>
   <div
-    class="flex h-full w-5/12 flex-col rounded-lg border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-800 dark:bg-[#151515]"
+    class="flex h-full flex-col rounded-lg border border-gray-200 bg-white p-2 shadow-sm dark:border-gray-800 dark:bg-[#151515]"
   >
     <div
       class="mb-2 flex items-center justify-between border-l-4 border-primary px-2 py-1 text-base font-bold"
