@@ -39,6 +39,23 @@ import DeptTree from './DeptTree.vue';
 import FormDrawer from './FormDrawer.vue';
 import RoleAssignModal from './RoleAssignModal.vue';
 
+// 常量定义
+const USER_STATUS = {
+  DISABLED: 0,
+  ENABLED: 1,
+};
+
+const STATUS_MAP = {
+  [USER_STATUS.DISABLED]: { text: '禁用', actionText: '启用', color: 'red' },
+  [USER_STATUS.ENABLED]: { text: '启用', actionText: '禁用', color: 'green' },
+};
+
+const GENDER_MAP: Record<number, { text: string; color: string; icon: string }> = {
+  1: { text: '男', color: 'blue', icon: 'icon-[lucide--user]' },
+  2: { text: '女', color: 'pink', icon: 'icon-[lucide--user-check]' },
+  0: { text: '未知', color: 'default', icon: 'icon-[lucide--help-circle]' },
+};
+
 // 响应式状态变量：当前选中的部门ID
 const selectedDeptId = ref<string>('');
 // 部门数据加载状态
@@ -221,8 +238,11 @@ const handleBatchDelete = async () => {
  */
 const handleStatusToggle = (row: Record<string, any>) => {
   const prevStatus = row.status;
-  const newStatus = row.status === 1 ? 0 : 1;
-  const statusText = newStatus === 1 ? '启用' : '禁用';
+  const newStatus =
+    row.status === USER_STATUS.ENABLED
+      ? USER_STATUS.DISABLED
+      : USER_STATUS.ENABLED;
+  const statusText = STATUS_MAP[newStatus].text;
   row.statusLoading = true;
   return updateUserStatus(row.id, newStatus)
     .then(() => {
@@ -531,7 +551,7 @@ function handleClearDept() {
             <div class="flex items-center gap-2">
               <Switch
                 v-access:code="'user:update'"
-                :checked="row.status === 1"
+                :checked="row.status === USER_STATUS.ENABLED"
                 :disabled="row.statusLoading"
                 :loading="row.statusLoading"
                 checked-children="启用"
@@ -542,14 +562,21 @@ function handleClearDept() {
           </template>
 
           <template #gender="{ row }">
-            <Tag v-if="row.gender === 1" color="blue" :bordered="false">
-              <span class="icon-[lucide--user] mr-1 align-text-bottom"></span>男
+            <Tag
+              v-if="GENDER_MAP[row.gender]"
+              :bordered="false"
+              :color="GENDER_MAP[row.gender].color"
+            >
+              <span
+                :class="`${GENDER_MAP[row.gender].icon} mr-1 align-text-bottom`"
+              ></span>
+              {{ GENDER_MAP[row.gender].text }}
             </Tag>
-            <Tag v-else-if="row.gender === 2" color="pink" :bordered="false">
-              <span class="icon-[lucide--user-check] mr-1 align-text-bottom"></span>女
-            </Tag>
-            <Tag v-else color="default" :bordered="false">
-              <span class="icon-[lucide--help-circle] mr-1 align-text-bottom"></span>未知
+            <Tag v-else :bordered="false" color="default">
+              <span
+                class="icon-[lucide--help-circle] mr-1 align-text-bottom"
+              ></span>
+              未知
             </Tag>
           </template>
 

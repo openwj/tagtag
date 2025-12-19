@@ -29,7 +29,6 @@ import java.util.List;
 public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> implements DictDataService {
 
 
-    @Override
     /**
      * 字典数据分页查询
      * 根据类型、标签、状态进行筛选，状态枚举转换为整型编码
@@ -37,6 +36,7 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
      * @param pageQuery 分页参数
      * @return 分页结果
      */
+    @Override
     public PageResult<DictItemDTO> page(DictItemQueryDTO query, PageQuery pageQuery) {
         LambdaQueryWrapper<DictData> wrapper = new LambdaQueryWrapper<>();
         if (query != null) {
@@ -56,6 +56,11 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
         return PageResults.of(page.convert(DictDataConvert.INSTANCE::toDTO));
     }
 
+    /**
+     * 根据字典类型查询字典数据列表
+     * @param dictType 字典类型
+     * @return 字典数据列表
+     */
     @Override
     @Cacheable(value = CacheConstants.DICT, key = "#dictType")
     public List<DictItemDTO> listByDictType(String dictType) {
@@ -68,12 +73,21 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
         return DictDataConvert.INSTANCE.toDTOList(list);
     }
 
+    /**
+     * 根据ID获取字典数据
+     * @param id 字典数据ID
+     * @return 字典数据DTO
+     */
     @Override
     public DictItemDTO getById(Long id) {
         DictData entity = super.getById(id);
         return DictDataConvert.INSTANCE.toDTO(entity);
     }
 
+    /**
+     * 保存字典数据
+     * @param dto 字典数据DTO
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = CacheConstants.DICT, key = "#dto.typeCode")
@@ -82,6 +96,10 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
         this.save(entity);
     }
 
+    /**
+     * 更新字典数据
+     * @param dto 字典数据DTO
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = CacheConstants.DICT, key = "#dto.typeCode")
@@ -90,6 +108,10 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
         this.updateById(entity);
     }
 
+    /**
+     * 删除字典数据
+     * @param id 字典数据ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = CacheConstants.DICT, allEntries = true)
@@ -97,12 +119,12 @@ public class DictDataServiceImpl extends ServiceImpl<DictDataMapper, DictData> i
         this.removeById(id);
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     /**
      * 批量删除字典数据
      * @param ids 字典数据 ID 列表
      */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = CacheConstants.DICT, allEntries = true)
     public void deleteBatch(List<Long> ids) {
         this.removeByIds(ids);

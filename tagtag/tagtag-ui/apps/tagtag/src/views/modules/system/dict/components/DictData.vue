@@ -175,8 +175,11 @@ async function handleBatchDeleteData() {
           </div>
         </template>
         <template #status="{ row }">
-          <Tag :color="row.status === 1 ? 'green' : 'red'" :bordered="false">
-            {{ row.status === 1 ? '正常' : '停用' }}
+          <Tag
+            :bordered="false"
+            :color="statusMap[row.status]?.color || 'default'"
+          >
+            {{ statusMap[row.status]?.text || '未知' }}
           </Tag>
         </template>
         <template #action="{ row }">

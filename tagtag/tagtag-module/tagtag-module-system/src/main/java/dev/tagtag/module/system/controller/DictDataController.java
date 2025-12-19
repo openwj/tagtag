@@ -32,18 +32,33 @@ public class DictDataController {
         return Result.ok(dictDataService.page(req.query(), req.page()));
     }
 
+    /**
+     * 根据字典类型获取字典数据列表
+     * @param dictType 字典类型
+     * @return 字典数据列表
+     */
     @GetMapping("/type/{dictType}")
     @RequirePerm(Permissions.DICT_DATA_READ)
     public Result<List<DictItemDTO>> listByDictType(@PathVariable String dictType) {
         return Result.ok(dictDataService.listByDictType(dictType));
     }
 
+    /**
+     * 获取字典数据详情
+     * @param id 字典数据ID
+     * @return 字典数据详情
+     */
     @GetMapping("/{id}")
     @RequirePerm(Permissions.DICT_DATA_READ)
     public Result<DictItemDTO> get(@PathVariable Long id) {
         return Result.ok(dictDataService.getById(id));
     }
 
+    /**
+     * 新增字典数据
+     * @param dto 字典数据传输对象
+     * @return 空
+     */
     @PostMapping
     @RequirePerm(Permissions.DICT_DATA_CREATE)
     public Result<Void> save(@RequestBody @Validated DictItemDTO dto) {
@@ -51,6 +66,11 @@ public class DictDataController {
         return Result.ok();
     }
 
+    /**
+     * 修改字典数据
+     * @param dto 字典数据传输对象
+     * @return 空
+     */
     @PutMapping
     @RequirePerm(Permissions.DICT_DATA_UPDATE)
     public Result<Void> update(@RequestBody @Validated DictItemDTO dto) {
@@ -58,6 +78,11 @@ public class DictDataController {
         return Result.ok();
     }
 
+    /**
+     * 删除字典数据
+     * @param id 字典数据ID
+     * @return 空
+     */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.DICT_DATA_DELETE)
     public Result<Void> delete(@PathVariable Long id) {

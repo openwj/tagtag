@@ -15,7 +15,7 @@ spring:
     init:
       mode: always  # 或 embedded  默认 never 不执行
       schema-locations:
-        - classpath*:db/schema.sql
+        - classpath*:db/schema-*.sql
       data-locations:
         - classpath*:db/data/**.sql
   data:

@@ -56,6 +56,8 @@ public class UserController {
 
     /**
      * 获取用户详情
+     * @param id 用户ID
+     * @return 用户详情DTO
      */
     @GetMapping("/{id}")
     @RequirePerm(Permissions.USER_READ)
@@ -65,6 +67,8 @@ public class UserController {
 
     /**
      * 创建用户
+     * @param user 用户DTO
+     * @return 空
      */
     @PostMapping
     @RequirePerm(Permissions.USER_CREATE)
@@ -75,6 +79,8 @@ public class UserController {
 
     /**
      * 更新用户（忽略源对象中的空值）
+     * @param user 用户DTO
+     * @return 空
      */
     @PutMapping
     @RequirePerm(Permissions.USER_UPDATE)
@@ -86,6 +92,8 @@ public class UserController {
     /**
      * 本人更新基础信息（头像/昵称/邮箱/电话/性别/生日/备注）
      * 从会话中获取当前用户ID，仅更新非空字段；返回最新用户信息避免前端再拉取。
+     * @param user 用户DTO
+     * @return 更新后的用户DTO
      */
     @PutMapping("/me")
     public Result<UserDTO> updateMe(@Valid @RequestBody UserDTO user) {
@@ -99,6 +107,8 @@ public class UserController {
 
     /**
      * 删除用户
+     * @param id 用户ID
+     * @return 空
      */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.USER_DELETE)
@@ -109,6 +119,9 @@ public class UserController {
 
     /**
      * 为用户分配角色（覆盖式分配）
+     * @param id 用户ID
+     * @param roleIds 角色ID列表
+     * @return 空
      */
     @PostMapping("/{id}/roles")
     @RequirePerm(Permissions.USER_ASSIGN_ROLE)
