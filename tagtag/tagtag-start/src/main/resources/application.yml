@@ -4,9 +4,7 @@ spring:
     version: 1.0.0
   profiles:
     active: dev
-#  jackson:
-#    date-format: yyyy-MM-dd HH:mm:ss
-#    time-zone: GMT+8
+
   servlet:
     multipart:
       max-file-size: 50MB
@@ -42,6 +40,8 @@ storage:
 # Scalar 配置
 scalar:
   enabled: true                    # 是否启用 Scalar
+  path:  /scalar
+  url: /v3/api-docs
 
 
 # Springdoc 配置（仅核心功能，无 Swagger UI）

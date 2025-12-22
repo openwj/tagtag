@@ -6,6 +6,8 @@ import dev.tagtag.contract.auth.dto.ImageCaptchaDTO;
 import dev.tagtag.kernel.annotation.RateLimit;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.module.auth.service.CaptchaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping(GlobalConstants.API_PREFIX + "/captcha")
+@Tag(name = "认证管理 - 验证码", description = "验证码相关 API 接口")
 public class CaptchaController {
 
     private final CaptchaService captchaService;
@@ -33,6 +36,7 @@ public class CaptchaController {
      */
     @RateLimit(key = "captcha:image", periodSeconds = 60, permits = 10, message = "验证码获取过于频繁，请稍后再试")
     @GetMapping("/image")
+    @Operation(summary = "获取图片验证码", description = "获取图片验证码，用于登录、注册等场景的人机验证")
     public Result<ImageCaptchaDTO> image() {
         return Result.ok(captchaService.generateImageCaptcha());
     }
@@ -43,6 +47,7 @@ public class CaptchaController {
      * @return 是否通过
      */
     @PostMapping("/validate")
+    @Operation(summary = "预校验验证码", description = "预校验验证码，用于前端在登录前主动检查验证码是否正确")
     public Result<Boolean> validate(@Valid @RequestBody CaptchaValidateRequest req) {
         boolean ok = captchaService.validate(req.getCaptchaId(), req.getCode());
         return Result.ok(ok);

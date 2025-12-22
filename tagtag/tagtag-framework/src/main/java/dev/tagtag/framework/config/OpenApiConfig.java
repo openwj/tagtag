@@ -15,7 +15,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("TagTag Admin API")
+                        .title("TagTag Starter API")
                         .version("1.0.0")
                         .description("基于 Spring Boot 3.x 的企业级后台管理系统 API"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))

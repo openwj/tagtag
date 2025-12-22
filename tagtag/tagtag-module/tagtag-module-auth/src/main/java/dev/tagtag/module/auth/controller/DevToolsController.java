@@ -1,6 +1,8 @@
 package dev.tagtag.module.auth.controller;
 
 import dev.tagtag.common.model.Result;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -18,6 +20,7 @@ import dev.tagtag.common.constant.GlobalConstants;
 @Profile("dev")
 @RestController
 @RequestMapping(GlobalConstants.API_PREFIX + "/auth/tools")
+@Tag(name = "开发工具", description = "开发环境辅助工具 API 接口")
 public class DevToolsController {
 
     private final PasswordEncoder passwordEncoder;
@@ -36,6 +39,7 @@ public class DevToolsController {
      * @return BCrypt 哈希
      */
     @PostMapping("/bcrypt")
+    @Operation(summary = "生成 BCrypt 密码哈希", description = "生成 BCrypt 密码哈希，用于开发环境辅助测试")
     public Result<String> bcrypt(@Valid @RequestBody BcryptRequest req) {
         String plain = req.getPlain() == null ? "" : req.getPlain().trim();
         String hash = passwordEncoder.encode(plain);
