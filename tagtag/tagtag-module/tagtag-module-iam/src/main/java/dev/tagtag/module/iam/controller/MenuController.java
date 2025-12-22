@@ -14,11 +14,14 @@ import jakarta.validation.Valid;
 import java.util.List;
 import dev.tagtag.framework.security.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Validated
 @AllArgsConstructor
 @RequestMapping(GlobalConstants.API_PREFIX + "/iam/menus")
+@Tag(name = "IAM - 菜单管理", description = "菜单相关 API 接口")
 public class MenuController {
 
     private final MenuService menuService;
@@ -30,6 +33,7 @@ public class MenuController {
      */
     @GetMapping("/tree")
     @RequirePerm(Permissions.MENU_READ)
+    @Operation(summary = "获取菜单树", description = "获取菜单树列表，支持过滤条件")
     public Result<List<MenuDTO>> tree(MenuQueryDTO query) {
         return Result.ok(menuService.listTree(query));
     }
@@ -37,6 +41,7 @@ public class MenuController {
     /** 获取菜单详情 */
     @GetMapping("/{id}")
     @RequirePerm(Permissions.MENU_READ)
+    @Operation(summary = "获取菜单详情", description = "根据菜单ID获取菜单详细信息")
     public Result<MenuDTO> get(@PathVariable("id") Long id) {
         return Result.ok(menuService.getById(id));
     }
@@ -45,6 +50,7 @@ public class MenuController {
     /** 创建菜单 */
     @PostMapping
     @RequirePerm(Permissions.MENU_CREATE)
+    @Operation(summary = "创建菜单", description = "创建新菜单")
     public Result<Long> create(@Valid @RequestBody MenuDTO menu) {
         Long id = menuService.create(menu);
         return Result.ok(id);
@@ -53,6 +59,7 @@ public class MenuController {
     /** 更新菜单（忽略源对象中的空值） */
     @PutMapping
     @RequirePerm(Permissions.MENU_UPDATE)
+    @Operation(summary = "更新菜单", description = "更新菜单信息")
     public Result<Void> update(@Valid @RequestBody MenuDTO menu) {
         menuService.update(menu);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -61,6 +68,7 @@ public class MenuController {
     /** 删除菜单 */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.MENU_DELETE)
+    @Operation(summary = "删除菜单", description = "根据菜单ID删除菜单")
     public Result<Void> delete(@PathVariable("id") Long id) {
         menuService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -73,6 +81,7 @@ public class MenuController {
      */
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.MENU_UPDATE)
+    @Operation(summary = "更新菜单状态", description = "启用或禁用菜单")
     public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody MenuStatusUpdateRequest req) {
         menuService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -84,6 +93,7 @@ public class MenuController {
      */
     @PutMapping("/status/batch")
     @RequirePerm(Permissions.MENU_UPDATE)
+    @Operation(summary = "批量更新菜单状态", description = "批量启用或禁用菜单")
     public Result<Void> batchUpdateStatus(@RequestBody MenuStatusBatchRequest req) {
         menuService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -95,6 +105,7 @@ public class MenuController {
      */
     @DeleteMapping("/batch")
     @RequirePerm(Permissions.MENU_DELETE)
+    @Operation(summary = "批量删除菜单", description = "批量删除菜单")
     public Result<Void> batchDelete(@RequestBody MenuBatchDeleteRequest req) {
         menuService.batchDelete(req.getIds());
         return Result.okMsg(AppMessages.DELETE_SUCCESS);

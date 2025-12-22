@@ -11,12 +11,15 @@ import dev.tagtag.kernel.constant.Permissions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
 @RestController
 @RequestMapping(GlobalConstants.API_PREFIX + "/sys/dict/data")
 @RequiredArgsConstructor
+@Tag(name = "系统管理 - 字典数据", description = "字典数据相关 API 接口")
 public class DictDataController {
 
     private final DictDataService dictDataService;
@@ -28,6 +31,7 @@ public class DictDataController {
      */
     @PostMapping("/page")
     @RequirePerm(Permissions.DICT_DATA_READ)
+    @Operation(summary = "字典数据分页查询", description = "根据条件分页查询字典数据列表")
     public Result<PageResult<DictItemDTO>> page(@RequestBody dev.tagtag.common.model.PageRequest<DictItemQueryDTO> req) {
         return Result.ok(dictDataService.page(req.query(), req.page()));
     }
@@ -39,6 +43,7 @@ public class DictDataController {
      */
     @GetMapping("/type/{dictType}")
     @RequirePerm(Permissions.DICT_DATA_READ)
+    @Operation(summary = "根据字典类型获取字典数据", description = "根据字典类型获取字典数据列表")
     public Result<List<DictItemDTO>> listByDictType(@PathVariable String dictType) {
         return Result.ok(dictDataService.listByDictType(dictType));
     }
@@ -50,6 +55,7 @@ public class DictDataController {
      */
     @GetMapping("/{id}")
     @RequirePerm(Permissions.DICT_DATA_READ)
+    @Operation(summary = "获取字典数据详情", description = "根据ID获取字典数据详情")
     public Result<DictItemDTO> get(@PathVariable Long id) {
         return Result.ok(dictDataService.getById(id));
     }
@@ -61,6 +67,7 @@ public class DictDataController {
      */
     @PostMapping
     @RequirePerm(Permissions.DICT_DATA_CREATE)
+    @Operation(summary = "新增字典数据", description = "新增字典数据")
     public Result<Void> save(@RequestBody @Validated DictItemDTO dto) {
         dictDataService.save(dto);
         return Result.ok();
@@ -73,6 +80,7 @@ public class DictDataController {
      */
     @PutMapping
     @RequirePerm(Permissions.DICT_DATA_UPDATE)
+    @Operation(summary = "修改字典数据", description = "修改字典数据")
     public Result<Void> update(@RequestBody @Validated DictItemDTO dto) {
         dictDataService.update(dto);
         return Result.ok();
@@ -85,6 +93,7 @@ public class DictDataController {
      */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.DICT_DATA_DELETE)
+    @Operation(summary = "删除字典数据", description = "根据ID删除字典数据")
     public Result<Void> delete(@PathVariable Long id) {
         dictDataService.delete(id);
         return Result.ok();
@@ -97,6 +106,7 @@ public class DictDataController {
      */
     @DeleteMapping
     @RequirePerm(Permissions.DICT_DATA_DELETE)
+    @Operation(summary = "批量删除字典数据", description = "批量删除字典数据")
     public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
         dictDataService.deleteBatch(ids);
         return Result.ok();

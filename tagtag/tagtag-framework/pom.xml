@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>tagtag-framework</artifactId>
-    <version>1.0.0</version>
     <name>TAGTAG Framework</name>
     <description>框架整合层（Spring、MyBatis、Security 等基础设施整合）</description>
 
@@ -67,6 +66,29 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
+        </dependency>
+
+        <!-- Springdoc OpenAPI 核心依赖 -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        
+        <!-- Scalar WebMVC 依赖 -->
+        <dependency>
+            <groupId>com.scalar.maven</groupId>
+            <artifactId>scalar-webmvc</artifactId>
         </dependency>
 
         <!-- 内部模块依赖 -->

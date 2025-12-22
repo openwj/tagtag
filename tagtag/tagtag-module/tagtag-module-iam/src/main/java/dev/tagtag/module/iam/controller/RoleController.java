@@ -16,11 +16,14 @@ import jakarta.validation.Valid;
 import java.util.List;
 import dev.tagtag.framework.security.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Validated
 @AllArgsConstructor
 @RequestMapping(GlobalConstants.API_PREFIX + "/iam/roles")
+@Tag(name = "IAM - 角色管理", description = "角色相关 API 接口")
 public class RoleController {
 
     private final RoleService roleService;
@@ -28,6 +31,7 @@ public class RoleController {
     /** 角色分页查询 */
     @PostMapping("/page")
     @RequirePerm(Permissions.ROLE_READ)
+    @Operation(summary = "角色分页查询", description = "根据条件分页查询角色列表")
     public Result<PageResult<RoleDTO>> page(@Valid @RequestBody RolePageRequest req) {
         PageResult<RoleDTO> pr = roleService.page(req.getQuery(), req.getPage());
         return Result.ok(pr);
@@ -36,6 +40,7 @@ public class RoleController {
     /** 获取角色详情 */
     @GetMapping("/{id}")
     @RequirePerm(Permissions.ROLE_READ)
+    @Operation(summary = "获取角色详情", description = "根据角色ID获取角色详细信息")
     public Result<RoleDTO> get(@PathVariable("id") Long id) {
         return Result.ok(roleService.getById(id));
     }
@@ -47,6 +52,7 @@ public class RoleController {
      */
     @GetMapping("/code/{code}")
     @RequirePerm(Permissions.ROLE_READ)
+    @Operation(summary = "根据编码获取角色", description = "根据角色编码查询角色详情")
     public Result<RoleDTO> getByCode(@PathVariable("code") String code) {
         return Result.ok(roleService.getByCode(code));
     }
@@ -58,6 +64,7 @@ public class RoleController {
      */
     @GetMapping("/name/{name}")
     @RequirePerm(Permissions.ROLE_READ)
+    @Operation(summary = "根据名称获取角色", description = "根据角色名称查询角色详情")
     public Result<RoleDTO> getByName(@PathVariable("name") String name) {
         return Result.ok(roleService.getByName(name));
     }
@@ -65,6 +72,7 @@ public class RoleController {
     /** 创建角色 */
     @PostMapping
     @RequirePerm(Permissions.ROLE_CREATE)
+    @Operation(summary = "创建角色", description = "创建新角色")
     public Result<Void> create(@Valid @RequestBody RoleDTO role) {
         roleService.create(role);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
@@ -73,6 +81,7 @@ public class RoleController {
     /** 更新角色（忽略源对象中的空值） */
     @PutMapping
     @RequirePerm(Permissions.ROLE_UPDATE)
+    @Operation(summary = "更新角色", description = "更新角色信息")
     public Result<Void> update(@Valid @RequestBody RoleDTO role) {
         roleService.update(role);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -81,6 +90,7 @@ public class RoleController {
     /** 删除角色 */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.ROLE_DELETE)
+    @Operation(summary = "删除角色", description = "根据角色ID删除角色")
     public Result<Void> delete(@PathVariable("id") Long id) {
         roleService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -94,6 +104,7 @@ public class RoleController {
      */
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.ROLE_UPDATE)
+    @Operation(summary = "更新角色状态", description = "启用或禁用角色")
     public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody RoleStatusUpdateRequest req) {
         roleService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -106,6 +117,7 @@ public class RoleController {
      */
     @PutMapping("/status/batch")
     @RequirePerm(Permissions.ROLE_UPDATE)
+    @Operation(summary = "批量更新角色状态", description = "批量启用或禁用角色")
     public Result<Void> batchUpdateStatus(@Valid @RequestBody RoleStatusBatchRequest req) {
         roleService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -114,6 +126,7 @@ public class RoleController {
     /** 查询所有角色（简单列表） */
     @GetMapping
     @RequirePerm(Permissions.ROLE_READ)
+    @Operation(summary = "查询所有角色", description = "查询所有角色列表")
     public Result<List<RoleDTO>> listAll() {
         return Result.ok(roleService.listAll());
     }
@@ -122,6 +135,7 @@ public class RoleController {
     /** 为角色分配菜单（覆盖式） */
     @PostMapping("/{id}/menus")
     @RequirePerm(Permissions.ROLE_ASSIGN_MENU)
+    @Operation(summary = "分配菜单", description = "为角色分配菜单")
     public Result<Void> assignMenus(@PathVariable("id") Long roleId, @RequestBody List<Long> menuIds) {
         roleService.assignMenus(roleId, menuIds);
         return Result.okMsg(AppMessages.ASSIGN_SUCCESS);
@@ -134,6 +148,7 @@ public class RoleController {
      */
     @GetMapping("/{id}/menu-ids")
     @RequirePerm(Permissions.ROLE_READ)
+    @Operation(summary = "查询角色菜单", description = "查询角色已分配的菜单ID列表")
     public Result<List<Long>> listMenuIds(@PathVariable("id") Long roleId) {
         return Result.ok(roleService.listMenuIdsByRoleId(roleId));
     }

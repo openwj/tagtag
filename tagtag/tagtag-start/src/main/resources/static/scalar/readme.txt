@@ -1,0 +1,1 @@
+https://www.jsdelivr.com/package/npm/@scalar/api-reference?tab=files

@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <title>TagTag Starter API</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<div id="app"></div>
+
+<!-- Load Scalar UI -->
+<script src="/scalar/standalone.min.js
+"></script>
+<link href="/scalar/style.min.css
+" rel="stylesheet">
+
+<script>
+    Scalar.createApiReference('#app', {
+        // 指向本地 Springdoc 生成的 OpenAPI 文档
+        "theme": "kepler",
+        url: '/v3/api-docs',
+        // 代理 URL 可以省略，如果本地和前端同源
+        // proxyUrl: 'https://proxy.scalar.com',
+    });
+</script>
+</body>
+</html>

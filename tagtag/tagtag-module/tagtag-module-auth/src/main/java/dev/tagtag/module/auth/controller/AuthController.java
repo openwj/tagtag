@@ -38,6 +38,8 @@ import java.util.Objects;
 import java.util.ArrayList;
 
 import dev.tagtag.kernel.annotation.RateLimit;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 认证控制器，提供登录、刷新与注销接口
@@ -46,6 +48,7 @@ import dev.tagtag.kernel.annotation.RateLimit;
 @Validated
 @AllArgsConstructor
 @RequestMapping(GlobalConstants.API_PREFIX + "/auth")
+@Tag(name = "认证管理", description = "认证相关 API 接口")
 public class AuthController {
 
     private final AuthService authService;
@@ -65,6 +68,7 @@ public class AuthController {
      */
     @RateLimit(key = "auth:login", periodSeconds = 60, permits = 10, message = "登录请求过多，请稍后再试")
     @PostMapping("/login")
+    @Operation(summary = "用户登录", description = "用户登录，返回访问令牌与刷新令牌")
     public Result<TokenDTO> login(@Valid @RequestBody LoginRequest req) {
         String inCode = req.getCaptcha().getCode();
         String inId = req.getCaptcha().getCaptchaId();
@@ -85,6 +89,7 @@ public class AuthController {
      */
     @RateLimit(key = "auth:refresh", periodSeconds = 60, permits = 30, message = "刷新频率过快，请稍后再试")
     @PostMapping("/refresh")
+    @Operation(summary = "刷新令牌", description = "刷新令牌，返回新的访问令牌与刷新令牌")
     public Result<TokenDTO> refresh(@Valid @RequestBody RefreshRequest req) {
         TokenDTO dto = authService.refresh(req.getRefreshToken());
         return Result.ok(dto);
@@ -97,6 +102,7 @@ public class AuthController {
      * @return 操作结果
      */
     @PostMapping("/logout")
+    @Operation(summary = "注销登录", description = "用户注销登录")
     public Result<Void> logout(@Valid @RequestBody LogoutRequest req) {
         authService.logout(req.getAccessToken());
         return Result.ok();
@@ -110,6 +116,7 @@ public class AuthController {
      */
     @RateLimit(key = "auth:register", periodSeconds = 60, permits = 10, message = "注册请求过多，请稍后再试")
     @PostMapping("/register")
+    @Operation(summary = "用户注册", description = "用户注册，公开接口")
     public Result<Void> register(@Valid @RequestBody RegisterRequest req) {
         if (req.getCaptcha() == null || req.getCaptcha().getCaptchaId() == null || req.getCaptcha().getCode() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码不能为空");
@@ -129,6 +136,7 @@ public class AuthController {
      * @return 用户信息
      */
     @GetMapping("/me")
+    @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
     public Result<UserDTO> me() {
         Long uid = AuthContext.getCurrentUserId();
         UserDTO user = uid == null ? null : userApi.getUserById(uid).getData();
@@ -142,6 +150,7 @@ public class AuthController {
      * @return 权限码列表
      */
     @GetMapping("/codes")
+    @Operation(summary = "获取权限编码", description = "获取当前用户的权限编码集合")
     public Result<Set<String>> codes() {
         UserPrincipal principal = AuthContext.getCurrentPrincipal();
         // 如果是超级管理员，返回所有权限码
@@ -160,6 +169,7 @@ public class AuthController {
      * @return 路由记录列表
      */
     @GetMapping("/menu/all")
+    @Operation(summary = "获取用户路由", description = "获取当前用户可访问的路由记录")
     public Result<List<RouteRecordStringComponentDTO>> allMenus() {
         UserPrincipal principal = AuthContext.getCurrentPrincipal();
         List<MenuDTO> filteredTree;

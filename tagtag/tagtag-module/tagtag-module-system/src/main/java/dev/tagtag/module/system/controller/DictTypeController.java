@@ -13,12 +13,15 @@ import dev.tagtag.kernel.constant.Permissions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
 @RestController
 @RequestMapping(GlobalConstants.API_PREFIX + "/sys/dict/type")
 @RequiredArgsConstructor
+@Tag(name = "系统管理 - 字典类型", description = "字典类型相关 API 接口")
 public class DictTypeController {
 
     private final DictTypeService dictTypeService;
@@ -30,24 +33,28 @@ public class DictTypeController {
      */
     @PostMapping("/page")
     @RequirePerm(Permissions.DICT_TYPE_READ)
+    @Operation(summary = "字典类型分页查询", description = "根据条件分页查询字典类型列表")
     public Result<PageResult<DictTypeDTO>> page(@RequestBody PageRequest<DictTypeQueryDTO> req) {
         return Result.ok(dictTypeService.page(req.query(), req.page()));
     }
 
     @GetMapping("/list")
     @RequirePerm(Permissions.DICT_TYPE_READ)
+    @Operation(summary = "获取字典类型列表", description = "获取所有字典类型列表")
     public Result<List<DictTypeDTO>> list() {
         return Result.ok(dictTypeService.listAll());
     }
 
     @GetMapping("/{id}")
     @RequirePerm(Permissions.DICT_TYPE_READ)
+    @Operation(summary = "获取字典类型详情", description = "根据ID获取字典类型详情")
     public Result<DictTypeDTO> get(@PathVariable Long id) {
         return Result.ok(dictTypeService.getById(id));
     }
 
     @PostMapping
     @RequirePerm(Permissions.DICT_TYPE_CREATE)
+    @Operation(summary = "创建字典类型", description = "创建新的字典类型")
     public Result<Void> save(@RequestBody @Validated DictTypeDTO dto) {
         dictTypeService.save(dto);
         return Result.ok();
@@ -55,6 +62,7 @@ public class DictTypeController {
 
     @PutMapping
     @RequirePerm(Permissions.DICT_TYPE_UPDATE)
+    @Operation(summary = "更新字典类型", description = "更新字典类型信息")
     public Result<Void> update(@RequestBody @Validated DictTypeDTO dto) {
         dictTypeService.update(dto);
         return Result.ok();
@@ -62,6 +70,7 @@ public class DictTypeController {
 
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.DICT_TYPE_DELETE)
+    @Operation(summary = "删除字典类型", description = "根据ID删除字典类型")
     public Result<Void> delete(@PathVariable Long id) {
         dictTypeService.delete(id);
         return Result.ok();
@@ -74,6 +83,7 @@ public class DictTypeController {
      */
     @DeleteMapping
     @RequirePerm(Permissions.DICT_TYPE_DELETE)
+    @Operation(summary = "批量删除字典类型", description = "批量删除字典类型")
     public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
         dictTypeService.deleteBatch(ids);
         return Result.ok();
@@ -83,6 +93,7 @@ public class DictTypeController {
 
     @PostMapping("/refresh")
     @RequirePerm(Permissions.DICT_TYPE_UPDATE)
+    @Operation(summary = "刷新字典缓存", description = "刷新字典类型缓存")
     public Result<Void> refreshCache() {
         dictTypeService.refreshCache();
         return Result.ok();

@@ -15,11 +15,14 @@ import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.framework.security.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 import dev.tagtag.common.constant.GlobalConstants;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(GlobalConstants.API_PREFIX + "/iam/depts")
 @Validated
+@Tag(name = "IAM - 部门管理", description = "部门相关 API 接口")
 public class DeptController {
 
     private final DeptService deptService;
@@ -28,6 +31,7 @@ public class DeptController {
     /** 创建部门 */
     @PostMapping
     @RequirePerm(Permissions.DEPT_CREATE)
+    @Operation(summary = "创建部门", description = "创建新部门")
     public Result<Void> create(@Validated(CreateGroup.class) @RequestBody DeptDTO dept) {
         deptService.create(dept);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
@@ -36,6 +40,7 @@ public class DeptController {
     /** 更新部门（忽略源对象中的空值） */
     @PutMapping
     @RequirePerm(Permissions.DEPT_UPDATE)
+    @Operation(summary = "更新部门", description = "更新部门信息")
     public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody DeptDTO dept) {
         deptService.update(dept);
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -44,6 +49,7 @@ public class DeptController {
     /** 删除部门 */
     @DeleteMapping("/{id}")
     @RequirePerm(Permissions.DEPT_DELETE)
+    @Operation(summary = "删除部门", description = "根据部门ID删除部门")
     public Result<Void> delete(@PathVariable("id") Long id) {
         deptService.delete(id);
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
@@ -56,6 +62,7 @@ public class DeptController {
      */
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.DEPT_UPDATE)
+    @Operation(summary = "更新部门状态", description = "启用或禁用部门")
     public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody DeptStatusUpdateRequest req) {
         deptService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -67,6 +74,7 @@ public class DeptController {
      */
     @PutMapping("/status/batch")
     @RequirePerm(Permissions.DEPT_UPDATE)
+    @Operation(summary = "批量更新部门状态", description = "批量启用或禁用部门")
     public Result<Void> batchUpdateStatus(@RequestBody DeptStatusBatchRequest req) {
         deptService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
@@ -75,6 +83,7 @@ public class DeptController {
     /** 部门树列表（支持查询条件） */
     @GetMapping("/tree")
     @RequirePerm(Permissions.DEPT_READ)
+    @Operation(summary = "获取部门树", description = "获取部门树列表，支持查询条件")
     public Result<List<DeptDTO>> listTree(DeptQueryDTO query) {
         return Result.ok(deptService.listTree(query));
     }

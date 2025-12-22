@@ -16,7 +16,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 /**
  * 统一响应体封装（ResponseBodyAdvice）
  */
-@RestControllerAdvice
+// 这里我停掉了全局 封装返回，没有必要使用还有负担
+//@RestControllerAdvice
 public class GlobalResponseAdvice implements ResponseBodyAdvice<Object> {
 
     /**

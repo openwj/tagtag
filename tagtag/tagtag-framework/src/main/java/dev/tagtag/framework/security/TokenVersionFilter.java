@@ -29,7 +29,6 @@ public class TokenVersionFilter extends OncePerRequestFilter {
 
     /**
      * 构造函数：注入 JWT 服务、令牌版本服务与全局 ObjectMapper
-     * @param jwtService JWT 服务
      * @param tokenVersionService 令牌版本服务
      * @param objectMapper 全局 ObjectMapper（统一序列化配置）
      */

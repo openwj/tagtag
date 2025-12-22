@@ -5,13 +5,7 @@ import { watch } from 'vue';
 
 import { useVbenDrawer } from '@vben/common-ui';
 
-import {
-  Button,
-  message,
-  Popconfirm,
-  Tag,
-  Tooltip,
-} from 'ant-design-vue';
+import { Button, message, Popconfirm, Tag, Tooltip } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -29,7 +23,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const statusMap: Record<number, { text: string; color: string }> = {
+const statusMap: Record<number, { color: string; text: string }> = {
   1: { text: '正常', color: 'green' },
   0: { text: '停用', color: 'red' },
 };

@@ -3,6 +3,8 @@ package dev.tagtag.framework.config;
 import dev.tagtag.framework.security.CustomAccessDeniedHandler;
 import dev.tagtag.framework.security.CustomAuthenticationEntryPoint;
 import dev.tagtag.framework.security.TokenVersionFilter;
+import lombok.NonNull;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -64,18 +66,19 @@ public class SecurityConfig {
                                                    CustomAccessDeniedHandler accessDeniedHandler,
                                                    JwtAuthenticationConverter jwtAuthenticationConverter,
                                                    TokenVersionFilter tokenVersionFilter) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     String extra = environment.getProperty("security.permit-paths");
                     List<String> permits = new ArrayList<>();
                     if (extra != null && !extra.isBlank()) {
                         for (String s : extra.split(",")) {
-                            if (s != null && !s.isBlank()) permits.add(s.trim());
+                            if (!s.isBlank()) permits.add(s.trim());
                         }
                     }
                     auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/captcha/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/captcha/**", "/v3/api-docs/**", "/scalar/**"
+                        ,"/index.html","/","/favicon.ico").permitAll()
                         .requestMatchers(permits.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated();
                 })
@@ -134,7 +137,7 @@ public class SecurityConfig {
              * @return 权限集合
              */
             @Override
-            public Collection<GrantedAuthority> convert(Jwt jwt) {
+            public Collection<GrantedAuthority> convert(@NonNull Jwt jwt) {
                 Set<GrantedAuthority> auths = new HashSet<>();
                 Object rolesObj = jwt.getClaims().get(SecurityClaims.ROLES);
                 if (rolesObj instanceof Collection<?> rc) {

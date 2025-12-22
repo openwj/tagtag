@@ -66,12 +66,12 @@ public class RateLimitAspect {
                     String.valueOf(period),
                     String.valueOf(permits)
             );
-            if (allowed != null && allowed == 0L) {
+            if (allowed == 0L) {
                 throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, limit.message());
             }
         } catch (BusinessException be) {
             throw be;
-        } catch (RuntimeException re) {
+        } catch (RuntimeException ignored) {
         }
         return pjp.proceed();
     }
