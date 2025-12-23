@@ -7,7 +7,7 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.system.dto.MessageDTO;
 import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.framework.security.annotation.RequirePerm;
-import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.framework.constant.Permissions;
 import dev.tagtag.module.system.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

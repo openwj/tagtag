@@ -7,7 +7,7 @@ import dev.tagtag.contract.system.dto.DictItemDTO;
 import dev.tagtag.contract.system.dto.DictItemQueryDTO;
 import dev.tagtag.module.system.service.DictDataService;
 import dev.tagtag.framework.security.annotation.RequirePerm;
-import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.framework.constant.Permissions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

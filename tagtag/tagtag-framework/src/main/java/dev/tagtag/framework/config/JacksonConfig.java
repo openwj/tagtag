@@ -1,10 +1,8 @@
 package dev.tagtag.framework.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -15,7 +13,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import dev.tagtag.common.constant.GlobalConstants;
-import dev.tagtag.framework.security.util.SecurityHandlerUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -54,8 +51,6 @@ public class JacksonConfig {
         mapper.setTimeZone(TimeZone.getTimeZone(GlobalConstants.DEFAULT_ZONE_ID));
         mapper.setDefaultPrettyPrinter(null);
         mapper.setDateFormat(new java.text.SimpleDateFormat(GlobalConstants.FORMAT_DATETIME));
-
-        SecurityHandlerUtils.setObjectMapper(mapper);
 
         return mapper;
     }

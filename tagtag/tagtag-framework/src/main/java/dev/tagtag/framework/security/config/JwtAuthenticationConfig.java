@@ -1,7 +1,7 @@
 package dev.tagtag.framework.security.config;
 
-import dev.tagtag.kernel.constant.Roles;
-import dev.tagtag.kernel.constant.SecurityClaims;
+import dev.tagtag.framework.constant.Roles;
+import dev.tagtag.framework.constant.SecurityClaims;
 import lombok.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import java.util.List;
-import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.framework.constant.Permissions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 

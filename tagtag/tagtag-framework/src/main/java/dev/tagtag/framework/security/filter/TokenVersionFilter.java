@@ -1,7 +1,7 @@
 package dev.tagtag.framework.security.filter;
 
+import dev.tagtag.framework.constant.SecurityClaims;
 import dev.tagtag.framework.security.service.TokenVersionService;
-import dev.tagtag.kernel.constant.SecurityClaims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

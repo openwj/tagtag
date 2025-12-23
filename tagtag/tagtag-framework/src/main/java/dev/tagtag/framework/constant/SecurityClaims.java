@@ -1,8 +1,5 @@
-package dev.tagtag.kernel.constant;
+package dev.tagtag.framework.constant;
 
-/**
- * JWT Claims 名称常量
- */
 public final class SecurityClaims {
 
     private SecurityClaims() {}

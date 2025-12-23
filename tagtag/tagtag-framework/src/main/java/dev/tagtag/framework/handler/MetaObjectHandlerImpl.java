@@ -1,17 +1,16 @@
-package dev.tagtag.kernel.handler;
+package dev.tagtag.framework.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import dev.tagtag.kernel.util.UserContextHolder;
+import dev.tagtag.framework.security.context.AuthContext;
 import org.apache.ibatis.reflection.MetaObject;
 
 import java.time.LocalDateTime;
 
 public class MetaObjectHandlerImpl implements MetaObjectHandler {
 
-    /** 插入时填充创建人与创建时间 */
     @Override
     public void insertFill(MetaObject metaObject) {
-        Long uid = UserContextHolder.getUserId();
+        Long uid = AuthContext.getCurrentUserId();
         LocalDateTime now = LocalDateTime.now();
         setFieldValByName("createTime", now, metaObject);
         setFieldValByName("updateTime", now, metaObject);
@@ -21,10 +20,9 @@ public class MetaObjectHandlerImpl implements MetaObjectHandler {
         }
     }
 
-    /** 更新时填充更新人与更新时间 */
     @Override
     public void updateFill(MetaObject metaObject) {
-        Long uid = UserContextHolder.getUserId();
+        Long uid = AuthContext.getCurrentUserId();
         LocalDateTime now = LocalDateTime.now();
         setFieldValByName("updateTime", now, metaObject);
         if (uid != null) {

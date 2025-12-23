@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import dev.tagtag.kernel.validation.CreateGroup;
 import dev.tagtag.kernel.validation.UpdateGroup;
 import dev.tagtag.kernel.constant.AppMessages;
-import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.framework.constant.Permissions;
 import dev.tagtag.common.constant.GlobalConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

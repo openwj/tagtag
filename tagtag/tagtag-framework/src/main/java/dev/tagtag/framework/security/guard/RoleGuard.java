@@ -1,32 +1,20 @@
 package dev.tagtag.framework.security.guard;
 
+import dev.tagtag.framework.constant.Roles;
 import dev.tagtag.framework.security.annotation.RequireRole;
-import dev.tagtag.framework.security.context.AuthContext;
-import dev.tagtag.framework.security.model.UserPrincipal;
-import dev.tagtag.framework.security.util.SecurityUtils;
-import dev.tagtag.kernel.constant.Roles;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-@Aspect
 @Component
-public class RoleGuard {
+public class RoleGuard extends AbstractAuthorityGuard {
 
-    @Around("@annotation(rr)")
-    public Object around(ProceedingJoinPoint pjp, RequireRole rr) throws Throwable {
-        UserPrincipal principal = AuthContext.getCurrentPrincipal();
+    @Override
+    protected String getRequiredAuthority(Object annotation) {
+        RequireRole rr = (RequireRole) annotation;
+        return Roles.PREFIX + rr.value();
+    }
 
-        if (principal.isAdmin()) {
-            return pjp.proceed();
-        }
-
-        String required = Roles.PREFIX + rr.value();
-        if (!SecurityUtils.hasAuthority(required)) {
-            throw new AccessDeniedException("角色不足: " + required);
-        }
-        return pjp.proceed();
+    @Override
+    protected String getAuthorityType() {
+        return "角色";
     }
 }

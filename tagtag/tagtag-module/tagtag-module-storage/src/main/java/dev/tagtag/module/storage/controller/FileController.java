@@ -10,7 +10,7 @@ import dev.tagtag.module.storage.entity.FileResource;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.module.storage.service.FileService;
 import dev.tagtag.framework.security.annotation.RequirePerm;
-import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.framework.constant.Permissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;

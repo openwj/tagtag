@@ -3,7 +3,6 @@ package dev.tagtag.framework.config;
 import dev.tagtag.framework.constant.SecurityConstants;
 import dev.tagtag.framework.security.filter.CustomBearerTokenResolver;
 import dev.tagtag.framework.security.filter.TokenVersionFilter;
-import dev.tagtag.framework.security.filter.UserContextCleanupFilter;
 import dev.tagtag.framework.security.handler.CustomAuthenticationEntryPoint;
 import dev.tagtag.framework.security.handler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 
 import java.util.List;
@@ -34,7 +32,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
     private final TokenVersionFilter tokenVersionFilter;
-    private final UserContextCleanupFilter userContextCleanupFilter;
     private final CustomAuthenticationEntryPoint entryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final SecurityProperties securityProperties;
@@ -60,8 +57,7 @@ public class SecurityConfig {
                         .bearerTokenResolver(new CustomBearerTokenResolver(permitPaths))
                         .authenticationEntryPoint(entryPoint)
                 )
-                .addFilterAfter(tokenVersionFilter, BearerTokenAuthenticationFilter.class)
-                .addFilterAfter(userContextCleanupFilter, TokenVersionFilter.class);
+                .addFilterAfter(tokenVersionFilter, BearerTokenAuthenticationFilter.class);
 
         return http.build();
     }

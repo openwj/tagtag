@@ -1,30 +1,15 @@
 package dev.tagtag.framework.security.util;
 
+import org.springframework.util.AntPathMatcher;
+
 public final class PathMatcherUtils {
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private PathMatcherUtils() {}
 
     public static boolean matchPath(String pattern, String path) {
-        // 精确匹配
-        if (pattern.equals(path)) {
-            return true;
-        }
-        // 匹配 /** 模式（多级路径）
-        if (pattern.endsWith("/**")) {
-            String prefix = pattern.substring(0, pattern.length() - 3);
-            return path.startsWith(prefix);
-        }
-        // 匹配 /* 模式（单级路径）
-        if (pattern.endsWith("/*")) {
-            String prefix = pattern.substring(0, pattern.length() - 2);
-            if (!path.startsWith(prefix)) {
-                return false;
-            }
-            // 检查是否只有一级
-            String remaining = path.substring(prefix.length());
-            return !remaining.contains("/");
-        }
-        return false;
+        return PATH_MATCHER.match(pattern, path);
     }
 
     public static boolean isPermitPath(String path, String[] permitPaths) {
