@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import dev.tagtag.common.util.StringUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j

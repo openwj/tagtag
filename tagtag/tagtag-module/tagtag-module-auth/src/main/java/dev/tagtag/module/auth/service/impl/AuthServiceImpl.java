@@ -5,14 +5,12 @@ import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
-import dev.tagtag.common.util.StringUtils;
 import dev.tagtag.framework.config.JwtProperties;
 import dev.tagtag.framework.security.service.JwtService;
 import dev.tagtag.framework.security.service.TokenVersionService;
 import dev.tagtag.module.auth.service.AuthService;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.TokenFactory;
-import dev.tagtag.framework.constant.SecurityMessages;
 import dev.tagtag.framework.constant.SecurityClaims;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,9 +53,9 @@ public class AuthServiceImpl implements AuthService {
     public TokenDTO login(String username, String password) {
         checkLoginRateLimit(username);
 
-        String uname = StringUtils.normalize(username);
-        String pwd = StringUtils.normalize(password);
-        if (!StringUtils.hasText(uname) || !StringUtils.hasText(pwd)) {
+        String uname = normalize(username);
+        String pwd = normalize(password);
+        if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
             log.warn("login failed: blank credentials username='{}', ip={}, ua={}, traceId={}",
                     uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
@@ -65,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         UserDTO full = loadUserOrFail(uname);
-        String stored = StringUtils.normalize(full.getPassword());
+        String stored = normalize(full.getPassword());
         if (stored != null && stored.startsWith("{bcrypt}")) {
             stored = stored.substring(8);
         }
@@ -75,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
         if (!matched) {
             log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
                     uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
         }
 
         List<Long> roleIds = Objects.requireNonNullElse(full.getRoleIds(), Collections.emptyList());
@@ -98,10 +96,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenDTO refresh(String refreshToken) {
         checkRefreshRateLimit();
-        if (!StringUtils.hasText(refreshToken) || !jwtService.validateToken(refreshToken)) {
+        if (!org.springframework.util.StringUtils.hasText(refreshToken) || !jwtService.validateToken(refreshToken)) {
             log.warn("refresh failed: invalid token, ip={}, ua={}, traceId={}",
                     resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
         }
         String subject = jwtService.getSubject(refreshToken);
         Map<String, Object> claims = new HashMap<>(jwtService.getClaims(refreshToken));
@@ -111,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
         if (uid == null || tokenVer == null || !tokenVersionService.isTokenVersionValid(uid, tokenVer)) {
             log.warn("refresh failed: token version mismatch uid={} tokenVer={}, ip={}, ua={}, traceId={}",
                     uid, tokenVer, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
         }
         claims.put(SecurityClaims.TYP, "access");
         String access = jwtService.generateToken(claims, subject, jwtProps.getAccessTtlSeconds());
@@ -134,7 +132,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(String accessToken) {
         // 解析令牌并提升令牌版本，使旧令牌全部失效
-        if (!StringUtils.hasText(accessToken) || !jwtService.validateToken(accessToken)) {
+        if (!org.springframework.util.StringUtils.hasText(accessToken) || !jwtService.validateToken(accessToken)) {
             return;
         }
         Map<String, Object> claims = jwtService.getClaims(accessToken);
@@ -172,8 +170,8 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void register(String username, String password) {
-        String uname = StringUtils.normalize(username);
-        String pwd = StringUtils.normalize(password);
+        String uname = normalize(username);
+        String pwd = normalize(password);
         if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
             throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
         }
@@ -199,7 +197,7 @@ public class AuthServiceImpl implements AuthService {
     private UserDTO loadUserOrFail(String uname) {
         UserDTO full = userApi.getUserByUsername(uname).getData();
         if (full == null || full.getPassword() == null) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, SecurityMessages.INVALID_CREDENTIALS);
+            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
         }
         return full;
     }
@@ -211,7 +209,7 @@ public class AuthServiceImpl implements AuthService {
     private void checkLoginRateLimit(String username) {
         try {
             String ip = resolveClientIp();
-            String uname = StringUtils.normalize(username);
+            String uname = normalize(username);
             String key = "rl:login:" + (ip == null ? "unknown" : ip) + ":" + (uname == null ? "" : uname);
             long maxPerMinute = 10L;
             Long n = stringRedisTemplate.opsForValue().increment(key);
@@ -256,16 +254,20 @@ public class AuthServiceImpl implements AuthService {
             if (attrs == null) return null;
             HttpServletRequest req = attrs.getRequest();
             String xff = req.getHeader("X-Forwarded-For");
-            if (StringUtils.hasText(xff)) {
+            if (org.springframework.util.StringUtils.hasText(xff)) {
                 int idx = xff.indexOf(',');
                 return idx > 0 ? xff.substring(0, idx).trim() : xff.trim();
             }
             String rip = req.getHeader("X-Real-IP");
-            if (StringUtils.hasText(rip)) return rip.trim();
+            if (org.springframework.util.StringUtils.hasText(rip)) return rip.trim();
             return req.getRemoteAddr();
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String normalize(String s) {
+        return s == null ? null : s.trim();
     }
 
     /**

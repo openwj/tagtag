@@ -1,6 +1,6 @@
 package dev.tagtag.contract.iam.dto;
 
-import dev.tagtag.kernel.validation.CreateGroup;
+import dev.tagtag.common.validation.CreateGroup;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
