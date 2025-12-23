@@ -59,7 +59,6 @@ public class TokenVersionFilter extends OncePerRequestFilter {
         try {
             return Long.valueOf(uidObj.toString());
         } catch (NumberFormatException e) {
-            log.debug("Failed to parse userId from token claims: {}", uidObj);
             return null;
         }
     }
@@ -72,7 +71,6 @@ public class TokenVersionFilter extends OncePerRequestFilter {
         try {
             return Long.valueOf(verObj.toString());
         } catch (NumberFormatException e) {
-            log.debug("Failed to parse token version from token claims: {}", verObj);
             return null;
         }
     }
