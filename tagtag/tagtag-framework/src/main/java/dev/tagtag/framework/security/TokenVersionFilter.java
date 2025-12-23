@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.kernel.constant.SecurityClaims;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +39,8 @@ public class TokenVersionFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 过滤执行：当请求有 Bearer 令牌时校验 ver 与当前版本一致，否则返回 401
+     * 过滤执行：当请求携带 Bearer Token 时，校验其 claims 中的 ver 是否为用户当前版本。
+     * 若不匹配，直接返回 401 并输出统一错误结构，避免旧令牌继续访问。
      * @param request HTTP 请求
      * @param response HTTP 响应
      * @param filterChain 过滤链
@@ -46,18 +48,21 @@ public class TokenVersionFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
+        // 只有当认证信息存在、不是匿名认证，且主体是JWT时才进行令牌版本验证
+        if (auth != null && auth.isAuthenticated() && !(auth.getPrincipal() instanceof String) && auth.getPrincipal() instanceof Jwt jwt) {
             Object uidObj = jwt.getClaims().get(SecurityClaims.UID);
             Object verObj = jwt.getClaims().get(SecurityClaims.VER);
             Long uid = uidObj == null ? null : Long.valueOf(uidObj.toString());
             Long ver = verObj == null ? null : Long.valueOf(verObj.toString());
             if (uid != null && ver != null) {
                 if (!tokenVersionService.isTokenVersionValid(uid, ver)) {
-                    writeUnauthorized(response);
-                    return;
+                    // 令牌版本无效，清除认证信息，让请求以匿名身份继续
+                    // 这样permitAll()的路径仍能访问，需要认证的路径会被后续的FilterSecurityInterceptor拦截
+                    SecurityContextHolder.clearContext();
                 }
             }
         }
+        // 继续过滤链，让FilterSecurityInterceptor决定是否允许访问
         filterChain.doFilter(request, response);
     }
 
