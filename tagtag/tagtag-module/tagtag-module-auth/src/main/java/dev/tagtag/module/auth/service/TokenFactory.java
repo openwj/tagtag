@@ -2,7 +2,8 @@ package dev.tagtag.module.auth.service;
 
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.iam.dto.UserDTO;
-import dev.tagtag.framework.security.JwtService;
+
+import dev.tagtag.framework.security.service.JwtService;
 import dev.tagtag.kernel.constant.SecurityClaims;
 import org.springframework.stereotype.Service;
 

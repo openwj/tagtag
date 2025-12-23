@@ -1,18 +1,19 @@
 package dev.tagtag.framework.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.tagtag.common.constant.CacheConstants;
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import lombok.Data;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -25,14 +26,8 @@ import java.util.Map;
 public class CacheConfig {
 
     private Map<String, Duration> ttl = new HashMap<>();
-    private Duration defaultTtl = Duration.ofMinutes(5);
+    private Duration defaultTtl = CacheConstants.DEFAULT_TTL;
 
-    /**
-     * 注册 RedisCacheManager（统一值序列化为带类型信息的 JSON）
-     * @param connectionFactory Redis 连接工厂
-     * @param redisObjectMapper 仅用于 Redis 的 ObjectMapper（启用类型信息）
-     * @return 缓存管理器
-     */
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper) {
         StringRedisSerializer keySerializer = new StringRedisSerializer();
@@ -42,7 +37,8 @@ public class CacheConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(keySerializer))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(valueSerializer))
                 .disableCachingNullValues()
-                .entryTtl(defaultTtl);
+                .entryTtl(defaultTtl)
+                .computePrefixWith(cacheName -> CacheConstants.PREFIX + ":" + cacheName + ":");
 
         Map<String, RedisCacheConfiguration> initialConfigs = new HashMap<>();
         if (ttl != null) {
@@ -58,5 +54,4 @@ public class CacheConfig {
                 .withInitialCacheConfigurations(initialConfigs)
                 .build();
     }
-
 }

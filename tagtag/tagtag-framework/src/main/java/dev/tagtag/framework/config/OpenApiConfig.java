@@ -1,5 +1,6 @@
 package dev.tagtag.framework.config;
 
+import dev.tagtag.framework.constant.OpenApiConstants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -15,16 +16,16 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("TagTag Starter API")
-                        .version("1.0.0")
-                        .description("基于 Spring Boot 3.x 的企业级后台管理系统 API"))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                        .title(OpenApiConstants.API_TITLE)
+                        .version(OpenApiConstants.API_VERSION)
+                        .description(OpenApiConstants.API_DESCRIPTION))
+                .addSecurityItem(new SecurityRequirement().addList(OpenApiConstants.SECURITY_SCHEME_NAME))
                 .components(new Components()
-                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                                .name("Authorization")
+                        .addSecuritySchemes(OpenApiConstants.SECURITY_SCHEME_NAME, new SecurityScheme()
+                                .name(OpenApiConstants.HEADER_NAME)
                                 .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")
+                                .scheme(OpenApiConstants.AUTH_SCHEME)
+                                .bearerFormat(OpenApiConstants.BEARER_FORMAT)
                                 .in(SecurityScheme.In.HEADER)));
     }
 }

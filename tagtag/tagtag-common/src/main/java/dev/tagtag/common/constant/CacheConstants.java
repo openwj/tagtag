@@ -29,6 +29,8 @@ public class CacheConstants {
     public static final Duration MENU_TTL = Duration.ofMinutes(30);
     public static final Duration DICT_TTL = Duration.ofHours(1);
     public static final Duration DEPT_TREE_TTL = Duration.ofMinutes(30);
+    public static final Duration DEFAULT_TTL = Duration.ofMinutes(5);
+    public static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
 
     /**
      * 构建 Redis Key（统一使用冒号拼接）

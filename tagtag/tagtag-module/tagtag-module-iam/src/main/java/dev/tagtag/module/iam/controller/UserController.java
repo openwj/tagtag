@@ -24,7 +24,7 @@ import dev.tagtag.contract.iam.dto.ChangePasswordRequest;
 import dev.tagtag.framework.security.context.AuthContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
-import dev.tagtag.framework.security.RequirePerm;
+import dev.tagtag.framework.security.annotation.RequirePerm;
 
 import java.util.List;
 

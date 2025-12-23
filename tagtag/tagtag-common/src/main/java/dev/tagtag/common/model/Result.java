@@ -13,7 +13,8 @@ public class Result<T> {
     private int code;
     private String message;
     private T data;
-    private long timestamp;
+    @Builder.Default
+    private long timestamp = System.currentTimeMillis();
     private List<String> errors;
 
     /**
@@ -26,7 +27,6 @@ public class Result<T> {
                 .code(ErrorCode.SUCCESS.getCode())
                 .message(ErrorCode.SUCCESS.getMessage())
                 .data(data)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -38,7 +38,6 @@ public class Result<T> {
         return Result.<Void>builder()
                 .code(ErrorCode.SUCCESS.getCode())
                 .message(ErrorCode.SUCCESS.getMessage())
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -51,7 +50,6 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(ErrorCode.SUCCESS.getCode())
                 .message(message)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -64,7 +62,6 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(error.getCode())
                 .message(error.getMessage())
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -78,7 +75,6 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(error.getCode())
                 .message(message)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -94,7 +90,6 @@ public class Result<T> {
                 .code(error.getCode())
                 .message(message)
                 .errors(errors)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -107,7 +102,6 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(ErrorCode.BAD_REQUEST.getCode())
                 .message(message)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -120,7 +114,6 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(ErrorCode.FORBIDDEN.getCode())
                 .message(message)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 
@@ -133,7 +126,6 @@ public class Result<T> {
         return Result.<T>builder()
                 .code(ErrorCode.UNAUTHORIZED.getCode())
                 .message(message)
-                .timestamp(System.currentTimeMillis())
                 .build();
     }
 

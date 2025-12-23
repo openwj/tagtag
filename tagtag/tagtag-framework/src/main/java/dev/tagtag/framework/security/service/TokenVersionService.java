@@ -1,4 +1,4 @@
-package dev.tagtag.framework.security;
+package dev.tagtag.framework.security.service;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;

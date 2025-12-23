@@ -1,6 +1,7 @@
 package dev.tagtag.common.constant;
 
 import lombok.experimental.UtilityClass;
+
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -21,8 +22,10 @@ public class GlobalConstants {
 
     public static final String FORMAT_DATE = "yyyy-MM-dd";
     public static final String FORMAT_DATETIME = "yyyy-MM-dd HH:mm:ss";
+    public static final String FORMAT_TIME = "HH:mm:ss";
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(FORMAT_DATE);
     public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(FORMAT_DATETIME);
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(FORMAT_TIME);
 
     public static final int DEFAULT_PAGE_NO = 1;
     public static final int DEFAULT_PAGE_SIZE = 20;
@@ -45,11 +48,6 @@ public class GlobalConstants {
 
     public static final String TRACE_ID_MDC_KEY = "traceId";
 
-    /**
-     * 归一化页码（null 或 < 1 时返回默认值）
-     * @param pageNo 页码
-     * @return 归一化后的页码
-     */
     public static int normalizePageNo(Integer pageNo) {
         if (pageNo == null || pageNo < 1) {
             return DEFAULT_PAGE_NO;
@@ -57,16 +55,10 @@ public class GlobalConstants {
         return pageNo;
     }
 
-    /**
-     * 限制分页大小（null 返回默认值，超出上限则截断）
-     * @param pageSize 每页大小
-     * @return 归一化后的分页大小
-     */
     public static int clampPageSize(Integer pageSize) {
         if (pageSize == null || pageSize < 1) {
             return DEFAULT_PAGE_SIZE;
         }
         return Math.min(pageSize, MAX_PAGE_SIZE);
     }
-
 }

@@ -8,7 +8,7 @@ import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.system.dto.DictTypeDTO;
 import dev.tagtag.contract.system.dto.DictTypeQueryDTO;
 import dev.tagtag.module.system.service.DictTypeService;
-import dev.tagtag.framework.security.RequirePerm;
+import dev.tagtag.framework.security.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;

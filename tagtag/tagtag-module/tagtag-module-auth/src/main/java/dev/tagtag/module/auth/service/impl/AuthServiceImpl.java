@@ -6,20 +6,19 @@ import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.util.Numbers;
-import dev.tagtag.common.util.Strings;
-import dev.tagtag.framework.security.JwtService;
-import dev.tagtag.framework.security.TokenVersionService;
+import dev.tagtag.common.util.StringUtils;
+import dev.tagtag.framework.config.JwtProperties;
+import dev.tagtag.framework.security.service.JwtService;
+import dev.tagtag.framework.security.service.TokenVersionService;
 import dev.tagtag.module.auth.service.AuthService;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.TokenFactory;
 import dev.tagtag.kernel.constant.SecurityMessages;
-import dev.tagtag.framework.config.SecurityJwtProperties;
 import dev.tagtag.kernel.constant.SecurityClaims;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -44,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final PermissionResolver permissionResolver;
     private final TokenFactory tokenFactory;
 
-    private final SecurityJwtProperties jwtProps;
+    private final JwtProperties jwtProps;
     private final StringRedisTemplate stringRedisTemplate;
 
     /**
@@ -57,8 +56,8 @@ public class AuthServiceImpl implements AuthService {
     public TokenDTO login(String username, String password) {
         checkLoginRateLimit(username);
 
-        String uname = Strings.normalize(username);
-        String pwd = Strings.normalize(password);
+        String uname = StringUtils.normalize(username);
+        String pwd = StringUtils.normalize(password);
         if (!StringUtils.hasText(uname) || !StringUtils.hasText(pwd)) {
             log.warn("login failed: blank credentials username='{}', ip={}, ua={}, traceId={}",
                     uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
@@ -67,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         UserDTO full = loadUserOrFail(uname);
-        String stored = Strings.normalize(full.getPassword());
+        String stored = StringUtils.normalize(full.getPassword());
         boolean matched = passwordEncoder.matches(pwd, stored);
         if (!matched) {
             log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
@@ -150,8 +149,8 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void register(String username, String password) {
-        String uname = Strings.normalize(username);
-        String pwd = Strings.normalize(password);
+        String uname = StringUtils.normalize(username);
+        String pwd = StringUtils.normalize(password);
         if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
             throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
         }
@@ -189,7 +188,7 @@ public class AuthServiceImpl implements AuthService {
     private void checkLoginRateLimit(String username) {
         try {
             String ip = resolveClientIp();
-            String uname = Strings.normalize(username);
+            String uname = StringUtils.normalize(username);
             String key = "rl:login:" + (ip == null ? "unknown" : ip) + ":" + (uname == null ? "" : uname);
             long maxPerMinute = 10L;
             Long n = stringRedisTemplate.opsForValue().increment(key);
@@ -272,3 +271,4 @@ public class AuthServiceImpl implements AuthService {
         return raw.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$");
     }
 }
+
