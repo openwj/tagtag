@@ -28,7 +28,7 @@ import dev.tagtag.framework.security.annotation.RequirePerm;
 
 import java.util.List;
 
-import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.common.constant.AppMessages;
 import dev.tagtag.framework.constant.Permissions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

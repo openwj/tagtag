@@ -3,7 +3,7 @@ package dev.tagtag.module.iam.controller;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
-import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.common.constant.AppMessages;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;

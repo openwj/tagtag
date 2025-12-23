@@ -33,14 +33,12 @@ public class JacksonConfig {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(GlobalConstants.DATETIME_FORMATTER));
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(GlobalConstants.DATETIME_FORMATTER));
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(GlobalConstants.DATE_FORMATTER));
         javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(GlobalConstants.DATE_FORMATTER));
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(GlobalConstants.TIME_FORMATTER));
         javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(GlobalConstants.TIME_FORMATTER));
-
         mapper.registerModule(javaTimeModule);
 
         SimpleModule numberToStringModule = new SimpleModule();
@@ -49,8 +47,6 @@ public class JacksonConfig {
         mapper.registerModule(numberToStringModule);
 
         mapper.setTimeZone(TimeZone.getTimeZone(GlobalConstants.DEFAULT_ZONE_ID));
-        mapper.setDefaultPrettyPrinter(null);
-        mapper.setDateFormat(new java.text.SimpleDateFormat(GlobalConstants.FORMAT_DATETIME));
 
         return mapper;
     }

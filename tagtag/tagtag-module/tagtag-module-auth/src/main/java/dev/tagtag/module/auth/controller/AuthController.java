@@ -37,7 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.ArrayList;
 
-import dev.tagtag.kernel.annotation.RateLimit;
+import dev.tagtag.framework.annotation.RateLimit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 

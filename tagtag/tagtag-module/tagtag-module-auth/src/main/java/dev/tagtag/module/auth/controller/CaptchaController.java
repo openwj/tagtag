@@ -3,7 +3,7 @@ package dev.tagtag.module.auth.controller;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.contract.auth.dto.CaptchaValidateRequest;
 import dev.tagtag.contract.auth.dto.ImageCaptchaDTO;
-import dev.tagtag.kernel.annotation.RateLimit;
+import dev.tagtag.framework.annotation.RateLimit;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.module.auth.service.CaptchaService;
 import io.swagger.v3.oas.annotations.Operation;

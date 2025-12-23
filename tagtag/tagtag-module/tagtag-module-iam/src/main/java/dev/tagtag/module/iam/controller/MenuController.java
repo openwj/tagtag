@@ -2,7 +2,7 @@ package dev.tagtag.module.iam.controller;
 
 import dev.tagtag.common.model.Result;
 import dev.tagtag.framework.security.annotation.RequirePerm;
-import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.common.constant.AppMessages;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;

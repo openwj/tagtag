@@ -5,7 +5,6 @@ import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
-import dev.tagtag.common.util.Numbers;
 import dev.tagtag.common.util.StringUtils;
 import dev.tagtag.framework.config.JwtProperties;
 import dev.tagtag.framework.security.service.JwtService;
@@ -107,8 +106,8 @@ public class AuthServiceImpl implements AuthService {
         String subject = jwtService.getSubject(refreshToken);
         Map<String, Object> claims = new HashMap<>(jwtService.getClaims(refreshToken));
         // 校验令牌版本是否仍然有效
-        Long uid = claims.get(SecurityClaims.UID) == null ? null : Numbers.toLong(claims.get(SecurityClaims.UID));
-        Long tokenVer = claims.get(SecurityClaims.VER) == null ? null : Numbers.toLong(claims.get(SecurityClaims.VER));
+        Long uid = claims.get(SecurityClaims.UID) == null ? null : toLong(claims.get(SecurityClaims.UID));
+        Long tokenVer = claims.get(SecurityClaims.VER) == null ? null : toLong(claims.get(SecurityClaims.VER));
         if (uid == null || tokenVer == null || !tokenVersionService.isTokenVersionValid(uid, tokenVer)) {
             log.warn("refresh failed: token version mismatch uid={} tokenVer={}, ip={}, ua={}, traceId={}",
                     uid, tokenVer, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
@@ -139,11 +138,30 @@ public class AuthServiceImpl implements AuthService {
             return;
         }
         Map<String, Object> claims = jwtService.getClaims(accessToken);
-        Long uid = claims.get(SecurityClaims.UID) == null ? null : Numbers.toLong(claims.get(SecurityClaims.UID));
+        Long uid = claims.get(SecurityClaims.UID) == null ? null : toLong(claims.get(SecurityClaims.UID));
         if (uid != null) {
             tokenVersionService.bumpVersion(uid);
             log.info("logout: bumped token version for uid={}, ip={}, ua={}, traceId={}",
                     uid, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+        }
+    }
+
+    /**
+     * 将任意对象转换为 Long（不可转换时返回 null）
+     * @param src 源对象
+     * @return Long 或 null
+     */
+    private Long toLong(Object src) {
+        if (src == null) return null;
+        if (src instanceof Number n) return n.longValue();
+        String s = String.valueOf(src);
+        if (s == null) return null;
+        s = s.trim();
+        if (s.isEmpty()) return null;
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
