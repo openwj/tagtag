@@ -3,6 +3,7 @@ package dev.tagtag.framework.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.tagtag.common.constant.CacheConstants;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -29,7 +30,7 @@ public class CacheConfig {
     private Duration defaultTtl = CacheConstants.DEFAULT_TTL;
 
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, ObjectMapper redisObjectMapper) {
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, @Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
         StringRedisSerializer keySerializer = new StringRedisSerializer();
         GenericJackson2JsonRedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper);
 

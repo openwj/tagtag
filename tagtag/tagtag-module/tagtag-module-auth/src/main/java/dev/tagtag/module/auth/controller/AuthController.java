@@ -139,7 +139,7 @@ public class AuthController {
     @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
     public Result<UserDTO> me() {
         Long uid = AuthContext.getCurrentUserId();
-        UserDTO user = uid == null ? null : userApi.getUserById(uid).getData();
+        UserDTO user = userApi.getUserById(uid).getData();
         if (user != null) user.setPassword(null);
         return Result.ok(user);
     }

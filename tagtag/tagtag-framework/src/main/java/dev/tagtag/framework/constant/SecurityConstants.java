@@ -7,7 +7,10 @@ public final class SecurityConstants {
     private SecurityConstants() {}
 
     public static final List<String> DEFAULT_PUBLIC_PATHS = List.of(
-            "/api/auth/**",
+            "/api/auth/login",
+            "/api/auth/register",
+            "/api/auth/refresh",
+            "/api/auth/logout",
             "/api/captcha/**",
             "/v3/api-docs/**",
             "/scalar/**",

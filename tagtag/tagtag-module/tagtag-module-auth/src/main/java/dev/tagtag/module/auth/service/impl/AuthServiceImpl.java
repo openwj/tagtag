@@ -67,7 +67,12 @@ public class AuthServiceImpl implements AuthService {
 
         UserDTO full = loadUserOrFail(uname);
         String stored = StringUtils.normalize(full.getPassword());
+        if (stored != null && stored.startsWith("{bcrypt}")) {
+            stored = stored.substring(8);
+        }
+        log.info("调试信息: username={}, 存储的密码='{}'", uname, stored);
         boolean matched = passwordEncoder.matches(pwd, stored);
+        log.info("调试信息: 密码匹配结果={}, 输入密码='{}'", matched, pwd);
         if (!matched) {
             log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
                     uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));

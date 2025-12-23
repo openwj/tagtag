@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class SecurityConfig {
                         .bearerTokenResolver(new CustomBearerTokenResolver(permitPaths))
                         .authenticationEntryPoint(entryPoint)
                 )
-                .addFilterAfter(tokenVersionFilter, AnonymousAuthenticationFilter.class)
+                .addFilterAfter(tokenVersionFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterAfter(userContextCleanupFilter, TokenVersionFilter.class);
 
         return http.build();

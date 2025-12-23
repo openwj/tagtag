@@ -11,10 +11,13 @@ import java.util.List;
 @Slf4j
 public class CustomBearerTokenResolver implements BearerTokenResolver {
 
-    private final BearerTokenResolver delegate = new DefaultBearerTokenResolver();
+    private final DefaultBearerTokenResolver delegate;
     private final String[] permitPaths;
 
     public CustomBearerTokenResolver(List<String> permitPaths) {
+        this.delegate = new DefaultBearerTokenResolver();
+        this.delegate.setAllowFormEncodedBodyParameter(false);
+        this.delegate.setAllowUriQueryParameter(false);
         this.permitPaths = permitPaths != null ? permitPaths.toArray(new String[0]) : new String[0];
         log.info("CustomBearerTokenResolver initialized with permitPaths: {}", (Object) permitPaths);
     }

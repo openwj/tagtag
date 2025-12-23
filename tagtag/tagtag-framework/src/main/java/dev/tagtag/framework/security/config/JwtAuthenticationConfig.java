@@ -34,7 +34,7 @@ public class JwtAuthenticationConfig {
         public Collection<GrantedAuthority> convert(@NonNull Jwt jwt) {
             Set<GrantedAuthority> authorities = new LinkedHashSet<>();
 
-            Collection<String> roles = extractClaimAsCollection(jwt, SecurityClaims.ROLES);
+            Collection<?> roles = extractClaimAsCollection(jwt, SecurityClaims.ROLES);
             if (roles != null) {
                 authorities.addAll(roles.stream()
                         .map(role -> new SimpleGrantedAuthority(Roles.PREFIX + role))
@@ -52,15 +52,15 @@ public class JwtAuthenticationConfig {
         }
 
         @SuppressWarnings("unchecked")
-        private Collection<String> extractClaimAsCollection(Jwt jwt, String claimName) {
+        private <T> Collection<T> extractClaimAsCollection(Jwt jwt, String claimName) {
             Object claim = jwt.getClaim(claimName);
             if (claim == null) {
                 return Collections.emptyList();
             }
             if (claim instanceof Collection) {
-                return (Collection<String>) claim;
+                return (Collection<T>) claim;
             }
-            return Stream.of(String.valueOf(claim)).collect(Collectors.toList());
+            return Stream.of((T) claim).collect(Collectors.toList());
         }
     }
 }
