@@ -5,6 +5,7 @@ import dev.tagtag.contract.iam.dto.UserDTO;
 
 import dev.tagtag.framework.security.service.JwtService;
 import dev.tagtag.kernel.constant.SecurityClaims;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -16,17 +17,10 @@ import java.util.Set;
  * 令牌工厂：构造 Claims 并发放访问与刷新令牌
  */
 @Service
+@RequiredArgsConstructor
 public class TokenFactory {
 
     private final JwtService jwtService;
-
-    /**
-     * 构造函数：注入 JWT 服务
-     * @param jwtService JWT 服务
-     */
-    public TokenFactory(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
 
     /**
      * 构造 JWT Claims 映射

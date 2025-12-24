@@ -1,27 +1,26 @@
 package dev.tagtag.module.auth.service.impl;
 
+import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.common.exception.BusinessException;
+import dev.tagtag.common.exception.ErrorCode;
+import dev.tagtag.framework.util.WebUtil;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.iam.api.UserApi;
 import dev.tagtag.contract.iam.dto.UserDTO;
-import dev.tagtag.common.exception.BusinessException;
-import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.framework.config.JwtProperties;
 import dev.tagtag.framework.security.service.JwtService;
 import dev.tagtag.framework.security.service.TokenVersionService;
+import dev.tagtag.kernel.constant.SecurityClaims;
 import dev.tagtag.module.auth.service.AuthService;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.TokenFactory;
-import dev.tagtag.kernel.constant.SecurityClaims;
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.MDC;
-import dev.tagtag.common.constant.GlobalConstants;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
@@ -57,22 +56,17 @@ public class AuthServiceImpl implements AuthService {
         String pwd = normalize(password);
         if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
             log.warn("login failed: blank credentials username='{}', ip={}, ua={}, traceId={}",
-                    uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
+                    uname, WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+            throw BusinessException.badRequest("用户名或密码不能为空");
         }
 
 
         UserDTO full = loadUserOrFail(uname);
         String stored = normalize(full.getPassword());
-        if (stored != null && stored.startsWith("{bcrypt}")) {
-            stored = stored.substring(8);
-        }
-        log.info("调试信息: username={}, 存储的密码='{}'", uname, stored);
         boolean matched = passwordEncoder.matches(pwd, stored);
-        log.info("调试信息: 密码匹配结果={}, 输入密码='{}'", matched, pwd);
         if (!matched) {
             log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
-                    uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+                    uname, WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw BusinessException.unauthorized("凭证无效");
         }
 
@@ -83,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> claims = tokenFactory.buildClaims(full, roleIds, perms, ver);
         TokenDTO dto = tokenFactory.issueTokens(claims, uname, jwtProps.getAccessTtlSeconds(), jwtProps.getRefreshTtlSeconds());
         log.info("login success: uid={}, roles={}, perms={}, ip={}, ua={}, traceId={}",
-                full.getId(), roleIds.size(), perms.size(), resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+                full.getId(), roleIds.size(), perms.size(), WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         return dto;
     }
 
@@ -98,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
         checkRefreshRateLimit();
         if (!org.springframework.util.StringUtils.hasText(refreshToken) || !jwtService.validateToken(refreshToken)) {
             log.warn("refresh failed: invalid token, ip={}, ua={}, traceId={}",
-                    resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+                    WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw BusinessException.unauthorized("凭证无效");
         }
         String subject = jwtService.getSubject(refreshToken);
@@ -108,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         Long tokenVer = claims.get(SecurityClaims.VER) == null ? null : toLong(claims.get(SecurityClaims.VER));
         if (uid == null || tokenVer == null || !tokenVersionService.isTokenVersionValid(uid, tokenVer)) {
             log.warn("refresh failed: token version mismatch uid={} tokenVer={}, ip={}, ua={}, traceId={}",
-                    uid, tokenVer, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+                    uid, tokenVer, WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
             throw BusinessException.unauthorized("凭证无效");
         }
         claims.put(SecurityClaims.TYP, "access");
@@ -121,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
         dto.setRefreshToken(refresh);
         dto.setTokenType("Bearer");
         dto.setExpiresIn(jwtProps.getAccessTtlSeconds());
-        log.info("refresh success: uid={}, ip={}, ua={}, traceId={}", uid, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+        log.info("refresh success: uid={}, ip={}, ua={}, traceId={}", uid, WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         return dto;
     }
 
@@ -140,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
         if (uid != null) {
             tokenVersionService.bumpVersion(uid);
             log.info("logout: bumped token version for uid={}, ip={}, ua={}, traceId={}",
-                    uid, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
+                    uid, WebUtil.resolveClientIp(), WebUtil.getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
         }
     }
 
@@ -152,13 +146,9 @@ public class AuthServiceImpl implements AuthService {
     private Long toLong(Object src) {
         if (src == null) return null;
         if (src instanceof Number n) return n.longValue();
-        String s = String.valueOf(src);
-        if (s == null) return null;
-        s = s.trim();
-        if (s.isEmpty()) return null;
         try {
-            return Long.parseLong(s);
-        } catch (NumberFormatException e) {
+            return Long.parseLong(String.valueOf(src).trim());
+        } catch (NumberFormatException | NullPointerException e) {
             return null;
         }
     }
@@ -173,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
         String uname = normalize(username);
         String pwd = normalize(password);
         if (!org.springframework.util.StringUtils.hasText(uname) || !org.springframework.util.StringUtils.hasText(pwd)) {
-            throw BusinessException.of(ErrorCode.BAD_REQUEST, "用户名或密码不能为空");
+            throw BusinessException.badRequest("用户名或密码不能为空");
         }
         if (!isStrongPassword(pwd)) {
             throw BusinessException.of(ErrorCode.UNPROCESSABLE_ENTITY, "密码至少8位，需包含大写、小写、数字和特殊字符");
@@ -208,7 +198,7 @@ public class AuthServiceImpl implements AuthService {
      */
     private void checkLoginRateLimit(String username) {
         try {
-            String ip = resolveClientIp();
+            String ip = WebUtil.resolveClientIp();
             String uname = normalize(username);
             String key = "rl:login:" + (ip == null ? "unknown" : ip) + ":" + (uname == null ? "" : uname);
             long maxPerMinute = 10L;
@@ -229,7 +219,7 @@ public class AuthServiceImpl implements AuthService {
      */
     private void checkRefreshRateLimit() {
         try {
-            String ip = resolveClientIp();
+            String ip = WebUtil.resolveClientIp();
             String key = "rl:refresh:" + (ip == null ? "unknown" : ip);
             long maxPerMinute = 30L;
             Long n = stringRedisTemplate.opsForValue().increment(key);
@@ -237,53 +227,15 @@ public class AuthServiceImpl implements AuthService {
                 stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
             }
             if (n != null && n > maxPerMinute) {
-                throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+                throw BusinessException.of(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
             }
         } catch (Exception ignore) {
             return;
         }
     }
 
-    /**
-     * 解析客户端 IP（优先使用反向代理头部）
-     * @return 客户端 IP
-     */
-    private String resolveClientIp() {
-        try {
-            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if (attrs == null) return null;
-            HttpServletRequest req = attrs.getRequest();
-            String xff = req.getHeader("X-Forwarded-For");
-            if (org.springframework.util.StringUtils.hasText(xff)) {
-                int idx = xff.indexOf(',');
-                return idx > 0 ? xff.substring(0, idx).trim() : xff.trim();
-            }
-            String rip = req.getHeader("X-Real-IP");
-            if (org.springframework.util.StringUtils.hasText(rip)) return rip.trim();
-            return req.getRemoteAddr();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private String normalize(String s) {
-        return s == null ? null : s.trim();
-    }
-
-    /**
-     * 读取客户端 User-Agent
-     * @return UA 字符串
-     */
-    private String getUserAgent() {
-        try {
-            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if (attrs == null) return null;
-            HttpServletRequest req = attrs.getRequest();
-            String ua = req.getHeader(GlobalConstants.HEADER_USER_AGENT);
-            return (ua == null ? null : ua.trim());
-        } catch (Exception e) {
-            return null;
-        }
+        return StringUtils.trim(s);
     }
 
     /**
