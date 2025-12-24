@@ -1,4 +1,4 @@
-package dev.tagtag.common.constant;
+package dev.tagtag.kernel.constant;
 
 public final class AppMessages {
 

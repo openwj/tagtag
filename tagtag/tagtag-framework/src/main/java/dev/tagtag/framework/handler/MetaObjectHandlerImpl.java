@@ -1,7 +1,7 @@
 package dev.tagtag.framework.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import dev.tagtag.framework.security.context.AuthContext;
+import dev.tagtag.kernel.context.AuthContext;
 import org.apache.ibatis.reflection.MetaObject;
 
 import java.time.LocalDateTime;

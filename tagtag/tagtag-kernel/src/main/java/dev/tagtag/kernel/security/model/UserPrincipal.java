@@ -1,13 +1,10 @@
-package dev.tagtag.framework.security.model;
+package dev.tagtag.kernel.security.model;
 
 import lombok.Getter;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * 轻量用户主体模型，来源于 JWT claims，用于在控制器快速注入当前用户。
- */
 @Getter
 public class UserPrincipal {
 
@@ -18,15 +15,6 @@ public class UserPrincipal {
     private final Long version;
     private final boolean isAdmin;
 
-    /**
-     * 构造函数：基于基本字段初始化主体
-     * @param id 用户ID
-     * @param username 用户名
-     * @param roleIds 角色ID集合
-     * @param permissions 权限集合（业务码）
-     * @param version 令牌版本
-     * @param isAdmin 是否超级管理员
-     */
     public UserPrincipal(Long id, String username, Set<Long> roleIds, Set<String> permissions, Long version, boolean isAdmin) {
         this.id = id;
         this.username = username;
@@ -36,22 +24,10 @@ public class UserPrincipal {
         this.isAdmin = isAdmin;
     }
 
-
-
-    /**
-     * 判断是否具备某个权限码
-     * @param perm 权限码
-     * @return 是否具备
-     */
     public boolean hasPermission(String perm) {
         return perm != null && permissions.contains(perm);
     }
 
-    /**
-     * 判断是否具备某个角色ID
-     * @param roleId 角色ID
-     * @return 是否具备
-     */
     public boolean hasRole(Long roleId) {
         return roleId != null && roleIds.contains(roleId);
     }

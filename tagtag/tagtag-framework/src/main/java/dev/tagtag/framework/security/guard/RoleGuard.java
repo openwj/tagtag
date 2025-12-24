@@ -1,7 +1,7 @@
 package dev.tagtag.framework.security.guard;
 
-import dev.tagtag.framework.security.annotation.RequireRole;
-import dev.tagtag.framework.constant.Roles;
+import dev.tagtag.kernel.annotation.RequireRole;
+import dev.tagtag.kernel.constant.Roles;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

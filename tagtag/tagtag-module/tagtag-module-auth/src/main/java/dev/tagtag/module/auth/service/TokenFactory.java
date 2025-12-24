@@ -4,7 +4,7 @@ import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.iam.dto.UserDTO;
 
 import dev.tagtag.framework.security.service.JwtService;
-import dev.tagtag.framework.constant.SecurityClaims;
+import dev.tagtag.kernel.constant.SecurityClaims;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

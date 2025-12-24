@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import dev.tagtag.common.enums.StatusEnum;
+import dev.tagtag.kernel.enums.StatusEnum;
 
 @Data
 @Builder

@@ -2,8 +2,8 @@ package dev.tagtag.module.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import dev.tagtag.common.constant.CacheConstants;
-import dev.tagtag.common.enums.StatusEnum;
+import dev.tagtag.kernel.constant.CacheConstants;
+import dev.tagtag.kernel.enums.StatusEnum;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.system.dto.DictTypeDTO;

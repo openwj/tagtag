@@ -1,7 +1,7 @@
 package dev.tagtag.framework.security.guard;
 
-import dev.tagtag.framework.security.annotation.RequirePerm;
-import dev.tagtag.framework.constant.Permissions;
+import dev.tagtag.kernel.annotation.RequirePerm;
+import dev.tagtag.kernel.constant.Permissions;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

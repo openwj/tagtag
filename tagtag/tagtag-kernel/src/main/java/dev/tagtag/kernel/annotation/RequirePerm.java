@@ -1,6 +1,6 @@
-package dev.tagtag.framework.security.annotation;
+package dev.tagtag.kernel.annotation;
 
-import dev.tagtag.framework.constant.Permissions;
+import dev.tagtag.kernel.constant.Permissions;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

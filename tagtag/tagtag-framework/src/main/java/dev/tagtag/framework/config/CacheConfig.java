@@ -1,7 +1,7 @@
 package dev.tagtag.framework.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.tagtag.common.constant.CacheConstants;
+import dev.tagtag.kernel.constant.CacheConstants;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;

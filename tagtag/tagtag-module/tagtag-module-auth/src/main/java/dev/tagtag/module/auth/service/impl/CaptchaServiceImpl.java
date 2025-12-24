@@ -1,6 +1,6 @@
 package dev.tagtag.module.auth.service.impl;
 
-import dev.tagtag.common.constant.CacheConstants;
+import dev.tagtag.kernel.constant.CacheConstants;
 import dev.tagtag.contract.auth.dto.ImageCaptchaDTO;
 import dev.tagtag.module.auth.service.CaptchaService;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package dev.tagtag.framework.constant;
+package dev.tagtag.kernel.constant;
 
 public final class Permissions {
 

@@ -26,6 +26,10 @@
             <artifactId>tagtag-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>dev.tagtag</groupId>
+            <artifactId>tagtag-kernel</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>

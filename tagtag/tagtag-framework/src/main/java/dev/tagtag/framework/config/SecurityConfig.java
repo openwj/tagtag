@@ -1,6 +1,6 @@
 package dev.tagtag.framework.config;
 
-import dev.tagtag.framework.constant.SecurityConstants;
+import dev.tagtag.kernel.constant.SecurityConstants;
 import dev.tagtag.framework.security.filter.CustomBearerTokenResolver;
 import dev.tagtag.framework.security.filter.TokenVersionFilter;
 import dev.tagtag.framework.security.handler.CustomAuthenticationEntryPoint;

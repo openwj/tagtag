@@ -1,4 +1,4 @@
-package dev.tagtag.framework.security.annotation;
+package dev.tagtag.kernel.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

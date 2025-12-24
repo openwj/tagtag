@@ -3,13 +3,14 @@ package dev.tagtag.module.auth.controller;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.Result;
-import dev.tagtag.framework.security.context.AuthContext;
-import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.contract.auth.dto.TokenDTO;
 import dev.tagtag.contract.auth.dto.LoginRequest;
 import dev.tagtag.contract.auth.dto.RefreshRequest;
 import dev.tagtag.contract.auth.dto.LogoutRequest;
 import dev.tagtag.contract.auth.dto.RegisterRequest;
+import dev.tagtag.kernel.annotation.RateLimit;
+import dev.tagtag.kernel.context.AuthContext;
+import dev.tagtag.kernel.security.model.UserPrincipal;
 import dev.tagtag.module.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,6 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.ArrayList;
 
-import dev.tagtag.framework.annotation.RateLimit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 

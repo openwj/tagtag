@@ -11,7 +11,7 @@ import dev.tagtag.framework.security.service.TokenVersionService;
 import dev.tagtag.module.auth.service.AuthService;
 import dev.tagtag.module.auth.service.PermissionResolver;
 import dev.tagtag.module.auth.service.TokenFactory;
-import dev.tagtag.framework.constant.SecurityClaims;
+import dev.tagtag.kernel.constant.SecurityClaims;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;

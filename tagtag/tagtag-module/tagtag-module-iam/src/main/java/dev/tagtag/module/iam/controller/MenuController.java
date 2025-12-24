@@ -1,8 +1,8 @@
 package dev.tagtag.module.iam.controller;
 
 import dev.tagtag.common.model.Result;
-import dev.tagtag.framework.security.annotation.RequirePerm;
-import dev.tagtag.common.constant.AppMessages;
+import dev.tagtag.kernel.annotation.RequirePerm;
+import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import java.util.List;
-import dev.tagtag.framework.constant.Permissions;
+import dev.tagtag.kernel.constant.Permissions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 

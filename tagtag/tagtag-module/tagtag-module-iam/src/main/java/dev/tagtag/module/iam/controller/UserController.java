@@ -6,6 +6,7 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
+import dev.tagtag.kernel.context.AuthContext;
 import dev.tagtag.module.iam.service.UserService;
 import dev.tagtag.common.constant.GlobalConstants;
 import lombok.AllArgsConstructor;
@@ -21,15 +22,14 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import dev.tagtag.contract.iam.dto.UserOperationRequest;
 import dev.tagtag.contract.iam.dto.ChangePasswordRequest;
-import dev.tagtag.framework.security.context.AuthContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
-import dev.tagtag.framework.security.annotation.RequirePerm;
+import dev.tagtag.kernel.annotation.RequirePerm;
 
 import java.util.List;
 
-import dev.tagtag.common.constant.AppMessages;
-import dev.tagtag.framework.constant.Permissions;
+import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.kernel.constant.Permissions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 

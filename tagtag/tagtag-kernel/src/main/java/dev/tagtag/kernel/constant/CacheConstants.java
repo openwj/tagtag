@@ -1,4 +1,4 @@
-package dev.tagtag.common.constant;
+package dev.tagtag.kernel.constant;
 
 import lombok.experimental.UtilityClass;
 import java.time.Duration;
@@ -32,11 +32,6 @@ public class CacheConstants {
     public static final Duration DEFAULT_TTL = Duration.ofMinutes(5);
     public static final String RATE_LIMIT_KEY_PREFIX = "rate_limit:";
 
-    /**
-     * 构建 Redis Key（统一使用冒号拼接）
-     * @param segments key 段
-     * @return 规范化 key
-     */
     public static String compose(String... segments) {
         Objects.requireNonNull(segments, "segments");
         StringBuilder sb = new StringBuilder();
@@ -53,16 +48,8 @@ public class CacheConstants {
         return sb.toString();
     }
 
-
-    /**
-     * 构建图形验证码缓存Key
-     * @param uuid 验证码唯一标识
-     * @return 缓存Key
-     */
     public static String keyCaptcha(String uuid) {
         Objects.requireNonNull(uuid, "uuid");
         return compose(PREFIX, CAPTCHA, "img", uuid.trim());
     }
-
-
 }

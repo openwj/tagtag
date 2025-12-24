@@ -1,8 +1,8 @@
-package dev.tagtag.framework.security.context;
+package dev.tagtag.kernel.context;
 
-import dev.tagtag.framework.constant.SecurityClaims;
-import dev.tagtag.framework.security.model.UserPrincipal;
-import dev.tagtag.framework.security.util.JwtClaimUtils;
+import dev.tagtag.kernel.constant.SecurityClaims;
+import dev.tagtag.kernel.security.model.UserPrincipal;
+import dev.tagtag.kernel.security.util.JwtClaimUtils;
 import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.exception.ErrorCode;
 import org.springframework.security.core.Authentication;

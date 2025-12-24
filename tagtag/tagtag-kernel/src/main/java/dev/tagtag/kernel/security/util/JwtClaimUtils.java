@@ -1,4 +1,4 @@
-package dev.tagtag.framework.security.util;
+package dev.tagtag.kernel.security.util;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 
