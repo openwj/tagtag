@@ -59,11 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserDTO getById(Long id) {
         User entity = super.getById(id);
         UserDTO dto = userMapperConvert.toDTO(entity);
-        if (dto != null && dto.getId() != null) {
-            List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
-            dto.setRoleIds(roleIds);
-        }
-        return dto;
+        return fillUserRoleIds(dto);
     }
 
     /**
@@ -144,6 +140,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
         UserDTO dto = userMapperConvert.toDTO(entity);
+        return fillUserRoleIds(dto);
+    }
+    
+    /**
+     * 为用户DTO填充角色ID列表
+     * @param dto 用户DTO
+     * @return 填充后的用户DTO
+     */
+    private UserDTO fillUserRoleIds(UserDTO dto) {
         if (dto != null && dto.getId() != null) {
             List<Long> roleIds = baseMapper.selectRoleIdsByUserId(dto.getId());
             dto.setRoleIds(roleIds);

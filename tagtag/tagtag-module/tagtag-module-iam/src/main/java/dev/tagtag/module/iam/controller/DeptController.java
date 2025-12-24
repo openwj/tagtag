@@ -1,13 +1,14 @@
 package dev.tagtag.module.iam.controller;
 
 import dev.tagtag.common.model.Result;
+import dev.tagtag.common.model.StatusUpdateRequest;
+import dev.tagtag.common.model.BatchStatusUpdateRequest;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.module.iam.service.DeptService;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import dev.tagtag.common.validation.CreateGroup;
@@ -63,7 +64,7 @@ public class DeptController {
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.DEPT_UPDATE)
     @Operation(summary = "更新部门状态", description = "启用或禁用部门")
-    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody DeptStatusUpdateRequest req) {
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody StatusUpdateRequest req) {
         deptService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -75,7 +76,7 @@ public class DeptController {
     @PutMapping("/status/batch")
     @RequirePerm(Permissions.DEPT_UPDATE)
     @Operation(summary = "批量更新部门状态", description = "批量启用或禁用部门")
-    public Result<Void> batchUpdateStatus(@RequestBody DeptStatusBatchRequest req) {
+    public Result<Void> batchUpdateStatus(@RequestBody BatchStatusUpdateRequest req) {
         deptService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -86,20 +87,5 @@ public class DeptController {
     @Operation(summary = "获取部门树", description = "获取部门树列表，支持查询条件")
     public Result<List<DeptDTO>> listTree(DeptQueryDTO query) {
         return Result.ok(deptService.listTree(query));
-    }
-
-
-
-    /** 部门状态更新请求 */
-    @Data
-    public static class DeptStatusUpdateRequest {
-        private int status;
-    }
-
-    /** 部门批量状态更新请求 */
-    @Data
-    public static class DeptStatusBatchRequest {
-        private List<Long> ids;
-        private int status;
     }
 }

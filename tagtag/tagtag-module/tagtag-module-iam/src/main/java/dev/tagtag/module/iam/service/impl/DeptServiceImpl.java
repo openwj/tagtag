@@ -3,12 +3,14 @@ package dev.tagtag.module.iam.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
+import dev.tagtag.common.util.TreeUtil;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.DeptDTO;
 import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.module.iam.convert.DeptMapperConvert;
 import dev.tagtag.module.iam.entity.Dept;
+import dev.tagtag.module.iam.entity.User;
 import dev.tagtag.module.iam.mapper.DeptMapper;
 import dev.tagtag.module.iam.mapper.UserMapper;
 import dev.tagtag.module.iam.service.DeptService;
@@ -17,11 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import dev.tagtag.module.iam.entity.User;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import dev.tagtag.common.exception.BusinessException;
-import dev.tagtag.common.exception.ErrorCode;
+
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -67,7 +69,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = "deptTree", allEntries = true)
     public void create(DeptDTO dept) {
-        validateForCreate(dept);
+        validateDept(dept, true);
         Dept entity = deptMapperConvert.toEntity(dept);
         super.save(entity);
         log.info("dept create: id={}, name={}", entity.getId(), entity.getName());
@@ -83,7 +85,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         if (dept == null || dept.getId() == null) {
             return;
         }
-        validateForUpdate(dept);
+        validateDept(dept, false);
         Dept entity = super.getById(dept.getId());
         if (entity == null) {
             return;
@@ -143,24 +145,23 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
                     .orderByAsc(Dept::getSort, Dept::getId);
         }
         List<Dept> all = chain.list();
-        Map<Long, DeptDTO> map = new HashMap<>(all.size());
-        List<DeptDTO> roots = new ArrayList<>();
-        for (Dept d : all) {
-            DeptDTO dto = deptMapperConvert.toDTO(d);
-            dto.setChildren(new ArrayList<>());
-            map.put(dto.getId(), dto);
-        }
-        for (Dept d : all) {
-            Long pid = d.getParentId();
-            DeptDTO dto = map.get(d.getId());
-            if (pid == null || pid == 0L || !map.containsKey(pid)) {
-                roots.add(dto);
-            } else {
-                map.get(pid).getChildren().add(dto);
-            }
-        }
-        sortTree(roots);
-        return roots;
+        
+        // 转换为DTO并初始化子节点列表
+        List<DeptDTO> dtos = all.stream()
+                .map(deptMapperConvert::toDTO)
+                .peek(dto -> dto.setChildren(new ArrayList<>()))
+                .collect(Collectors.toList());
+        
+        // 使用 TreeUtil 构建树结构并排序
+        Comparator<DeptDTO> comparator = Comparator.comparing((DeptDTO d) -> d.getSort() == null ? Integer.MAX_VALUE : d.getSort())
+                .thenComparing(DeptDTO::getId);
+        
+        return TreeUtil.buildTree(dtos, 
+                DeptDTO::getId, 
+                DeptDTO::getParentId, 
+                DeptDTO::getChildren,
+                (dto, children) -> dto.setChildren(children),
+                comparator);
     }
 
     /**
@@ -236,24 +237,19 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     /**
-     * 创建校验：唯一性、父ID合法、状态合法
+     * 部门验证：唯一性、父ID合法、状态合法
+     * @param dept 部门DTO
+     * @param isCreate 是否为创建操作
      */
-    private void validateForCreate(DeptDTO dept) {
+    private void validateDept(DeptDTO dept, boolean isCreate) {
         if (dept == null) return;
-        if (dept.getCode() == null || dept.getCode().isBlank()) {
-            throw BusinessException.badRequest("部门编码不能为空");
+        
+        // 状态验证
+        if (dept.getStatus() != null && dept.getStatus() != 0 && dept.getStatus() != 1) {
+            throw BusinessException.badRequest("状态不合法");
         }
-        boolean codeExists = this.lambdaQuery().eq(Dept::getCode, dept.getCode()).exists();
-        if (codeExists) {
-            throw BusinessException.badRequest("部门编码已存在");
-        }
-        if (dept.getName() == null || dept.getName().isBlank()) {
-            throw BusinessException.badRequest("部门名称不能为空");
-        }
-        boolean nameExists = this.lambdaQuery().eq(Dept::getName, dept.getName()).exists();
-        if (nameExists) {
-            throw BusinessException.badRequest("部门名称已存在");
-        }
+        
+        // 父ID验证
         if (dept.getParentId() != null) {
             if (dept.getId() != null && dept.getId().equals(dept.getParentId())) {
                 throw BusinessException.badRequest("父部门不可为自身");
@@ -262,38 +258,31 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
                 throw BusinessException.badRequest("不可设置为自身的下级");
             }
         }
-        if (dept.getStatus() != null && dept.getStatus() != 0 && dept.getStatus() != 1) {
-            throw BusinessException.badRequest("状态不合法");
-        }
-    }
-
-    /**
-     * 更新校验：唯一性、父ID合法、状态合法
-     */
-    private void validateForUpdate(DeptDTO dept) {
-        if (dept == null) return;
-        if (dept.getCode() != null && !dept.getCode().isBlank()) {
-            boolean codeExists = this.lambdaQuery().eq(Dept::getCode, dept.getCode()).ne(Dept::getId, dept.getId()).exists();
+        
+        // 编码验证
+        if (isCreate || (dept.getCode() != null && !dept.getCode().isBlank())) {
+            if (isCreate && (dept.getCode() == null || dept.getCode().isBlank())) {
+                throw BusinessException.badRequest("部门编码不能为空");
+            }
+            boolean codeExists = isCreate 
+                ? this.lambdaQuery().eq(Dept::getCode, dept.getCode()).exists()
+                : this.lambdaQuery().eq(Dept::getCode, dept.getCode()).ne(Dept::getId, dept.getId()).exists();
             if (codeExists) {
                 throw BusinessException.badRequest("部门编码已存在");
             }
         }
-        if (dept.getName() != null && !dept.getName().isBlank()) {
-            boolean nameExists = this.lambdaQuery().eq(Dept::getName, dept.getName()).ne(Dept::getId, dept.getId()).exists();
+        
+        // 名称验证
+        if (isCreate || (dept.getName() != null && !dept.getName().isBlank())) {
+            if (isCreate && (dept.getName() == null || dept.getName().isBlank())) {
+                throw BusinessException.badRequest("部门名称不能为空");
+            }
+            boolean nameExists = isCreate 
+                ? this.lambdaQuery().eq(Dept::getName, dept.getName()).exists()
+                : this.lambdaQuery().eq(Dept::getName, dept.getName()).ne(Dept::getId, dept.getId()).exists();
             if (nameExists) {
                 throw BusinessException.badRequest("部门名称已存在");
             }
-        }
-        if (dept.getParentId() != null) {
-            if (dept.getId().equals(dept.getParentId())) {
-                throw BusinessException.badRequest("父部门不可为自身");
-            }
-            if (isAncestor(dept.getId(), dept.getParentId())) {
-                throw BusinessException.badRequest("不可设置为自身的下级");
-            }
-        }
-        if (dept.getStatus() != null && dept.getStatus() != 0 && dept.getStatus() != 1) {
-            throw BusinessException.badRequest("状态不合法");
         }
     }
 
@@ -321,18 +310,5 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
             map.put(d.getId(), d.getParentId());
         }
         return map;
-    }
-
-    /**
-     * 递归为每个节点的 children 排序（按 sort、id）
-     */
-    private void sortTree(List<DeptDTO> nodes) {
-        if (nodes == null || nodes.isEmpty()) return;
-        nodes.sort(Comparator
-                .comparing((DeptDTO d) -> d.getSort() == null ? Integer.MAX_VALUE : d.getSort())
-                .thenComparing(DeptDTO::getId));
-        for (DeptDTO n : nodes) {
-            sortTree(n.getChildren());
-        }
     }
 }

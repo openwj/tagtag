@@ -1,6 +1,9 @@
 package dev.tagtag.module.iam.controller;
 
 import dev.tagtag.common.model.Result;
+import dev.tagtag.common.model.StatusUpdateRequest;
+import dev.tagtag.common.model.BatchStatusUpdateRequest;
+import dev.tagtag.common.model.BatchIdsDTO;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.common.constant.GlobalConstants;
@@ -8,7 +11,6 @@ import dev.tagtag.contract.iam.dto.MenuDTO;
 import dev.tagtag.contract.iam.dto.MenuQueryDTO;
 import dev.tagtag.module.iam.service.MenuService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
@@ -82,7 +84,7 @@ public class MenuController {
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.MENU_UPDATE)
     @Operation(summary = "更新菜单状态", description = "启用或禁用菜单")
-    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody MenuStatusUpdateRequest req) {
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody StatusUpdateRequest req) {
         menuService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -94,7 +96,7 @@ public class MenuController {
     @PutMapping("/status/batch")
     @RequirePerm(Permissions.MENU_UPDATE)
     @Operation(summary = "批量更新菜单状态", description = "批量启用或禁用菜单")
-    public Result<Void> batchUpdateStatus(@RequestBody MenuStatusBatchRequest req) {
+    public Result<Void> batchUpdateStatus(@RequestBody BatchStatusUpdateRequest req) {
         menuService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -106,26 +108,8 @@ public class MenuController {
     @DeleteMapping("/batch")
     @RequirePerm(Permissions.MENU_DELETE)
     @Operation(summary = "批量删除菜单", description = "批量删除菜单")
-    public Result<Void> batchDelete(@RequestBody MenuBatchDeleteRequest req) {
+    public Result<Void> batchDelete(@RequestBody BatchIdsDTO req) {
         menuService.batchDelete(req.getIds());
         return Result.okMsg(AppMessages.DELETE_SUCCESS);
-    }
-
-
-
-    @Data
-    public static class MenuStatusUpdateRequest {
-        private int status;
-    }
-
-    @Data
-    public static class MenuStatusBatchRequest {
-        private List<Long> ids;
-        private int status;
-    }
-
-    @Data
-    public static class MenuBatchDeleteRequest {
-        private List<Long> ids;
     }
 }

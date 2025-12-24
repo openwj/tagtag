@@ -1,7 +1,9 @@
 package dev.tagtag.module.iam.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
+import dev.tagtag.common.util.TreeUtil;
 import dev.tagtag.framework.util.PageResults;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.contract.iam.dto.MenuDTO;
@@ -16,12 +18,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import dev.tagtag.common.exception.BusinessException;
-import dev.tagtag.common.exception.ErrorCode;
+
 import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Collections;
@@ -117,28 +117,17 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             }
         }
         List<Menu> all = lq.orderByAsc(Menu::getSort, Menu::getId).list();
-        // 映射为 DTO
-        List<MenuDTO> dtos = menuMapperConvert.toDTOList(all);
-        Map<Long, MenuDTO> byId = new HashMap<>();
-        for (MenuDTO dto : dtos) {
-            byId.put(dto.getId(), dto);
-        }
-        List<MenuDTO> roots = new ArrayList<>();
-        for (MenuDTO dto : dtos) {
-            Long pid = dto.getParentId() == null ? 0L : dto.getParentId();
-            if (pid == 0L) {
-                roots.add(dto);
-            } else {
-                MenuDTO parent = byId.get(pid);
-                if (parent != null) {
-                    if (parent.getChildren() == null) parent.setChildren(new ArrayList<>());
-                    parent.getChildren().add(dto);
-                } else {
-                    roots.add(dto); // 无父节点数据时作为根返回
-                }
-            }
-        }
-        return roots;
+        // 映射为 DTO 并初始化子节点列表
+        List<MenuDTO> dtos = all.stream()
+                .map(menuMapperConvert::toDTO)
+                .peek(dto -> dto.setChildren(new ArrayList<>()))
+                .collect(Collectors.toList());
+        
+        // 使用 TreeUtil 构建树结构
+        return TreeUtil.buildTree(dtos, 
+                MenuDTO::getId, 
+                MenuDTO::getParentId, 
+                (dto, children) -> dto.setChildren(children));
     }
 
     /**
@@ -197,7 +186,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         LinkedHashSet<Long> uniq = new LinkedHashSet<>(ids);
         boolean existChildren = this.lambdaQuery().in(Menu::getParentId, uniq).exists();
         if (existChildren) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "选中的菜单中存在子菜单，无法批量删除");
+            throw BusinessException.badRequest("选中的菜单中存在子菜单，无法批量删除");
         }
         super.removeBatchByIds(uniq);
     }
