@@ -5,10 +5,6 @@ import lombok.Getter;
 @Getter
 public class BusinessException extends RuntimeException {
 
-    /**
-     * -- GETTER --
-     *  获取错误码枚举
-     */
     private final ErrorCode errorCode;
 
     public BusinessException(ErrorCode errorCode) {
@@ -32,7 +28,7 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * 获取错误码数值（枚举为空返回 -1）
+     * 获取错误码数值
      * @return 错误码数值
      */
     public int getCode() {
@@ -40,8 +36,8 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * 获取错误码数值（枚举为空返回 500，以便默认作为服务器错误）
-     * @return 错误码数值
+     * 获取HTTP状态码
+     * @return HTTP状态码
      */
     public int getHttpStatus() {
         return errorCode == null ? 500 : errorCode.getCode();

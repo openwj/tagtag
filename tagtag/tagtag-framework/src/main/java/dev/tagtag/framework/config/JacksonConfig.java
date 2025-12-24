@@ -12,7 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.common.util.DateTimeUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -33,12 +33,12 @@ public class JacksonConfig {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(GlobalConstants.DATETIME_FORMATTER));
-        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(GlobalConstants.DATETIME_FORMATTER));
-        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(GlobalConstants.DATE_FORMATTER));
-        javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(GlobalConstants.DATE_FORMATTER));
-        javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(GlobalConstants.TIME_FORMATTER));
-        javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(GlobalConstants.TIME_FORMATTER));
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeUtil.DATETIME_FORMATTER));
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeUtil.DATETIME_FORMATTER));
+        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeUtil.DATE_FORMATTER));
+        javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeUtil.DATE_FORMATTER));
+        javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeUtil.TIME_FORMATTER));
+        javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeUtil.TIME_FORMATTER));
         mapper.registerModule(javaTimeModule);
 
         SimpleModule numberToStringModule = new SimpleModule();
@@ -46,7 +46,7 @@ public class JacksonConfig {
         numberToStringModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
         mapper.registerModule(numberToStringModule);
 
-        mapper.setTimeZone(TimeZone.getTimeZone(GlobalConstants.DEFAULT_ZONE_ID));
+        mapper.setTimeZone(TimeZone.getTimeZone(DateTimeUtil.DEFAULT_ZONE_ID));
 
         return mapper;
     }

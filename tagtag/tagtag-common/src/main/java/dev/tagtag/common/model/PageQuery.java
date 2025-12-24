@@ -1,6 +1,6 @@
 package dev.tagtag.common.model;
 
-import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.common.util.PageUtil;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -12,17 +12,17 @@ public record PageQuery(
         @JsonAlias({"pageNumber", "currentPage", "current"})
         int pageNo,
         @Min(1)
-        @Max(GlobalConstants.MAX_PAGE_SIZE)
+        @Max(PageUtil.MAX_PAGE_SIZE)
         @JsonAlias({"pageSize", "limit", "size"})
         int pageSize
 ) {
     public PageQuery() {
-        this(GlobalConstants.DEFAULT_PAGE_NO, GlobalConstants.DEFAULT_PAGE_SIZE);
+        this(PageUtil.DEFAULT_PAGE_NO, PageUtil.DEFAULT_PAGE_SIZE);
     }
 
     public PageQuery normalized() {
-        int pn = GlobalConstants.normalizePageNo(this.pageNo);
-        int ps = GlobalConstants.clampPageSize(this.pageSize);
+        int pn = PageUtil.normalizePageNo(this.pageNo);
+        int ps = PageUtil.clampPageSize(this.pageSize);
         return new PageQuery(pn, ps);
     }
 
