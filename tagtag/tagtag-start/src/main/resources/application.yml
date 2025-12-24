@@ -48,3 +48,17 @@ scalar:
 springdoc:
   api-docs:
     path: /v3/api-docs              # OpenAPI 规范生成路径
+    enabled: true                   # 启用 API 文档生成
+    groups:
+      enabled: true                 # 启用分组支持
+  swagger-ui:
+    enabled: false                  # 禁用默认 Swagger UI
+  packages-to-scan: dev.tagtag      # 扫描的包路径
+  paths-to-match: /**               # 匹配的 API 路径
+  default-consumes-media-type: application/json  # 默认请求媒体类型
+  default-produces-media-type: application/json  # 默认响应媒体类型
+  model-and-view-allowed: true      # 允许 ModelAndView 响应
+  cache:
+    disabled: true                  # 禁用缓存，开发环境实时更新
+  show-actuator: false              # 不显示 Actuator 端点
+  common-extensions-enabled: false  # 禁用通用扩展

@@ -16,6 +16,8 @@ public class Result<T> {
     @Builder.Default
     private long timestamp = System.currentTimeMillis();
     private List<String> errors;
+    @Builder.Default
+    private boolean success = true;
 
     /**
      * 创建成功结果
@@ -137,3 +139,4 @@ public class Result<T> {
         return this.code == ErrorCode.SUCCESS.getCode();
     }
 }
+

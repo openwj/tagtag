@@ -20,6 +20,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        securityHandlerUtils.writeErrorResponse(response, ErrorCode.UNAUTHORIZED.getCode(), Result.unauthorized(authException.getMessage()));
+        securityHandlerUtils.writeErrorResponse(response, ErrorCode.UNAUTHORIZED.getCode(), Result.unauthorized(ErrorCode.UNAUTHORIZED.getMessage()));
     }
 }

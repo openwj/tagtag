@@ -20,6 +20,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        securityHandlerUtils.writeErrorResponse(response, ErrorCode.FORBIDDEN.getCode(), Result.forbidden(accessDeniedException.getMessage()));
+        securityHandlerUtils.writeErrorResponse(response, ErrorCode.FORBIDDEN.getCode(), Result.forbidden(ErrorCode.FORBIDDEN.getMessage()));
     }
 }

@@ -29,7 +29,6 @@ import java.util.*;
  * 认证控制器，提供登录、刷新与注销接口
  */
 @RestController
-@Validated
 @AllArgsConstructor
 @RequestMapping(GlobalConstants.API_PREFIX + "/auth")
 @Tag(name = "认证管理", description = "认证相关 API 接口")
@@ -183,3 +182,5 @@ public class AuthController {
     }
 
 }
+
+
