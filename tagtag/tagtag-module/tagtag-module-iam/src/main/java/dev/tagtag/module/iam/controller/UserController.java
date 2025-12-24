@@ -6,7 +6,7 @@ import dev.tagtag.common.model.Result;
 import dev.tagtag.common.exception.ErrorCode;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
-import dev.tagtag.kernel.context.AuthContext;
+import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.module.iam.service.UserService;
 import dev.tagtag.common.constant.GlobalConstants;
 import lombok.AllArgsConstructor;

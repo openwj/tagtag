@@ -1,7 +1,7 @@
 package dev.tagtag.framework.security.guard;
 
-import dev.tagtag.kernel.context.AuthContext;
-import dev.tagtag.kernel.security.model.UserPrincipal;
+import dev.tagtag.framework.security.context.AuthContext;
+import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.framework.security.util.SecurityUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.security.access.AccessDeniedException;
