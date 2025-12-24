@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class SecurityUtils {
 
@@ -19,12 +20,9 @@ public class SecurityUtils {
             return false;
         }
 
-        for (GrantedAuthority ga : authorities) {
-            if (ga != null && authority.equals(ga.getAuthority())) {
-                return true;
-            }
-        }
-        return false;
+        return authorities.stream()
+                .filter(Objects::nonNull)
+                .anyMatch(ga -> authority.equals(ga.getAuthority()));
     }
 
     public static Authentication getAuthentication() {
