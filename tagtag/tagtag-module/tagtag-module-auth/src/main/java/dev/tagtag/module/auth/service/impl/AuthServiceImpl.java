@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
         if (!matched) {
             log.warn("login failed: invalid credentials username='{}', ip={}, ua={}, traceId={}",
                     uname, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
+            throw BusinessException.unauthorized("凭证无效");
         }
 
         List<Long> roleIds = Objects.requireNonNullElse(full.getRoleIds(), Collections.emptyList());
@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
         if (!org.springframework.util.StringUtils.hasText(refreshToken) || !jwtService.validateToken(refreshToken)) {
             log.warn("refresh failed: invalid token, ip={}, ua={}, traceId={}",
                     resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
+            throw BusinessException.unauthorized("凭证无效");
         }
         String subject = jwtService.getSubject(refreshToken);
         Map<String, Object> claims = new HashMap<>(jwtService.getClaims(refreshToken));
@@ -109,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
         if (uid == null || tokenVer == null || !tokenVersionService.isTokenVersionValid(uid, tokenVer)) {
             log.warn("refresh failed: token version mismatch uid={} tokenVer={}, ip={}, ua={}, traceId={}",
                     uid, tokenVer, resolveClientIp(), getUserAgent(), MDC.get(GlobalConstants.TRACE_ID_MDC_KEY));
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
+            throw BusinessException.unauthorized("凭证无效");
         }
         claims.put(SecurityClaims.TYP, "access");
         String access = jwtService.generateToken(claims, subject, jwtProps.getAccessTtlSeconds());
@@ -180,7 +180,7 @@ public class AuthServiceImpl implements AuthService {
         }
         UserDTO exists = userApi.getUserByUsername(uname).getData();
         if (exists != null && exists.getId() != null) {
-            throw new BusinessException(ErrorCode.CONFLICT, "用户名已存在");
+            throw BusinessException.of(ErrorCode.CONFLICT, "用户名已存在");
         }
         UserDTO toCreate = new UserDTO();
         toCreate.setUsername(uname);
@@ -197,7 +197,7 @@ public class AuthServiceImpl implements AuthService {
     private UserDTO loadUserOrFail(String uname) {
         UserDTO full = userApi.getUserByUsername(uname).getData();
         if (full == null || full.getPassword() == null) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "凭证无效");
+            throw BusinessException.unauthorized("凭证无效");
         }
         return full;
     }
@@ -217,7 +217,7 @@ public class AuthServiceImpl implements AuthService {
                 stringRedisTemplate.expire(key, java.time.Duration.ofMinutes(1));
             }
             if (n != null && n > maxPerMinute) {
-                throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
+                throw BusinessException.of(ErrorCode.TOO_MANY_REQUESTS, "请求过于频繁，请稍后再试");
             }
         } catch (Exception ignore) {
             return;

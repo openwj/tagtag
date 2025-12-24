@@ -104,10 +104,10 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
             return;
         }
         if (hasChildren(id)) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "该部门下存在子部门，无法删除");
+            throw BusinessException.badRequest("该部门下存在子部门，无法删除");
         }
         if (hasUsers(id)) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "该部门下存在用户，无法删除");
+            throw BusinessException.badRequest("该部门下存在用户，无法删除");
         }
         super.removeById(id);
         log.info("dept delete: id={}", id);
@@ -241,29 +241,29 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     private void validateForCreate(DeptDTO dept) {
         if (dept == null) return;
         if (dept.getCode() == null || dept.getCode().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "部门编码不能为空");
+            throw BusinessException.badRequest("部门编码不能为空");
         }
         boolean codeExists = this.lambdaQuery().eq(Dept::getCode, dept.getCode()).exists();
         if (codeExists) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "部门编码已存在");
+            throw BusinessException.badRequest("部门编码已存在");
         }
         if (dept.getName() == null || dept.getName().isBlank()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "部门名称不能为空");
+            throw BusinessException.badRequest("部门名称不能为空");
         }
         boolean nameExists = this.lambdaQuery().eq(Dept::getName, dept.getName()).exists();
         if (nameExists) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "部门名称已存在");
+            throw BusinessException.badRequest("部门名称已存在");
         }
         if (dept.getParentId() != null) {
             if (dept.getId() != null && dept.getId().equals(dept.getParentId())) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "父部门不可为自身");
+                throw BusinessException.badRequest("父部门不可为自身");
             }
             if (dept.getId() != null && isAncestor(dept.getId(), dept.getParentId())) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "不可设置为自身的下级");
+                throw BusinessException.badRequest("不可设置为自身的下级");
             }
         }
         if (dept.getStatus() != null && dept.getStatus() != 0 && dept.getStatus() != 1) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "状态不合法");
+            throw BusinessException.badRequest("状态不合法");
         }
     }
 
@@ -275,25 +275,25 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
         if (dept.getCode() != null && !dept.getCode().isBlank()) {
             boolean codeExists = this.lambdaQuery().eq(Dept::getCode, dept.getCode()).ne(Dept::getId, dept.getId()).exists();
             if (codeExists) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "部门编码已存在");
+                throw BusinessException.badRequest("部门编码已存在");
             }
         }
         if (dept.getName() != null && !dept.getName().isBlank()) {
             boolean nameExists = this.lambdaQuery().eq(Dept::getName, dept.getName()).ne(Dept::getId, dept.getId()).exists();
             if (nameExists) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "部门名称已存在");
+                throw BusinessException.badRequest("部门名称已存在");
             }
         }
         if (dept.getParentId() != null) {
             if (dept.getId().equals(dept.getParentId())) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "父部门不可为自身");
+                throw BusinessException.badRequest("父部门不可为自身");
             }
             if (isAncestor(dept.getId(), dept.getParentId())) {
-                throw new BusinessException(ErrorCode.BAD_REQUEST, "不可设置为自身的下级");
+                throw BusinessException.badRequest("不可设置为自身的下级");
             }
         }
         if (dept.getStatus() != null && dept.getStatus() != 0 && dept.getStatus() != 1) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "状态不合法");
+            throw BusinessException.badRequest("状态不合法");
         }
     }
 

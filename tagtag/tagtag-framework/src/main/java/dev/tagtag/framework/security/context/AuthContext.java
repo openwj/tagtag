@@ -4,7 +4,6 @@ import dev.tagtag.kernel.constant.SecurityClaims;
 import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.framework.security.util.JwtClaimUtils;
 import dev.tagtag.common.exception.BusinessException;
-import dev.tagtag.common.exception.ErrorCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,11 +25,11 @@ public final class AuthContext {
     public static Jwt getCurrentJwt() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+            throw BusinessException.unauthorized("未登录或会话已过期");
         }
         Object principal = auth.getPrincipal();
         if (principal instanceof Jwt j) return j;
-        throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+        throw BusinessException.unauthorized("未登录或会话已过期");
     }
 
     /**
@@ -42,7 +41,7 @@ public final class AuthContext {
         Jwt jwt = getCurrentJwt();
         Long uid = JwtClaimUtils.claimAsLong(jwt, SecurityClaims.UID);
         if (uid == null) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+            throw BusinessException.unauthorized("未登录或会话已过期");
         }
         return uid;
     }
@@ -56,7 +55,7 @@ public final class AuthContext {
         Jwt jwt = getCurrentJwt();
         String uname = jwt.getClaim(SecurityClaims.UNAME);
         if (uname == null || uname.isBlank()) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+            throw BusinessException.unauthorized("未登录或会话已过期");
         }
         return uname;
     }
@@ -88,7 +87,7 @@ public final class AuthContext {
         Jwt jwt = getCurrentJwt();
         UserPrincipal p = buildPrincipal(jwt);
         if (p.getId() == null) {
-            throw new BusinessException(ErrorCode.UNAUTHORIZED, "未登录或会话已过期");
+            throw BusinessException.unauthorized("未登录或会话已过期");
         }
         return p;
     }

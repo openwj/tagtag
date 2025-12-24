@@ -1,4 +1,5 @@
 package dev.tagtag.common.model;
+import dev.tagtag.common.util.PageUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,8 +31,8 @@ public class PageResult<T> {
         PageResult<T> pr = new PageResult<>();
         pr.setList(list == null ? Collections.emptyList() : list);
         pr.setTotal(Math.max(total, 0L));
-        pr.setPageNo(Math.max(pageNo, 1));
-        pr.setPageSize(Math.max(pageSize, 1));
+        pr.setPageNo(PageUtil.normalizePageNo(pageNo));
+        pr.setPageSize(PageUtil.clampPageSize(pageSize));
         return pr;
     }
 

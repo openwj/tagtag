@@ -86,7 +86,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         // 保护：存在子菜单禁止删除
         boolean hasChildren = this.lambdaQuery().eq(Menu::getParentId, id).count() > 0;
         if (hasChildren) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "该菜单下存在子菜单，无法删除");
+            throw BusinessException.badRequest("该菜单下存在子菜单，无法删除");
         }
         super.removeById(id);
     }

@@ -135,11 +135,29 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
+     * 创建401错误异常
+     * @param message 错误消息
+     * @return 业务异常
+     */
+    public static BusinessException unauthorized(String message) {
+        return new BusinessException(ErrorCode.UNAUTHORIZED, message);
+    }
+
+    /**
      * 创建403错误异常
      * @return 业务异常
      */
     public static BusinessException forbidden() {
         return new BusinessException(ErrorCode.FORBIDDEN);
+    }
+
+    /**
+     * 创建403错误异常
+     * @param message 错误消息
+     * @return 业务异常
+     */
+    public static BusinessException forbidden(String message) {
+        return new BusinessException(ErrorCode.FORBIDDEN, message);
     }
 
     /**

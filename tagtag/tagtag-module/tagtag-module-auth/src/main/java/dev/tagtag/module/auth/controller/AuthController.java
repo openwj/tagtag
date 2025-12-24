@@ -73,7 +73,7 @@ public class AuthController {
         String inCode = req.getCaptcha().getCode();
         String inId = req.getCaptcha().getCaptchaId();
         if (!captchaService.validate(inId, inCode)) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码错误或已过期");
+            throw BusinessException.badRequest("验证码错误或已过期");
         }
         TokenDTO dto = authService.login(req.getUsername(), req.getPassword());
         // 登录成功后再消费验证码，防止重复使用（同样兼容两种入参）
@@ -119,12 +119,12 @@ public class AuthController {
     @Operation(summary = "用户注册", description = "用户注册，公开接口")
     public Result<Void> register(@Valid @RequestBody RegisterRequest req) {
         if (req.getCaptcha() == null || req.getCaptcha().getCaptchaId() == null || req.getCaptcha().getCode() == null) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码不能为空");
+            throw BusinessException.badRequest("验证码不能为空");
         }
         String inId = req.getCaptcha().getCaptchaId();
         String inCode = req.getCaptcha().getCode();
         if (!captchaService.validate(inId, inCode)) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST, "验证码错误或已过期");
+            throw BusinessException.badRequest("验证码错误或已过期");
         }
         authService.register(req.getUsername(), req.getPassword());
         captchaService.validateAndConsume(inId, inCode);

@@ -63,7 +63,7 @@ public class RateLimitAspect {
                     String.valueOf(permits)
             );
             if (allowed == 0L) {
-                throw new BusinessException(ErrorCode.TOO_MANY_REQUESTS, limit.message());
+                throw BusinessException.of(ErrorCode.TOO_MANY_REQUESTS, limit.message());
             }
         } catch (BusinessException be) {
             throw be;
