@@ -1,11 +1,9 @@
-package dev.tagtag.framework.config;
+package dev.tagtag.framework.mybatis;
 
 import com.baomidou.mybatisplus.annotation.DbType;
-import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import dev.tagtag.framework.handler.MetaObjectHandlerImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,10 +18,5 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DATABASE_TYPE));
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         return interceptor;
-    }
-
-    @Bean
-    public MetaObjectHandler metaObjectHandler() {
-        return new MetaObjectHandlerImpl();
     }
 }

@@ -1,11 +1,13 @@
-package dev.tagtag.framework.handler;
+package dev.tagtag.framework.mybatis;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import dev.tagtag.common.util.DateTimeUtil;
 import dev.tagtag.framework.security.context.AuthContext;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.stereotype.Component;
 
-public class MetaObjectHandlerImpl implements MetaObjectHandler {
+@Component
+public class MybatisFieldAutoFillHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
@@ -27,3 +29,6 @@ public class MetaObjectHandlerImpl implements MetaObjectHandler {
         }
     }
 }
+
+
+
