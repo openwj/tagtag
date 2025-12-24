@@ -1,13 +1,14 @@
 package dev.tagtag.common.enums;
 
 /**
- * 具备整型编码的枚举统一接口
+ * 带码值枚举接口
+ * @param <T> 码值类型
  */
-public interface CodeEnum {
+public interface CodeEnum<T> {
 
     /**
-     * 获取枚举的整型编码
-     * @return 整型编码
+     * 获取码值
+     * @return 码值
      */
-    int getCode();
+    T getCode();
 }

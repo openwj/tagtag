@@ -1,24 +1,22 @@
 package dev.tagtag.kernel.enums;
 
+import dev.tagtag.common.util.EnumUtil;
+import dev.tagtag.common.enums.CodeEnum;
 import lombok.Getter;
 
 @Getter
-public enum StatusEnum implements CodeEnum {
+public enum StatusEnum implements CodeEnum<Integer> {
 
     DISABLED(0),
     ENABLED(1);
 
-    private final int code;
+    private final Integer code;
 
-    StatusEnum(int code) {
+    StatusEnum(Integer code) {
         this.code = code;
     }
 
     public static StatusEnum fromCode(Integer code) {
-        if (code == null) return null;
-        for (StatusEnum e : values()) {
-            if (e.code == code) return e;
-        }
-        return null;
+        return EnumUtil.fromCode(StatusEnum.class, code);
     }
 }

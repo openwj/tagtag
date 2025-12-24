@@ -1,12 +1,14 @@
 package dev.tagtag.common.exception;
 
+import dev.tagtag.common.util.EnumUtil;
+import dev.tagtag.common.enums.CodeEnum;
 import lombok.Getter;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * 错误码枚举
+ */
 @Getter
-public enum ErrorCode {
+public enum ErrorCode implements CodeEnum<Integer> {
 
     SUCCESS(200, "成功"),
     CREATED(201, "已创建"),
@@ -41,19 +43,12 @@ public enum ErrorCode {
     SERVICE_UNAVAILABLE(503, "服务不可用"),
     GATEWAY_TIMEOUT(504, "网关超时");
 
-    private final int code;
+    private final Integer code;
     private final String message;
 
-    ErrorCode(int code, String message) {
+    ErrorCode(Integer code, String message) {
         this.code = code;
         this.message = message;
-    }
-
-    private static final Map<Integer, ErrorCode> INDEX_BY_CODE = new HashMap<>();
-    static {
-        for (ErrorCode ec : values()) {
-            INDEX_BY_CODE.put(ec.code, ec);
-        }
     }
 
     /**
@@ -71,6 +66,6 @@ public enum ErrorCode {
      * @return 对应枚举，找不到返回 null
      */
     public static ErrorCode fromCode(int code) {
-        return INDEX_BY_CODE.get(code);
+        return EnumUtil.fromCode(ErrorCode.class, code);
     }
 }
