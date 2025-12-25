@@ -3,8 +3,6 @@ title: Releases
 description: Tagtag version history and announcements
 ---
 
-# Releases
-
 ## v1.0.0 (2025-12-12)
 
 🎉 **Tagtag v1.0 is now available!**

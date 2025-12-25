@@ -98,7 +98,7 @@ export default defineNuxtConfig({
   },
 
   llms: {
-    domain: 'https://github.com/admin/openwj/tagtag',
+    domain: 'https://tagtag.cn',
     title: 'Tagtag Documentation',
     description:
       'Documentation for Tagtag - A modular, enterprise-grade Java Spring Boot admin framework.',
@@ -115,10 +115,38 @@ export default defineNuxtConfig({
         ]
       },
       {
-        title: 'Essentials',
+        title: 'Architecture',
         contentCollection: 'docs',
         contentFilters: [
-          { field: 'path', operator: 'LIKE', value: '/essentials%' }
+          { field: 'path', operator: 'LIKE', value: '/architecture%' }
+        ]
+      },
+      {
+        title: 'Developer Guide',
+        contentCollection: 'docs',
+        contentFilters: [
+          { field: 'path', operator: 'LIKE', value: '/developer-guide%' }
+        ]
+      },
+      {
+        title: 'Modules',
+        contentCollection: 'docs',
+        contentFilters: [
+          { field: 'path', operator: 'LIKE', value: '/modules%' }
+        ]
+      },
+      {
+        title: 'Deployment',
+        contentCollection: 'docs',
+        contentFilters: [
+          { field: 'path', operator: 'LIKE', value: '/deployment%' }
+        ]
+      },
+      {
+        title: 'Maintenance',
+        contentCollection: 'docs',
+        contentFilters: [
+          { field: 'path', operator: 'LIKE', value: '/maintenance%' }
         ]
       }
     ]
