@@ -24,6 +24,15 @@ public class MessageController {
 
     private final MessageService messageService;
 
+    private List<Long> filterOwnMessageIds(Long userId, List<Long> ids) {
+        if (ids == null) return List.of();
+        return ids.stream()
+                .map(messageService::getById)
+                .filter(dto -> dto != null && userId.equals(dto.getReceiverId()))
+                .map(MessageDTO::getId)
+                .toList();
+    }
+
     /**
      * 获取当前用户的消息列表（不分页）
      * @param isRead 是否已读（可选）
@@ -99,15 +108,7 @@ public class MessageController {
     @Operation(summary = "批量标记消息已读", description = "批量标记消息为已读状态，仅限当前用户自己的消息")
     public Result<Void> markReadBatch(@RequestBody List<Long> ids) {
         Long userId = AuthContext.getCurrentUserId();
-        java.util.List<Long> ownIds = new java.util.ArrayList<>();
-        if (ids != null) {
-            for (Long mid : ids) {
-                MessageDTO dto = messageService.getById(mid);
-                if (dto != null && dto.getReceiverId() != null && dto.getReceiverId().equals(userId)) {
-                    ownIds.add(mid);
-                }
-            }
-        }
+        List<Long> ownIds = filterOwnMessageIds(userId, ids);
         if (!ownIds.isEmpty()) {
             messageService.markReadBatch(ownIds);
         }
@@ -140,15 +141,7 @@ public class MessageController {
     @Operation(summary = "批量标记消息未读", description = "批量标记消息为未读状态，仅限当前用户自己的消息")
     public Result<Void> markUnreadBatch(@RequestBody List<Long> ids) {
         Long userId = AuthContext.getCurrentUserId();
-        java.util.List<Long> ownIds = new java.util.ArrayList<>();
-        if (ids != null) {
-            for (Long mid : ids) {
-                MessageDTO dto = messageService.getById(mid);
-                if (dto != null && dto.getReceiverId() != null && dto.getReceiverId().equals(userId)) {
-                    ownIds.add(mid);
-                }
-            }
-        }
+        List<Long> ownIds = filterOwnMessageIds(userId, ids);
         if (!ownIds.isEmpty()) {
             messageService.markUnreadBatch(ownIds);
         }

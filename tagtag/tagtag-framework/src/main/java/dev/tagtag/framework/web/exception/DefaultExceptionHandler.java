@@ -29,9 +29,13 @@ public class DefaultExceptionHandler {
         return ResponseEntity.status(ErrorCode.BAD_REQUEST.getCode()).body(body);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Result<Void>> handleDefaultException(Exception ex) {
-        log.error("Unhandled exception", ex);
+    @ExceptionHandler({
+        NullPointerException.class,
+        IllegalStateException.class,
+        RuntimeException.class
+    })
+    public ResponseEntity<Result<Void>> handleRuntimeException(RuntimeException ex) {
+        log.error("Runtime exception", ex);
         Result<Void> body = Result.fail(ErrorCode.INTERNAL_SERVER_ERROR);
         return ResponseEntity.status(ErrorCode.INTERNAL_SERVER_ERROR.getCode()).body(body);
     }

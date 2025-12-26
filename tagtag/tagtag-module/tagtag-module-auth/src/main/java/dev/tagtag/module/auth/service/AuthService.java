@@ -13,12 +13,6 @@ public interface AuthService {
      * @param password 密码
      * @return 令牌对象
      */
-    /**
-     * 用户登录（生成访问令牌与刷新令牌）
-     * @param username 用户名
-     * @param password 密码
-     * @return 令牌对象
-     */
     TokenDTO login(String username, String password);
 
     /**

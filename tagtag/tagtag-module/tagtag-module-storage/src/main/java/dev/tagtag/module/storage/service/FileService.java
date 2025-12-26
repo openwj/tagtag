@@ -8,6 +8,8 @@ import dev.tagtag.contract.storage.dto.FileDTO;
 import dev.tagtag.contract.storage.dto.FilePageQuery;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.framework.util.PageResults;
+
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.storage.entity.FileResource;
@@ -61,8 +63,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
             wrapper.eq(FileResource::getStorageType, query.getStorageType());
         }
         Page<FileResource> page = this.page(Pages.toPage(pageQuery), wrapper);
-        PageResult<FileResource> pr = PageResults.of(page);
-        return pr.map(this::toDTO);
+        return PageResults.of(page).map(this::toDTO);
     }
 
     /**
@@ -70,7 +71,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
      * @param file MultipartFile
      * @return 保存后的实体
      */
-    public FileResource uploadLocal(MultipartFile file) throws IOException {
+    public FileResource uploadLocal(MultipartFile file) throws IOException, NoSuchAlgorithmException {
         String originalName = file.getOriginalFilename();
         String mime = file.getContentType();
         return saveLocal(file.getInputStream(), file.getSize(), originalName, mime);
@@ -83,7 +84,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
      * @param mime MIME 类型
      * @return 保存后的实体
      */
-    public FileResource uploadLocal(byte[] content, String filename, String mime) throws IOException {
+    public FileResource uploadLocal(byte[] content, String filename, String mime) throws IOException, NoSuchAlgorithmException {
         try (InputStream in = new java.io.ByteArrayInputStream(content)) {
             return saveLocal(in, content.length, filename, mime);
         }
@@ -104,22 +105,17 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
 
     /**
      * 计算输入字节的 SHA-256 摘要
-     * @param bytes 输入字节数组
+
      * @return 十六进制摘要字符串
      */
-    private FileResource saveLocal(InputStream in, long size, String filename, String mime) throws IOException {
+    private FileResource saveLocal(InputStream in, long size, String filename, String mime) throws IOException, NoSuchAlgorithmException {
         String originalName = filename;
         String ext = (originalName != null && originalName.contains(".")) ? originalName.substring(originalName.lastIndexOf('.') + 1) : "";
         Path root = Paths.get(basePath).toAbsolutePath();
         Files.createDirectories(root);
         String fname = System.currentTimeMillis() + "_" + (originalName == null ? "file" : originalName);
         Path target = root.resolve(fname);
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
         try (DigestInputStream dis = new DigestInputStream(in, md); OutputStream out = Files.newOutputStream(target)) {
             byte[] buffer = new byte[8192];
             int read;

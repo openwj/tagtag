@@ -183,7 +183,7 @@ public class UserController {
     /**
      * 重置用户密码
      *
-     * @param id  piID
+     * @param id  用户ID
      * @param req 请求体，包含 password
      */
     @PutMapping("/{id}/password")
