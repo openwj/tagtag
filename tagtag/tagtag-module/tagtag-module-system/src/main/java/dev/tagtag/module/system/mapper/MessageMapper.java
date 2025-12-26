@@ -7,6 +7,8 @@ import dev.tagtag.module.system.entity.Message;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * 消息 Mapper
  */
@@ -27,4 +29,11 @@ public interface MessageMapper extends BaseMapper<Message> {
      * @return 消息详情
      */
     MessageDTO selectDTOById(@Param("id") Long id);
+
+    /**
+     * 批量查询消息详情（关联用户表）
+     * @param ids 消息ID列表
+     * @return 消息详情列表
+     */
+    List<MessageDTO> selectDTOByIds(@Param("ids") List<Long> ids);
 }

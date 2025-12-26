@@ -1,6 +1,7 @@
 package dev.tagtag.module.system.controller;
 
 import dev.tagtag.common.constant.GlobalConstants;
+import dev.tagtag.common.model.BatchIdsDTO;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
@@ -12,6 +13,7 @@ import dev.tagtag.module.system.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,11 +25,11 @@ import java.util.List;
 public class MessageController {
 
     private final MessageService messageService;
+    private final dev.tagtag.module.system.mapper.MessageMapper messageMapper;
 
     private List<Long> filterOwnMessageIds(Long userId, List<Long> ids) {
-        if (ids == null) return List.of();
-        return ids.stream()
-                .map(messageService::getById)
+        if (ids == null || ids.isEmpty()) return List.of();
+        return messageMapper.selectDTOByIds(ids).stream()
                 .filter(dto -> dto != null && userId.equals(dto.getReceiverId()))
                 .map(MessageDTO::getId)
                 .toList();
@@ -106,9 +108,9 @@ public class MessageController {
      */
     @PutMapping("/read/batch")
     @Operation(summary = "批量标记消息已读", description = "批量标记消息为已读状态，仅限当前用户自己的消息")
-    public Result<Void> markReadBatch(@RequestBody List<Long> ids) {
+    public Result<Void> markReadBatch(@RequestBody @Validated BatchIdsDTO req) {
         Long userId = AuthContext.getCurrentUserId();
-        List<Long> ownIds = filterOwnMessageIds(userId, ids);
+        List<Long> ownIds = filterOwnMessageIds(userId, req.getIds());
         if (!ownIds.isEmpty()) {
             messageService.markReadBatch(ownIds);
         }
@@ -139,9 +141,9 @@ public class MessageController {
      */
     @PutMapping("/unread/batch")
     @Operation(summary = "批量标记消息未读", description = "批量标记消息为未读状态，仅限当前用户自己的消息")
-    public Result<Void> markUnreadBatch(@RequestBody List<Long> ids) {
+    public Result<Void> markUnreadBatch(@RequestBody @Validated BatchIdsDTO req) {
         Long userId = AuthContext.getCurrentUserId();
-        List<Long> ownIds = filterOwnMessageIds(userId, ids);
+        List<Long> ownIds = filterOwnMessageIds(userId, req.getIds());
         if (!ownIds.isEmpty()) {
             messageService.markUnreadBatch(ownIds);
         }
@@ -178,8 +180,8 @@ public class MessageController {
     @DeleteMapping("/batch")
     @RequirePerm(Permissions.MESSAGE_DELETE)
     @Operation(summary = "批量删除消息", description = "批量删除指定消息列表")
-    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-        messageService.deleteBatch(ids);
+    public Result<Void> deleteBatch(@RequestBody @Validated BatchIdsDTO req) {
+        messageService.deleteBatch(req.getIds());
         return Result.ok();
     }
 

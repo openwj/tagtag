@@ -3,13 +3,22 @@ package dev.tagtag.module.storage.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import dev.tagtag.common.exception.BusinessException;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.contract.storage.dto.FileDTO;
 import dev.tagtag.contract.storage.dto.FilePageQuery;
 import dev.tagtag.common.model.PageQuery;
 import dev.tagtag.framework.util.PageResults;
 
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.UUID;
 import dev.tagtag.framework.util.Pages;
 import dev.tagtag.module.storage.entity.FileResource;
@@ -21,15 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.DigestInputStream;
-import java.util.HexFormat;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * 文件服务，封装分页、上传、删除等核心逻辑
@@ -41,6 +42,7 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
     @Value("${storage.local.base-path:uploads}")
     private String basePath;
     private final FileMapperConvert fileMapperConvert;
+    private final FileStorageService fileStorageService;
 
     /**
      * 分页查询文件
@@ -103,31 +105,15 @@ public class FileService extends ServiceImpl<FileMapper, FileResource> {
         return dto;
     }
 
-    /**
-     * 计算输入字节的 SHA-256 摘要
-
-     * @return 十六进制摘要字符串
-     */
-    private FileResource saveLocal(InputStream in, long size, String filename, String mime) throws IOException, NoSuchAlgorithmException {
-        String originalName = filename;
+    private FileResource saveLocal(InputStream in, long size, String originalName, String mime) throws IOException, NoSuchAlgorithmException {
         String ext = (originalName != null && originalName.contains(".")) ? originalName.substring(originalName.lastIndexOf('.') + 1) : "";
-        Path root = Paths.get(basePath).toAbsolutePath();
-        Files.createDirectories(root);
-        String fname = System.currentTimeMillis() + "_" + (originalName == null ? "file" : originalName);
-        Path target = root.resolve(fname);
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        try (DigestInputStream dis = new DigestInputStream(in, md); OutputStream out = Files.newOutputStream(target)) {
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = dis.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-        }
-        String checksum = HexFormat.of().formatHex(md.digest());
+        String fileName = System.currentTimeMillis() + "_" + (originalName == null ? "file" : originalName);
+        String checksum = fileStorageService.saveFile(in, size, fileName, basePath);
         String publicId = UUID.randomUUID().toString();
+        Path target = fileStorageService.getFilePath(basePath, fileName);
         FileResource fr = new FileResource()
                 .setPublicId(publicId)
-                .setName(fname)
+                .setName(fileName)
                 .setOriginalName(originalName)
                 .setExt(ext)
                 .setSize(size)

@@ -37,11 +37,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final RoleMapperConvert roleMapperConvert;
     private final PasswordEncoder passwordEncoder;
 
-    
 
     /**
      * 用户分页查询（XML 构建 WHERE/ORDER BY，服务层保持轻薄）
-     * @param query 查询条件
+     *
+     * @param query     查询条件
      * @param pageQuery 分页参数
      * @return 用户分页结果
      */
@@ -52,7 +52,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return PageResults.of(page.convert(userMapperConvert::toDTO));
     }
 
-    /** 获取用户详情 */
+    /**
+     * 获取用户详情
+     */
     @Override
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = "userById", key = "#root.args[0]", unless = "#result == null")
@@ -64,6 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 创建用户（服务端安全编码密码）
+     *
      * @param user 用户DTO，若包含明文密码则在服务端进行编码
      */
     @Override
@@ -80,7 +83,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         super.save(entity);
     }
 
-    /** 更新用户（忽略源对象中的空值，实现 PATCH 语义） */
+    /**
+     * 更新用户（忽略源对象中的空值，实现 PATCH 语义）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -96,7 +101,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         super.updateById(entity);
     }
 
-    /** 删除用户（物理删除；如需逻辑删除可调整实体与全局配置） */
+    /**
+     * 删除用户（物理删除；如需逻辑删除可调整实体与全局配置）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -107,7 +114,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         super.removeById(id);
     }
 
-    /** 为用户分配角色（覆盖式：先删后插） */
+    /**
+     * 为用户分配角色（覆盖式：先删后插）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -123,6 +132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 根据用户名查询用户详情（包含密码与角色ID）
+     *
      * @param username 用户名
      * @return 用户数据
      */
@@ -142,9 +152,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserDTO dto = userMapperConvert.toDTO(entity);
         return fillUserRoleIds(dto);
     }
-    
+
     /**
      * 为用户DTO填充角色ID列表
+     *
      * @param dto 用户DTO
      * @return 填充后的用户DTO
      */
@@ -156,7 +167,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return dto;
     }
 
-    /** 更新单个用户状态 */
+    /**
+     * 更新单个用户状态
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -165,7 +178,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.lambdaUpdate().eq(User::getId, id).set(User::getStatus, status).update();
     }
 
-    /** 批量更新用户状态 */
+    /**
+     * 批量更新用户状态
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -174,7 +189,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.lambdaUpdate().in(User::getId, ids).set(User::getStatus, status).update();
     }
 
-    /** 批量删除用户 */
+    /**
+     * 批量删除用户
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -183,7 +200,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.removeBatchByIds(ids);
     }
 
-    /** 重置用户密码（编码并记录更新时间） */
+    /**
+     * 重置用户密码（编码并记录更新时间）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
@@ -191,12 +210,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (id == null || password == null || password.isBlank()) return;
         String encoded = passwordEncoder.encode(password);
         this.lambdaUpdate().eq(User::getId, id)
-            .set(User::getPassword, encoded)
-            .set(User::getPasswordUpdatedAt, java.time.LocalDateTime.now())
-            .update();
+                .set(User::getPassword, encoded)
+                .set(User::getPasswordUpdatedAt, java.time.LocalDateTime.now())
+                .update();
     }
 
-    /** 查询用户已分配角色列表（DTO） */
+    /**
+     * 查询用户已分配角色列表（DTO）
+     */
     @Override
     @Transactional(readOnly = true)
     public List<RoleDTO> listRolesByUserId(Long userId) {
@@ -207,20 +228,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return roleMapperConvert.toDTOList(roles);
     }
 
-    /** 批量为用户分配角色（覆盖式：每个用户先删后插） */
+    /**
+     * 批量为用户分配角色（覆盖式：先批量删除后批量插入）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
     public void assignRolesBatch(List<Long> userIds, List<Long> roleIds) {
         if (userIds == null || userIds.isEmpty()) return;
-        for (Long uid : userIds) {
-            if (uid == null) continue;
-            baseMapper.deleteUserRoles(uid);
-            if (roleIds != null && !roleIds.isEmpty()) {
-                baseMapper.insertUserRoles(uid, roleIds);
-            }
+        baseMapper.deleteUserRolesBatch(userIds);
+        if (roleIds != null && !roleIds.isEmpty()) {
+            baseMapper.insertUserRolesBatch(userIds, roleIds);
         }
     }
 
-    
 }

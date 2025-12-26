@@ -87,12 +87,31 @@
         DELETE FROM iam_user_role WHERE user_id = #{userId}
     </delete>
 
+    <!-- 批量删除多个用户的角色关联 -->
+    <delete id="deleteUserRolesBatch">
+        DELETE FROM iam_user_role WHERE user_id IN
+        <foreach collection="userIds" item="uid" open="(" separator="," close=")">
+            #{uid}
+        </foreach>
+    </delete>
+
     <!-- 批量插入用户角色关联 -->
     <insert id="insertUserRoles">
         INSERT INTO iam_user_role (user_id, role_id)
         VALUES
         <foreach collection="roleIds" item="rid" separator=",">
             (#{userId}, #{rid})
+        </foreach>
+    </insert>
+
+    <!-- 批量插入多个用户的角色关联 -->
+    <insert id="insertUserRolesBatch">
+        INSERT INTO iam_user_role (user_id, role_id)
+        VALUES
+        <foreach collection="userIds" item="uid" separator=",">
+            <foreach collection="roleIds" item="rid" separator=",">
+                (#{uid}, #{rid})
+            </foreach>
         </foreach>
     </insert>
 

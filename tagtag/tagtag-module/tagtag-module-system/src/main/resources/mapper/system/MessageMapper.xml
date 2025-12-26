@@ -69,4 +69,28 @@
         WHERE m.id = #{id} AND m.deleted = 0
     </select>
 
+    <select id="selectDTOByIds" resultType="dev.tagtag.contract.system.dto.MessageDTO">
+        SELECT
+            m.id,
+            m.title,
+            m.content,
+            m.type,
+            m.sender_id AS senderId,
+            IFNULL(s.nickname, '系统') AS senderName,
+            m.receiver_id AS receiverId,
+            r.nickname AS receiverName,
+            m.is_read AS isRead,
+            DATE_FORMAT(m.create_time, '%Y-%m-%d %H:%i:%s') AS createTime,
+            CONCAT('https://avatar.vercel.sh/', IFNULL(m.sender_id, 'sys')) AS avatar
+        FROM sys_message m
+        LEFT JOIN iam_user s ON m.sender_id = s.id
+        LEFT JOIN iam_user r ON m.receiver_id = r.id
+        WHERE m.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND m.deleted = 0
+        ORDER BY m.create_time DESC
+    </select>
+
 </mapper>

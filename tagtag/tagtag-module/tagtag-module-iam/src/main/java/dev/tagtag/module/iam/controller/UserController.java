@@ -4,6 +4,7 @@ import dev.tagtag.common.model.PageRequest;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.exception.ErrorCode;
+import dev.tagtag.common.validation.CreateGroup;
 import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.framework.security.context.AuthContext;
@@ -78,7 +79,7 @@ public class UserController {
     @PostMapping
     @RequirePerm(Permissions.USER_CREATE)
     @Operation(summary = "创建用户", description = "创建新用户")
-    public Result<Void> create(@Valid @RequestBody UserDTO user) {
+    public Result<Void> create(@Validated(CreateGroup.class) @RequestBody UserDTO user) {
         userService.create(user);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }

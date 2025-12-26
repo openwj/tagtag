@@ -1,8 +1,6 @@
 package dev.tagtag.module.iam.controller;
 
-import dev.tagtag.common.model.PageQuery;
-import dev.tagtag.common.model.PageResult;
-import dev.tagtag.common.model.Result;
+import dev.tagtag.common.model.*;
 import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.iam.dto.RoleDTO;
@@ -105,7 +103,7 @@ public class RoleController {
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.ROLE_UPDATE)
     @Operation(summary = "更新角色状态", description = "启用或禁用角色")
-    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody RoleStatusUpdateRequest req) {
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody StatusUpdateRequest req) {
         roleService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -118,7 +116,7 @@ public class RoleController {
     @PutMapping("/status/batch")
     @RequirePerm(Permissions.ROLE_UPDATE)
     @Operation(summary = "批量更新角色状态", description = "批量启用或禁用角色")
-    public Result<Void> batchUpdateStatus(@Valid @RequestBody RoleStatusBatchRequest req) {
+    public Result<Void> batchUpdateStatus(@Valid @RequestBody BatchStatusUpdateRequest req) {
         roleService.batchUpdateStatus(req.getIds(), req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
@@ -159,23 +157,6 @@ public class RoleController {
         private RoleQueryDTO query;
         @Valid
         private PageQuery page;
-    }
-
-    /**
-     * 角色状态更新请求
-     */
-    @Data
-    public static class RoleStatusUpdateRequest {
-        private int status;
-    }
-
-    /**
-     * 角色批量状态更新请求
-     */
-    @Data
-    public static class RoleStatusBatchRequest {
-        private List<Long> ids;
-        private int status;
     }
 }
 

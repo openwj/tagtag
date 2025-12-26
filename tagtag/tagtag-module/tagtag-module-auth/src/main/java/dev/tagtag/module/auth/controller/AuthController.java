@@ -56,25 +56,11 @@ public class AuthController {
     public Result<TokenDTO> login(@Valid @RequestBody LoginRequest req) {
         String inCode = req.getCaptcha().getCode();
         String inId = req.getCaptcha().getCaptchaId();
-        validateCaptcha(inId, inCode);
         TokenDTO dto = authService.login(req.getUsername(), req.getPassword());
-        // 登录成功后再消费验证码，防止重复使用
         captchaService.validateAndConsume(inId, inCode);
         return Result.ok(dto);
     }
     
-    /**
-     * 验证验证码
-     *
-     * @param captchaId 验证码ID
-     * @param code 验证码
-     */
-    private void validateCaptcha(String captchaId, String code) {
-        if (!captchaService.validate(captchaId, code)) {
-            throw BusinessException.badRequest("验证码错误或已过期");
-        }
-    }
-
     /**
      * 刷新令牌（返回新的访问令牌与刷新令牌）
      *
@@ -117,7 +103,6 @@ public class AuthController {
         }
         String inId = req.getCaptcha().getCaptchaId();
         String inCode = req.getCaptcha().getCode();
-        validateCaptcha(inId, inCode);
         authService.register(req.getUsername(), req.getPassword());
         captchaService.validateAndConsume(inId, inCode);
         return Result.ok();

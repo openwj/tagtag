@@ -1,6 +1,7 @@
 package dev.tagtag.module.system.controller;
 
  
+import dev.tagtag.common.model.BatchIdsDTO;
 import dev.tagtag.common.model.PageRequest;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
@@ -81,11 +82,11 @@ public class DictTypeController {
      * @param ids 待删除的字典类型 ID 列表
      * @return 空
      */
-    @DeleteMapping
+    @DeleteMapping("/batch")
     @RequirePerm(Permissions.DICT_TYPE_DELETE)
     @Operation(summary = "批量删除字典类型", description = "批量删除字典类型")
-    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-        dictTypeService.deleteBatch(ids);
+    public Result<Void> deleteBatch(@RequestBody @Validated BatchIdsDTO req) {
+        dictTypeService.deleteBatch(req.getIds());
         return Result.ok();
     }
 

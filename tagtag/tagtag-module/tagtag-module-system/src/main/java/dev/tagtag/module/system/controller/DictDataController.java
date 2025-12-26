@@ -1,5 +1,6 @@
 package dev.tagtag.module.system.controller;
 
+import dev.tagtag.common.model.BatchIdsDTO;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.constant.GlobalConstants;
@@ -104,11 +105,11 @@ public class DictDataController {
      * @param ids 待删除的字典数据 ID 列表
      * @return 空
      */
-    @DeleteMapping
+    @DeleteMapping("/batch")
     @RequirePerm(Permissions.DICT_DATA_DELETE)
     @Operation(summary = "批量删除字典数据", description = "批量删除字典数据")
-    public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-        dictDataService.deleteBatch(ids);
+    public Result<Void> deleteBatch(@RequestBody @Validated BatchIdsDTO req) {
+        dictDataService.deleteBatch(req.getIds());
         return Result.ok();
     }
     

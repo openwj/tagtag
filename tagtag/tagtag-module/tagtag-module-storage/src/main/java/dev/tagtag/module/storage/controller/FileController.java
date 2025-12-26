@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.File;
 
@@ -57,7 +59,7 @@ public class FileController {
      */
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传文件", description = "上传文件到本地存储")
-    public Result<FileUploadResult> upload(@RequestPart("file") MultipartFile file) throws Exception {
+    public Result<FileUploadResult> upload(@RequestPart("file") @NotNull(message = "文件不能为空") MultipartFile file) throws Exception {
         FileResource fr = fileService.uploadLocal(file);
         FileUploadResult res = new FileUploadResult()
                 .setId(fr.getId())
