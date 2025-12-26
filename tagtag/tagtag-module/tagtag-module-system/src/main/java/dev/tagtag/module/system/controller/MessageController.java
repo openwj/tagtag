@@ -25,15 +25,6 @@ import java.util.List;
 public class MessageController {
 
     private final MessageService messageService;
-    private final dev.tagtag.module.system.mapper.MessageMapper messageMapper;
-
-    private List<Long> filterOwnMessageIds(Long userId, List<Long> ids) {
-        if (ids == null || ids.isEmpty()) return List.of();
-        return messageMapper.selectDTOByIds(ids).stream()
-                .filter(dto -> dto != null && userId.equals(dto.getReceiverId()))
-                .map(MessageDTO::getId)
-                .toList();
-    }
 
     /**
      * 获取当前用户的消息列表（不分页）
@@ -103,14 +94,14 @@ public class MessageController {
 
     /**
      * 批量标记消息已读（仅限当前用户自己的消息）
-     * @param ids 消息ID列表
-     * @return 空
+     * @param req
+     * @return
      */
     @PutMapping("/read/batch")
     @Operation(summary = "批量标记消息已读", description = "批量标记消息为已读状态，仅限当前用户自己的消息")
     public Result<Void> markReadBatch(@RequestBody @Validated BatchIdsDTO req) {
         Long userId = AuthContext.getCurrentUserId();
-        List<Long> ownIds = filterOwnMessageIds(userId, req.getIds());
+        List<Long> ownIds = messageService.filterOwnMessageIds(userId, req.getIds());
         if (!ownIds.isEmpty()) {
             messageService.markReadBatch(ownIds);
         }
@@ -136,14 +127,14 @@ public class MessageController {
 
     /**
      * 批量标记消息未读（仅限当前用户自己的消息）
-     * @param ids 消息ID列表
+     * @param req 消息ID列表
      * @return 空
      */
     @PutMapping("/unread/batch")
     @Operation(summary = "批量标记消息未读", description = "批量标记消息为未读状态，仅限当前用户自己的消息")
     public Result<Void> markUnreadBatch(@RequestBody @Validated BatchIdsDTO req) {
         Long userId = AuthContext.getCurrentUserId();
-        List<Long> ownIds = filterOwnMessageIds(userId, req.getIds());
+        List<Long> ownIds = messageService.filterOwnMessageIds(userId, req.getIds());
         if (!ownIds.isEmpty()) {
             messageService.markUnreadBatch(ownIds);
         }

@@ -56,8 +56,8 @@ public class AuthController {
     public Result<TokenDTO> login(@Valid @RequestBody LoginRequest req) {
         String inCode = req.getCaptcha().getCode();
         String inId = req.getCaptcha().getCaptchaId();
-        TokenDTO dto = authService.login(req.getUsername(), req.getPassword());
         captchaService.validateAndConsume(inId, inCode);
+        TokenDTO dto = authService.login(req.getUsername(), req.getPassword());
         return Result.ok(dto);
     }
     

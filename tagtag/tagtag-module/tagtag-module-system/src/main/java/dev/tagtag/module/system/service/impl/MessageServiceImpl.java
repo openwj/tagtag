@@ -148,4 +148,13 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         entity.setCreateTime(LocalDateTime.now());
         this.save(entity);
     }
+
+    @Override
+    public List<Long> filterOwnMessageIds(Long userId, List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return baseMapper.selectDTOByIds(ids).stream()
+                .filter(dto -> dto != null && userId.equals(dto.getReceiverId()))
+                .map(MessageDTO::getId)
+                .toList();
+    }
 }

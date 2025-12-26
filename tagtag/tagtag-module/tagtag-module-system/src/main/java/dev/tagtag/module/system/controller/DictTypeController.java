@@ -11,6 +11,7 @@ import dev.tagtag.contract.system.dto.DictTypeQueryDTO;
 import dev.tagtag.module.system.service.DictTypeService;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.kernel.constant.AppMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -97,8 +98,6 @@ public class DictTypeController {
     @Operation(summary = "刷新字典缓存", description = "刷新字典类型缓存")
     public Result<Void> refreshCache() {
         dictTypeService.refreshCache();
-        return Result.ok();
-    }
-
-    
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+    } 
 }

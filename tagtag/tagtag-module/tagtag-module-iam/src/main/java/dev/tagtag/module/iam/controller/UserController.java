@@ -23,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import dev.tagtag.contract.iam.dto.UserOperationRequest;
 import dev.tagtag.contract.iam.dto.ChangePasswordRequest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.tagtag.contract.iam.dto.UserQueryDTO;
 import dev.tagtag.kernel.annotation.RequirePerm;
 
@@ -43,7 +42,6 @@ public class UserController {
 
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * 用户分页查询接口（通用分页请求体）
@@ -204,13 +202,12 @@ public class UserController {
     @Operation(summary = "修改密码", description = "当前用户修改自己的密码")
     public Result<Void> changeMyPassword(@Valid @RequestBody ChangePasswordRequest req) {
         Long uid = AuthContext.getCurrentUserId();
-        UserDTO me = userService.getById(uid);
-        boolean matched = passwordEncoder.matches(req.getOldPassword(), me.getPassword());
-        if (!matched) {
-            return Result.unauthorized("旧密码不正确");
+        try {
+            userService.changePassword(uid, req.getOldPassword(), req.getNewPassword());
+            return Result.okMsg(AppMessages.UPDATE_SUCCESS);
+        } catch (IllegalArgumentException e) {
+            return Result.unauthorized(e.getMessage());
         }
-        userService.resetPassword(uid, req.getNewPassword());
-        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
     /**

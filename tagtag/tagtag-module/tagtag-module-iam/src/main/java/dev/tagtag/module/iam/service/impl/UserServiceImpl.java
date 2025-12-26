@@ -242,4 +242,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+    /**
+     * 修改用户密码（校验旧密码）
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = {"userById", "userByUsername"}, allEntries = true)
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        if (userId == null || oldPassword == null || oldPassword.isBlank() || newPassword == null || newPassword.isBlank()) {
+            return;
+        }
+        User entity = super.getById(userId);
+        if (entity == null) {
+            return;
+        }
+        boolean matched = passwordEncoder.matches(oldPassword, entity.getPassword());
+        if (!matched) {
+            throw new IllegalArgumentException("旧密码不正确");
+        }
+        String encoded = passwordEncoder.encode(newPassword);
+        this.lambdaUpdate().eq(User::getId, userId)
+                .set(User::getPassword, encoded)
+                .set(User::getPasswordUpdatedAt, java.time.LocalDateTime.now())
+                .update();
+    }
+
 }

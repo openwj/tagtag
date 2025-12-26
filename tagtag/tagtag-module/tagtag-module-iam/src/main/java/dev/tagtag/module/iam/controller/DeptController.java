@@ -8,6 +8,8 @@ import dev.tagtag.contract.iam.dto.DeptQueryDTO;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.module.iam.service.DeptService;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
@@ -64,7 +66,7 @@ public class DeptController {
     @PutMapping("/{id}/status")
     @RequirePerm(Permissions.DEPT_UPDATE)
     @Operation(summary = "更新部门状态", description = "启用或禁用部门")
-    public Result<Void> updateStatus(@PathVariable("id") Long id, @RequestBody StatusUpdateRequest req) {
+    public Result<Void> updateStatus(@PathVariable("id") Long id, @Valid @RequestBody StatusUpdateRequest req) {
         deptService.updateStatus(id, req.getStatus());
         return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }

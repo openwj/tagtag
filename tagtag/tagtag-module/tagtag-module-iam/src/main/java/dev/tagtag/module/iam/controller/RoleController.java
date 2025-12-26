@@ -1,19 +1,22 @@
 package dev.tagtag.module.iam.controller;
 
-import dev.tagtag.common.model.*;
-import dev.tagtag.kernel.constant.AppMessages;
+import dev.tagtag.common.model.PageRequest;
+import dev.tagtag.common.model.PageResult;
+import dev.tagtag.common.model.Result;
+import dev.tagtag.common.model.StatusUpdateRequest;
+import dev.tagtag.common.model.BatchStatusUpdateRequest;
 import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.contract.iam.dto.RoleDTO;
 import dev.tagtag.contract.iam.dto.RoleQueryDTO;
 import dev.tagtag.module.iam.service.RoleService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import java.util.List;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.kernel.constant.AppMessages;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -30,8 +33,8 @@ public class RoleController {
     @PostMapping("/page")
     @RequirePerm(Permissions.ROLE_READ)
     @Operation(summary = "角色分页查询", description = "根据条件分页查询角色列表")
-    public Result<PageResult<RoleDTO>> page(@Valid @RequestBody RolePageRequest req) {
-        PageResult<RoleDTO> pr = roleService.page(req.getQuery(), req.getPage());
+    public Result<PageResult<RoleDTO>> page(@Valid @RequestBody PageRequest<RoleQueryDTO> req) {
+        PageResult<RoleDTO> pr = roleService.page(req.query(), req.page());
         return Result.ok(pr);
     }
 
@@ -149,14 +152,6 @@ public class RoleController {
     @Operation(summary = "查询角色菜单", description = "查询角色已分配的菜单ID列表")
     public Result<List<Long>> listMenuIds(@PathVariable("id") Long roleId) {
         return Result.ok(roleService.listMenuIdsByRoleId(roleId));
-    }
-
-
-    @Data
-    public static class RolePageRequest {
-        private RoleQueryDTO query;
-        @Valid
-        private PageQuery page;
     }
 }
 

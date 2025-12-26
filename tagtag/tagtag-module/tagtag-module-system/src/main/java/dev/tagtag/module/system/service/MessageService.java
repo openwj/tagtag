@@ -90,4 +90,12 @@ public interface MessageService {
      * @param message 消息内容
      */
     void send(MessageDTO message);
+
+    /**
+     * 过滤出属于指定用户的消息ID列表
+     * @param userId 用户ID
+     * @param ids 消息ID列表
+     * @return 属于该用户的消息ID列表
+     */
+    List<Long> filterOwnMessageIds(Long userId, List<Long> ids);
 }

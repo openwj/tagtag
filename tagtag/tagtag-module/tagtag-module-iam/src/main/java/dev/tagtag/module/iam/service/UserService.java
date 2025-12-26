@@ -95,4 +95,12 @@ public interface UserService {
      * @param roleIds 角色ID列表
      */
     void assignRolesBatch(List<Long> userIds, List<Long> roleIds);
+
+    /**
+     * 修改用户密码（校验旧密码）
+     * @param userId 用户ID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     */
+    void changePassword(Long userId, String oldPassword, String newPassword);
 }

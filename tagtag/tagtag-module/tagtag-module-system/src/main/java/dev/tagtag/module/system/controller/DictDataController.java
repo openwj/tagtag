@@ -1,6 +1,7 @@
 package dev.tagtag.module.system.controller;
 
 import dev.tagtag.common.model.BatchIdsDTO;
+import dev.tagtag.common.model.PageRequest;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.constant.GlobalConstants;
@@ -9,6 +10,7 @@ import dev.tagtag.contract.system.dto.DictItemQueryDTO;
 import dev.tagtag.module.system.service.DictDataService;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.kernel.constant.AppMessages;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +35,7 @@ public class DictDataController {
     @PostMapping("/page")
     @RequirePerm(Permissions.DICT_DATA_READ)
     @Operation(summary = "字典数据分页查询", description = "根据条件分页查询字典数据列表")
-    public Result<PageResult<DictItemDTO>> page(@RequestBody dev.tagtag.common.model.PageRequest<DictItemQueryDTO> req) {
+    public Result<PageResult<DictItemDTO>> page(@RequestBody PageRequest<DictItemQueryDTO> req) {
         return Result.ok(dictDataService.page(req.query(), req.page()));
     }
 
@@ -71,7 +73,7 @@ public class DictDataController {
     @Operation(summary = "新增字典数据", description = "新增字典数据")
     public Result<Void> save(@RequestBody @Validated DictItemDTO dto) {
         dictDataService.save(dto);
-        return Result.ok();
+        return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
 
     /**
