@@ -28,6 +28,7 @@
   "devDependencies": {
     "@iconify-json/heroicons": "^1.2.3",
     "@nuxt/eslint": "^1.10.0",
+    "baseline-browser-mapping": "^2.9.11",
     "eslint": "^9.39.1",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.1.5"
