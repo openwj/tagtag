@@ -33,7 +33,7 @@ public class RoleController {
     @PostMapping("/page")
     @RequirePerm(Permissions.ROLE_READ)
     @Operation(summary = "角色分页查询", description = "根据条件分页查询角色列表")
-    public Result<PageResult<RoleDTO>> page(@Valid @RequestBody PageRequest<RoleQueryDTO> req) {
+    public Result<PageResult<RoleDTO>> page(@Validated @RequestBody PageRequest<RoleQueryDTO> req) {
         PageResult<RoleDTO> pr = roleService.page(req.query(), req.page());
         return Result.ok(pr);
     }

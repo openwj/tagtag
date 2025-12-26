@@ -1,18 +1,17 @@
 package dev.tagtag.module.system.controller;
 
 import dev.tagtag.common.constant.GlobalConstants;
-import dev.tagtag.common.model.BatchIdsDTO;
-import dev.tagtag.common.model.PageQuery;
-import dev.tagtag.common.model.PageResult;
-import dev.tagtag.common.model.Result;
+import dev.tagtag.common.model.*;
 import dev.tagtag.contract.system.dto.MessageDTO;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.module.system.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +41,7 @@ public class MessageController {
      */
     @PostMapping("/page")
     @Operation(summary = "分页获取当前用户消息列表", description = "分页获取当前用户的消息列表")
-    public Result<PageResult<MessageDTO>> page(@RequestBody PageQuery pageQuery) {
+    public Result<PageResult<MessageDTO>> page(@Valid @RequestBody PageQuery pageQuery) {
         Long userId = AuthContext.getCurrentUserId();
         return Result.ok(messageService.pageByUserId(userId, pageQuery));
     }
@@ -54,7 +53,7 @@ public class MessageController {
     @PostMapping("/page-all")
     @RequirePerm(Permissions.MESSAGE_READ)
     @Operation(summary = "分页获取所有消息列表", description = "分页获取所有消息列表，仅管理员可用")
-    public Result<PageResult<MessageDTO>> pageAll(@RequestBody dev.tagtag.common.model.PageRequest<MessageDTO> req) {
+    public Result<PageResult<MessageDTO>> pageAll(@Valid @RequestBody PageRequest<MessageDTO> req) {
         return Result.ok(messageService.page(req.query(), req.page()));
     }
 
@@ -89,23 +88,23 @@ public class MessageController {
             return Result.forbidden("无权限操作该消息");
         }
         messageService.markRead(id);
-        return Result.ok();
+        return Result.okMsg(AppMessages.MARK_READ_SUCCESS);
     }
 
     /**
      * 批量标记消息已读（仅限当前用户自己的消息）
-     * @param req
+     * @param req 获取用户ID
      * @return
      */
     @PutMapping("/read/batch")
     @Operation(summary = "批量标记消息已读", description = "批量标记消息为已读状态，仅限当前用户自己的消息")
-    public Result<Void> markReadBatch(@RequestBody @Validated BatchIdsDTO req) {
+    public Result<Void> markReadBatch(@Valid @RequestBody BatchIdsDTO req) {
         Long userId = AuthContext.getCurrentUserId();
         List<Long> ownIds = messageService.filterOwnMessageIds(userId, req.getIds());
         if (!ownIds.isEmpty()) {
             messageService.markReadBatch(ownIds);
         }
-        return Result.ok();
+        return Result.okMsg(AppMessages.MARK_READ_SUCCESS);
     }
 
     /**
@@ -122,7 +121,7 @@ public class MessageController {
             return Result.forbidden("无权限操作该消息");
         }
         messageService.markUnread(id);
-        return Result.ok();
+        return Result.okMsg(AppMessages.MARK_UNREAD_SUCCESS);
     }
 
     /**
@@ -132,13 +131,13 @@ public class MessageController {
      */
     @PutMapping("/unread/batch")
     @Operation(summary = "批量标记消息未读", description = "批量标记消息为未读状态，仅限当前用户自己的消息")
-    public Result<Void> markUnreadBatch(@RequestBody @Validated BatchIdsDTO req) {
+    public Result<Void> markUnreadBatch(@Valid @RequestBody BatchIdsDTO req) {
         Long userId = AuthContext.getCurrentUserId();
         List<Long> ownIds = messageService.filterOwnMessageIds(userId, req.getIds());
         if (!ownIds.isEmpty()) {
             messageService.markUnreadBatch(ownIds);
         }
-        return Result.ok();
+        return Result.okMsg(AppMessages.MARK_UNREAD_SUCCESS);
     }
 
     /**
@@ -150,7 +149,7 @@ public class MessageController {
     public Result<Void> markAllRead() {
         Long userId = AuthContext.getCurrentUserId();
         messageService.markAllRead(userId);
-        return Result.ok();
+        return Result.okMsg(AppMessages.MARK_READ_SUCCESS);
     }
 
     /**
@@ -162,7 +161,7 @@ public class MessageController {
     public Result<Void> delete(@PathVariable Long id) {
         // 实际生产环境应校验该消息是否属于当前用户
         messageService.delete(id);
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
@@ -171,9 +170,9 @@ public class MessageController {
     @DeleteMapping("/batch")
     @RequirePerm(Permissions.MESSAGE_DELETE)
     @Operation(summary = "批量删除消息", description = "批量删除指定消息列表")
-    public Result<Void> deleteBatch(@RequestBody @Validated BatchIdsDTO req) {
+    public Result<Void> deleteBatch(@Valid @RequestBody BatchIdsDTO req) {
         messageService.deleteBatch(req.getIds());
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
@@ -185,7 +184,7 @@ public class MessageController {
     public Result<Void> clearAll() {
         Long userId = AuthContext.getCurrentUserId();
         messageService.clearAll(userId);
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
@@ -194,14 +193,14 @@ public class MessageController {
     @PostMapping("/send")
     @RequirePerm(Permissions.MESSAGE_UPDATE)
     @Operation(summary = "发送消息", description = "发送消息，仅供测试或管理员使用")
-    public Result<Void> send(@RequestBody MessageDTO message) {
+    public Result<Void> send(@Valid @RequestBody MessageDTO message) {
         // 简单设置当前用户为发送者
         Long userId = AuthContext.getCurrentUserId();
         if (message.getSenderId() == null) {
             message.setSenderId(userId);
         }
         messageService.send(message);
-        return Result.ok();
+        return Result.okMsg(AppMessages.SEND_SUCCESS);
     }
 
     

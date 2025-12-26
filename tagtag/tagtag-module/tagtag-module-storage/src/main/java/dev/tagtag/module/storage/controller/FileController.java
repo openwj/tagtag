@@ -1,5 +1,6 @@
 package dev.tagtag.module.storage.controller;
 
+import dev.tagtag.common.model.PageRequest;
 import dev.tagtag.common.model.PageResult;
 import dev.tagtag.common.model.Result;
 import dev.tagtag.common.model.BatchIdsDTO;
@@ -11,6 +12,7 @@ import dev.tagtag.common.constant.GlobalConstants;
 import dev.tagtag.module.storage.service.FileService;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
+import dev.tagtag.kernel.constant.AppMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
@@ -18,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +50,7 @@ public class FileController {
      */
     @PostMapping("/page")
     @Operation(summary = "文件分页查询", description = "根据条件分页查询文件列表")
-    public Result<PageResult<FileDTO>> page(@RequestBody dev.tagtag.common.model.PageRequest<FilePageQuery> req) {
+    public Result<PageResult<FileDTO>> page(@Validated @RequestBody PageRequest<FilePageQuery> req) {
         PageResult<FileDTO> pr = fileService.pageFiles(req.query(), req.page());
         return Result.ok(pr);
     }
@@ -80,9 +83,9 @@ public class FileController {
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "删除单个文件", description = "根据文件ID删除文件")
-    public Result<Void> delete(@PathVariable("id") Long id) {
+    public Result<Void> delete(@PathVariable Long id) {
         fileService.removeById(id);
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
@@ -92,9 +95,9 @@ public class FileController {
      */
     @DeleteMapping("/batch")
     @Operation(summary = "批量删除文件", description = "批量删除文件")
-    public Result<Void> batchDelete(@RequestBody BatchIdsDTO req) {
+    public Result<Void> batchDelete(@Valid @RequestBody BatchIdsDTO req) {
         fileService.removeBatchByIds(req.getIds());
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
@@ -127,7 +130,7 @@ public class FileController {
 
     /**
      * 下载文件
-     * @param id 文件ID
+     * @param publicId 文件ID
      * @return 二进制流
      */
     @GetMapping("/{publicId}/download")

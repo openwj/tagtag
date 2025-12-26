@@ -12,6 +12,7 @@ import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 import dev.tagtag.kernel.constant.AppMessages;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,7 @@ public class DictDataController {
     @PostMapping("/page")
     @RequirePerm(Permissions.DICT_DATA_READ)
     @Operation(summary = "字典数据分页查询", description = "根据条件分页查询字典数据列表")
-    public Result<PageResult<DictItemDTO>> page(@RequestBody PageRequest<DictItemQueryDTO> req) {
+    public Result<PageResult<DictItemDTO>> page(@Valid @RequestBody PageRequest<DictItemQueryDTO> req) {
         return Result.ok(dictDataService.page(req.query(), req.page()));
     }
 
@@ -71,7 +72,7 @@ public class DictDataController {
     @PostMapping
     @RequirePerm(Permissions.DICT_DATA_CREATE)
     @Operation(summary = "新增字典数据", description = "新增字典数据")
-    public Result<Void> save(@RequestBody @Validated DictItemDTO dto) {
+    public Result<Void> save(@Valid @RequestBody DictItemDTO dto) {
         dictDataService.save(dto);
         return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
@@ -84,9 +85,9 @@ public class DictDataController {
     @PutMapping
     @RequirePerm(Permissions.DICT_DATA_UPDATE)
     @Operation(summary = "修改字典数据", description = "修改字典数据")
-    public Result<Void> update(@RequestBody @Validated DictItemDTO dto) {
+    public Result<Void> update(@Valid @RequestBody DictItemDTO dto) {
         dictDataService.update(dto);
-        return Result.ok();
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
     /**
@@ -99,18 +100,18 @@ public class DictDataController {
     @Operation(summary = "删除字典数据", description = "根据ID删除字典数据")
     public Result<Void> delete(@PathVariable Long id) {
         dictDataService.delete(id);
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
      * 批量删除字典数据（DELETE）
-     * @param ids 待删除的字典数据 ID 列表
+     * @param req 待删除的字典数据 ID 列表
      * @return 空
      */
     @DeleteMapping("/batch")
     @RequirePerm(Permissions.DICT_DATA_DELETE)
     @Operation(summary = "批量删除字典数据", description = "批量删除字典数据")
-    public Result<Void> deleteBatch(@RequestBody @Validated BatchIdsDTO req) {
+    public Result<Void> deleteBatch(@Validated @RequestBody BatchIdsDTO req) {
         dictDataService.deleteBatch(req.getIds());
         return Result.ok();
     }

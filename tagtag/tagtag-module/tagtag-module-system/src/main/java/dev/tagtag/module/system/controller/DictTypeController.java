@@ -12,8 +12,8 @@ import dev.tagtag.module.system.service.DictTypeService;
 import dev.tagtag.kernel.annotation.RequirePerm;
 import dev.tagtag.kernel.constant.Permissions;
 import dev.tagtag.kernel.constant.AppMessages;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +36,7 @@ public class DictTypeController {
     @PostMapping("/page")
     @RequirePerm(Permissions.DICT_TYPE_READ)
     @Operation(summary = "字典类型分页查询", description = "根据条件分页查询字典类型列表")
-    public Result<PageResult<DictTypeDTO>> page(@RequestBody PageRequest<DictTypeQueryDTO> req) {
+    public Result<PageResult<DictTypeDTO>> page(@Valid @RequestBody PageRequest<DictTypeQueryDTO> req) {
         return Result.ok(dictTypeService.page(req.query(), req.page()));
     }
 
@@ -57,17 +57,17 @@ public class DictTypeController {
     @PostMapping
     @RequirePerm(Permissions.DICT_TYPE_CREATE)
     @Operation(summary = "创建字典类型", description = "创建新的字典类型")
-    public Result<Void> save(@RequestBody @Validated DictTypeDTO dto) {
+    public Result<Void> save(@Valid @RequestBody DictTypeDTO dto) {
         dictTypeService.save(dto);
-        return Result.ok();
+        return Result.okMsg(AppMessages.CREATE_SUCCESS);
     }
 
     @PutMapping
     @RequirePerm(Permissions.DICT_TYPE_UPDATE)
     @Operation(summary = "更新字典类型", description = "更新字典类型信息")
-    public Result<Void> update(@RequestBody @Validated DictTypeDTO dto) {
+    public Result<Void> update(@Valid @RequestBody DictTypeDTO dto) {
         dictTypeService.update(dto);
-        return Result.ok();
+        return Result.okMsg(AppMessages.UPDATE_SUCCESS);
     }
 
     @DeleteMapping("/{id}")
@@ -75,20 +75,20 @@ public class DictTypeController {
     @Operation(summary = "删除字典类型", description = "根据ID删除字典类型")
     public Result<Void> delete(@PathVariable Long id) {
         dictTypeService.delete(id);
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     /**
      * 批量删除字典类型（DELETE）
-     * @param ids 待删除的字典类型 ID 列表
+     * @param req 待删除的字典类型 ID 列表
      * @return 空
      */
     @DeleteMapping("/batch")
     @RequirePerm(Permissions.DICT_TYPE_DELETE)
     @Operation(summary = "批量删除字典类型", description = "批量删除字典类型")
-    public Result<Void> deleteBatch(@RequestBody @Validated BatchIdsDTO req) {
+    public Result<Void> deleteBatch(@Valid @RequestBody BatchIdsDTO req) {
         dictTypeService.deleteBatch(req.getIds());
-        return Result.ok();
+        return Result.okMsg(AppMessages.DELETE_SUCCESS);
     }
 
     

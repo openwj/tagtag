@@ -12,6 +12,7 @@ import dev.tagtag.contract.iam.dto.UserDTO;
 import dev.tagtag.framework.security.context.AuthContext;
 import dev.tagtag.framework.security.model.UserPrincipal;
 import dev.tagtag.kernel.annotation.RateLimit;
+import dev.tagtag.kernel.constant.AppMessages;
 import dev.tagtag.module.auth.service.AuthService;
 import dev.tagtag.module.auth.service.RouteService;
 import dev.tagtag.module.auth.service.CaptchaService;
@@ -20,7 +21,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -85,7 +85,7 @@ public class AuthController {
     @Operation(summary = "注销登录", description = "用户注销登录")
     public Result<Void> logout(@Valid @RequestBody LogoutRequest req) {
         authService.logout(req.getAccessToken());
-        return Result.ok();
+        return Result.okMsg(AppMessages.LOGOUT_SUCCESS);
     }
 
     /**
@@ -105,7 +105,7 @@ public class AuthController {
         String inCode = req.getCaptcha().getCode();
         authService.register(req.getUsername(), req.getPassword());
         captchaService.validateAndConsume(inId, inCode);
-        return Result.ok();
+        return Result.okMsg(AppMessages.REGISTER_SUCCESS);
     }
 
     /**
